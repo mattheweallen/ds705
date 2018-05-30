@@ -39,7 +39,8 @@ From the HealthExam data set, extract the cholesterol level of the 40 women and 
 
 ```{r}
 # Assign cholestrol of 40 women in data set to variable fs.
-fs <- hf$Cholesterol
+health_exam_female <- subset(HealthExam,HealthExam$Sex=="F")
+fs <- health_exam_female$Cholesterol
 # Check that the mean cholestrol level is 240.875
 mean(fs) == 240.875
 ```
