@@ -53,7 +53,7 @@ Apply summary() and sd() to the vector fs to find summary statistics for female 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+# summary and sd on fs
 summary(fs)
 sd(fs)
 ```
@@ -69,11 +69,11 @@ Make a histogram for female cholesterol level.  Label the $x$-axis with "mg/dl" 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
-
+# histogram of female cholesterol level
+hist(fs,xlab="mg/dl",main = "Female cholesterol level")
 ```
 
-Replace text with your written answer.
+Based on the histogram, there is further evidence of right skewness. From the shape of the graph, it does not appear female cholesterol level is normally distributed.
 
 ---
 
@@ -84,7 +84,8 @@ Make a boxplot for female cholesterol level.  Label the $y$-axis with "mg/dl" an
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+# boxplot of female cholesterol level
+boxplot(fs,ylab="mg/dl",main = "Female cholesterol level")
 
 ```
 
@@ -98,10 +99,13 @@ According to the 1.5 IQR rule, what is the cutoff value for outliers in the uppe
 
 ```{r}
 # quantile(fs,.75) gives the third quartile
+third_quartile <- quantile(fs,.75) 
 # IQR(fs) gives the interquartile range
-
+interquartile_range <- IQR(fs)
+cutoff_value <- third_quartile + (1.5*interquartile_range) 
+cutoff_value
 ```
-
+From the 1.5 IQR Rule, the cutoff value is 577.125.
 ---
 
 ### Part 1f
@@ -111,11 +115,12 @@ The maximum female cholesterol level is an outlier, find its $z$-score.  You'll 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+# Find the z-score of female cholesterol level
+(max(fs) - mean(fs))/sd(fs)
 
 ```
 
-Replace this text with your written answer.
+The z-score of 3.651556 of the maximum female cholesterol level would be unusually large if female cholesterol level was normally distributed. The z-score corresponds to standard deviations from 0 in the standard normal distribution. Anything beyond 3 standard deviations has a low probability of occurring. 
 
 ---
 
@@ -126,11 +131,14 @@ Make a normal probability plot for fs, add a fit line to it, and label $y$-axis 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
-
+# make a normal probability plot for fs and fit a line to it.
+{
+  qqnorm(fs, ylab="Female Cholesterol Quantiles") 
+  qqline(fs)
+}
 ```
 
-Replace this text with your written answer.
+The normal probability plot is further confirmation that it is unlikely that female cholesterol is normally distributed. If it were normally distributed the dots would follow the line. It looks good in the middle, but moves away especially on the right.
 
 ---
 
