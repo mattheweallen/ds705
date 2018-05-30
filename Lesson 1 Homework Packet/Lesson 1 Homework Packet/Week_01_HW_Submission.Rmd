@@ -1,7 +1,7 @@
 ---
 title: "Week 1 HW Submission"
-author: "*type your name here*"
-date: "*enter today's date*"
+author: "Matt Allen"
+date: "5/30/2018"
 output: word_document
 ---
 
@@ -38,10 +38,11 @@ From the HealthExam data set, extract the cholesterol level of the 40 women and 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# This is a comment, change it and add your code below.
-
+# Assign cholestrol of 40 women in data set to variable fs.
+fs <- hf$Cholesterol
+# Check that the mean cholestrol level is 240.875
+mean(fs) == 240.875
 ```
-
 ---
 
 ### Part 1b
@@ -52,10 +53,11 @@ Apply summary() and sd() to the vector fs to find summary statistics for female 
 
 ```{r}
 # insert your code here.
-
+summary(fs)
+sd(fs)
 ```
 
-Replace text with your written answer.
+By inspection of the summary statisitics, the Mean appears significantly higher than the Median. This implies right skewness. 
 
 ---
 
