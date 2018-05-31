@@ -156,20 +156,19 @@ The code below loads a data set with randomly sampled test scores from three dif
 # to {r, include=FALSE, eval=FALSE}.  You can also minimize the whole block by clicking the little down arrow next to the line number at the beginning of the block.
 
 # load the data and look at it
-testScores <- read.csv("testScores.csv")
-head(testScores)
+homes <- read.csv("homes.csv")
+head(homes)
 
-# summarize the scores for each instructor
-summary(testScores$score[testScores$instructor=="A"])
-summary(testScores$score[testScores$instructor=="B"])
-summary(testScores$score[testScores$instructor=="C"])
+# summarize the PercentOwned for each Year
+summary(homes$PercentOwned[homes$Year=="year1985"])
+summary(homes$PercentOwned[homes$Year=="year1996"])
+summary(homes$PercentOwned[homes$Year=="year2002"])
 
-# a more advanced version of this summary by instructor would be to use tapply() to loop over the factors.
-# uncomment the next line to try it
-tapply(testScores$score, testScores$instructor, summary)
+# a more advanced version of this summary by Year would be to use tapply() to loop over the factors.
+tapply(homes$PercentOwned, homes$Year, summary)
 
-#  looks like the test scores across all three instructors range from 52 to 87, to make it easier to compare the distributions lets use the same bins for all three histograms
-bins <- seq(50,90,by=5)
+#  looks like the PercentOwned across all three years range from 37.4 to 77.3, to make it easier to compare the distributions lets use the same bins for all three histograms
+bins <- seq(37.4,77.3,by=5)
 
 ```
 
