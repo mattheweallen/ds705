@@ -161,13 +161,16 @@ head(homes)
 
 # summarize the PercentOwned for each Year
 summary(homes$PercentOwned[homes$Year=="year1985"])
+sd(homes$PercentOwned[homes$Year=="year1985"])
 summary(homes$PercentOwned[homes$Year=="year1996"])
+sd(homes$PercentOwned[homes$Year=="year1996"])
 summary(homes$PercentOwned[homes$Year=="year2002"])
+sd(homes$PercentOwned[homes$Year=="year2002"])
 
 # a more advanced version of this summary by Year would be to use tapply() to loop over the factors.
 tapply(homes$PercentOwned, homes$Year, summary)
 
-#  looks like the PercentOwned across all three years range from 37.4 to 77.3, to make it easier to compare the distributions lets use the same bins for all three histograms
+#  looks like the PercentOwned across all three years range from 37.4 to 77.3, to make it easier to compare the distributions lets use the same bins for all three histograms. I chose a range from 30 to 90, because it left space on the sides of the histograms.
 bins <- seq(30,90,by=5)
 
 ```
@@ -196,7 +199,7 @@ Comment on similarities and differences among the distributions of home ownershi
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer.
+The shapes of the distributes look similar. It is possible that they are all approximately normally distributed, but they all have points that are small enough to have a low probability of occurring if normally distributed. The distributions may be somewhat left skewed. There is a general trend that mean and median percentage of home ownership is increasing over time. 
 
 ---
 
@@ -211,10 +214,10 @@ Find the probability that a random natural pregnancy lasts less than 250 days.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
-
+# probability that natural pregnancy last less that 250 days
+pnorm(250, mean = 268, sd = 16)
 ```
-
+There is a 13% chance of having a natural pregnancy that last less than 250 days.
 ---
 
 ### Part 3b
@@ -224,10 +227,11 @@ Compute the probability that a natural human pregnancy lasts between 260 and 280
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+# probability that natural pregnancy last less that 260 and 280 days
+pnorm(280, mean = 268, sd = 16) - pnorm(260, mean = 268, sd = 16)
 
 ```
-
+There is a 46.5% chance that a pregnancy will last 260 to 280 days.
 ---
 
 ### Part 3c
@@ -237,10 +241,11 @@ How long are the longest 10% of natural human pregnancies?
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+# the longest 10% of pregnancies are
+qnorm(.9, mean = 268, sd = 16)
 
 ```
-
+That is the longest 10% of pregnancies are 288.5048 days or greater.
 ---
 
 ## Exercise 4
@@ -255,7 +260,7 @@ Use read.csv(...) to read the file into a dataframe.  This is an artificial data
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+bfat <- read.csv("bodyFat.csv")
 
 ```
 
@@ -268,11 +273,11 @@ Make a histogram of the bodyfat percentages.  Does it appear that the data comes
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+hist(bfat$bodyFat,xlab="Percentage",main = "Body Fat Percentages")
 
 ```
 
-Replace this text with your written answer.
+By inspection of the histogram, body fat percentage does appear to be normally distributed with mean near 20%.
 
 ---
 
@@ -283,11 +288,14 @@ Now make a normal probability plot with a fitted line by using qqnorm() and qqli
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# insert your code here.
+{
+  qqnorm(bfat$bodyFat, ylab="Body Fat % Quantiles") 
+  qqline(bfat$bodyFat)
+}
 
 ```
 
-Replace this text with your written answer.
+I think since the points curve above the line at the left and below the line at the right,  the body fat percentage distribution has very short tails compared to a normal distribution. This is evidence that the body fat percentage data may not be normally distributed.
 
 ---
 
