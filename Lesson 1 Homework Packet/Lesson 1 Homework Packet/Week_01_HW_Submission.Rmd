@@ -106,6 +106,7 @@ cutoff_value <- third_quartile + (1.5*interquartile_range)
 cutoff_value
 ```
 From the 1.5 IQR Rule, the cutoff value is 577.125.
+
 ---
 
 ### Part 1f
@@ -120,7 +121,7 @@ The maximum female cholesterol level is an outlier, find its $z$-score.  You'll 
 
 ```
 
-The z-score of 3.651556 of the maximum female cholesterol level would be unusually large if female cholesterol level was normally distributed. The z-score corresponds to standard deviations from 0 in the standard normal distribution. Anything beyond 3 standard deviations has a low probability of occurring. 
+The z-score of 3.651556 of the maximum female cholesterol level would be unusually large if female cholesterol level was normally distributed. The z-score corresponds to standard deviations from 0 in the standard normal distribution. Anything beyond 3 standard deviations has a low probability of occurring. The female cholesterol levels are right skewed. 
 
 ---
 
@@ -218,6 +219,7 @@ Find the probability that a random natural pregnancy lasts less than 250 days.
 pnorm(250, mean = 268, sd = 16)
 ```
 There is a 13% chance of having a natural pregnancy that last less than 250 days.
+
 ---
 
 ### Part 3b
@@ -232,6 +234,7 @@ pnorm(280, mean = 268, sd = 16) - pnorm(260, mean = 268, sd = 16)
 
 ```
 There is a 46.5% chance that a pregnancy will last 260 to 280 days.
+
 ---
 
 ### Part 3c
@@ -245,7 +248,8 @@ How long are the longest 10% of natural human pregnancies?
 qnorm(.9, mean = 268, sd = 16)
 
 ```
-That is the longest 10% of pregnancies are 288.5048 days or greater.
+The longest 10% of pregnancies are 288.5048 days or greater.
+
 ---
 
 ## Exercise 4
