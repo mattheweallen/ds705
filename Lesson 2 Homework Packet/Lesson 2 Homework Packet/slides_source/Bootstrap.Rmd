@@ -1,0 +1,480 @@
+---
+title: 'Bootstrapping'
+header-includes: \usepackage{amssymb,color}
+output:
+  beamer_presentation:
+    colortheme: seahorse
+    fonttheme: default
+    keep_tex: yes
+    template: ../../beamer169.tex
+  ioslides_presentation: default
+fontsize: 12pt
+---
+
+```{r global_options, include=FALSE, echo=FALSE}
+.pardefault <- par()
+# use for beamer
+knitr::opts_chunk$set(fig.width=4, fig.height=3, fig.align='center',warning=FALSE, message=FALSE)
+# use for word
+# knitr::opts_chunk$set(fig.width=4, fig.height=3,warning=FALSE, message=FALSE)
+source('../scripts/shadeMe.R')
+```
+
+## Estimating a population parameter $\theta$
+
+**Goal:**  Approximate $\theta$ (the parameter) using $\hat{\theta}$ (the statistic) and other information from the sample.  
+
+**Problem:** Have one sample, but need infinitely many samples to complete the sampling distribution of the statistic
+
+<div class="notes">
+- audio01.mp3
+- We want to make a confidence interval estimate for the population parameter $\theta$.  $\theta$ could be the population mean for example.
+- The problem is that we have one sample and we're trying to get information about a much larger population
+- We can compute one value of our statistic, like the sample mean
+- but to construct a confidence interval we need to understand how that statistic varies when we repeatedly sample from the population
+- in other words, we want the sampling distribution of the statistic
+</div>
+
+## Classical Solution
+
+**Solution:** Fill in the missing information by making assumptions about the population that allow us to mathematically derive the sampling distribution of $\hat{\theta}$.
+
+*Parametric procedures:* assume a particular population distribution.
+
+<div class='notes'>
+- audio02.mp3
+- to fill in the missing information we can make assumptions about the shape of the population, like we could assume that sample comes from a normally distributed population in which case the sampling distribution of sample means is normally distributed.
+- or we can rely on asymptotics which basically say that for very large samples we can expect our statistic to behave in a certain way.  For instance the Central Limit Theorem says that for large samples, the sample means will be approximately normally distributed.
+- These procedures are called 'parametric procedures' because they typically assume the population has a particular distribution.
+- Even when we make assumptions about the shape of the population, there are some statistics such as the median or the trimmed mean for which we cannot mathematically derive the sampling distribution.
+</div>
+
+## Bootstrapping Solution
+
+**Solution:** Approximate the sampling distribution of $\hat{\theta}$ by **resampling** the original sample.  
+
+**Requirement:**  Sample is representative of the population.
+
+**Warning:** Not particularly good for very small samples.
+
+*Nonparametric procedures*: make no assumptions about the population distribution.
+
+<div class='notes'>
+- audio03.mp3
+- Bootstrapping is a relatively modern procedure, first developed around 1979, as it requires the use of a computer
+- It's an example of a nonparametric procedure as it makes no assumptions about the distribution of the population and only requires that the sample is representative of the population.
+- It's a popular misconception that bootstrapping is a fix for very small samples.  A very small sample simply doesn't contain very much information about the population and bootstrapping cannot make up for that.
+</div>
+
+## Bootstrap Method
+
+1. Compute statistic of interest for original sample.
+2. Resample to create $B$ bootstrap samples.  $B$ is large, like 5000.
+3. Compute the statistic for each bootstrap sample $\rightarrow$ bootstrap distribution.
+4.  Use bootstrap distribution to estimate standard error or confidence intervals.
+
+<div class='notes'>
+- audio04.mp3
+- essentially we are treating the original sample as the population and using it to create many, many more samples to approximate the sampling distribution of the statistic of interest
+- If our original sample has 10 observations and we want a new sample of size 10, then we have to allow the observations to be repeated in the new sample.  We call this resampling with replacement.
+</div>
+
+## Resamples
+
+Original sample:  2, 3, 7, 8, 11
+
+Resample with replacement:
+```{r}
+B <- 7 # number of resamples
+rs <- replicate( B, sample( c(2,3,7,8,11), replace = T ) )
+rs
+```
+
+<div class='notes'>
+- audio05.mp3
+- replacement means that after an obersvation is randomly selected, we replace or return the observation to the population so that it can be selected again.  
+- it's possible that a resample could be the same as the orginal sample, but most resamples will have combinations of repeated values
+- resamples have the same sample size as the original sample
+- The R code shown here produces 7 resamples, one per column of the matrix.
+- notice the use of the replicate command as an alternative to writing a loop,  replicate is a wrapper for the sapply function.  You can get more information by looking up replicate in R.
+</div>
+
+## Bootstrap Distribution, B = 7
+
+Compute the statistic of interest, $\hat{\theta}$, for each resample:
+```{r}
+bd <- apply( rs, 2, mean)
+bd
+```
+<div class='notes'>
+- audio06.mp3
+- in this case we are computing the mean for each of the 7 resamples
+- the apply command is begin used to compute the mean of each column of the matrix
+</div>
+
+## Bootstrap Distribution, B = 5000
+
+```{r}
+B <- 5000
+rs <- replicate( B, sample( c(2,3,7,8,11), replace = T ) )
+bd <- apply( rs, 2, mean )
+hist(bd,main="",xlab="",ylab="")
+```
+
+<div class='notes'>
+- audio07.mp3
+- to use the bootstrap distribution for statistical inference we want a large number of resamples
+- with today's computers there is no reason not to use very large numbers of resamples, such as 5000 or 10000.  
+</div>
+
+## Bootstrapping Demonstration
+
+Put Movie Here.
+
+<div class='notes'>
+- movie is in video01.mp4
+- just play with this shiny app for a couple of minutes
+- notice the agreement between the bootstrap distribution and the resampling distribution, particularly as the sample size increases
+- NOTE below slide: Better than watching the movie - run the Shiny app yourself.  The files are in the download packet for this week.  Open either file in RStudio and press "Run App".
+</div>
+
+## Sample of cholesterol levels
+```{r, echo=TRUE, eval=FALSE}
+chol <- c(136,180,218,226,232,243,244,281,294,335,
+          355,370,377,393,408,444,521,718,867,1357) # mg
+hist(chol,main=" ",xlab="",ylab="")
+```
+
+```{r, echo=FALSE, message=FALSE, fig.width=4, fig.height=2.5}
+chol <- c(136,180,218,226,232,243,244,281,294,335,
+          355,370,377,393,408,444,521,718,867,1357) # mg
+par(mar=(c(4,.5,0,1)),yaxs="i",bty="l",xaxs="i",yaxt="n")
+hist(chol,main="",xlab="",ylab="")
+```
+
+<div class='notes'>
+- audio08.mp3
+- here is a random sample of 20 cholesterol levels, in milligrams
+- notice that the sample suggests that the population is somewhat skewed to the right, so it certainly wouldn't be reasonable to say the population is normally distributed
+- we'll use this sample to explore some bootstrap confidence intervals
+</div>
+
+## Classical $t$ confidence interval for $\mu$
+
+Formula: $\bar{x} \pm t_{\alpha/2} \displaystyle \frac{s}{\sqrt{n}}$ 
+
+Using R:
+```{r}
+ci1 <- t.test( chol, conf.level=0.95 )$conf.int
+ci1
+```
+
+This interval is symmetric about the sample mean `r round(mean(chol),2)`.
+
+<div class = 'notes'>
+- audio09.mp3
+- if we want to estimate the population mean cholesterol level, then the $t$-interval is one way to go
+- but it requires that the population be normally distributed or that the sample is reasonably large 
+- we'll go ahead and compute it anyway for comparison
+- the way the t-interval is calculuated it will always be symmetric, but since this population is skewed it might be reasonable to expect a confidence interval would not be symmetrical
+- in the next few slides we'll compute a bootstrap confidence interval for the population mean
+</div>
+
+## Bootstrap distribution cholesterol levels
+
+First we'll compute the bootstrap distribution of the sample means for 5000 resamples.
+
+```{r, echo=FALSE}
+set.seed(123)
+```
+
+```{r}
+B <- 5000; rs <- replicate( B, sample( chol, replace = T ) )
+bd <- apply( rs, 2, mean )
+hist(bd,main="",xlab="",ylab="")
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Bootstrap percentile confidence interval
+
+Use the percentiles for the middle 95% from the bootstrap distribution as the confidence limits.  
+
+```{r}
+ci2 <- quantile( bd, c( .025, .975) )
+ci2
+```
+
+This interval is not symmetric about the sample mean `r round(mean(chol),2)` and reflects the skewness of the original sample.
+
+<div class='notes'>
+- audio10.mp3
+- The percentile confidence interval is pretty simple and intuitive.
+- Take your confidence level, for example 95% and imagine that you want to cut out the middle 95% of distribution as your range of plausible value.  That leaves 5% left over that is evenly divided with 2.5% in each tail.
+</div>
+
+## Comparing confidence intervals
+```{r echo = FALSE}
+hist(bd,main="",xlab="",ylab="")
+abline(v=ci1[1],col="red",lwd=2,lty=2)
+abline(v=ci1[2],col="red",lwd=2,lty=2)
+abline(v=ci2[1],col="blue",lwd=2,lty=3)
+abline(v=ci2[2],col="blue",lwd=2,lty=3)
+abline(v=mean(chol),col="magenta",lwd=2,lty=1)
+```
+\begin{center}
+\Large
+\color{red} Classic CI (dashed) \hspace{.25in} \color{magenta} $\bar{x}$ (solid) \hspace{.25in} \color{blue} Bootstrap CI (dotted)
+\end{center}
+
+<div class='notes'>
+- audio11.mp3
+- Notice that the bootstrap interval is not symmetric about the sample mean but instead both values are shifted to the right of what they were for the t-interval.
+- This reflects the right skewness of the data.
+</div>
+
+## Bootstrap Distribution for any statistic
+
+For the median:
+```{r}
+B <- 5000
+rs <- replicate( B, sample( chol, replace = T ) )
+bd <- apply( rs, 2, median)
+hist(bd,main="",xlab="",ylab="")
+```
+
+<div class='notes'>
+- audio12.mp3
+- bootstrapping can be used for any statistic which makes it especially useful when we can't predict the sampling distribution such as for the median.
+- here is bootstrap distribution of sample median cholesterol levels
+- on the next slide we give a confidence interval for the population median cholesterol level
+</div>
+
+## Bootstrap CI Median
+
+A bootstrapped percentile CI for the median with 90% confidence:
+
+```{r}
+# using bootstrap distribution from last slide
+ci3 <- quantile( bd, c(.05,.95) )
+ci3
+```
+
+We are 90% confident that the population median cholesterol level is between `r ci3[1]` mg and `r ci3[2]` mg.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Bootstrap CI Trimmed Mean
+
+99% CI for the 10% trimmed mean.  
+
+```{r}
+B <- 5000
+rs <- replicate( B, sample( chol, replace = T ) )
+bd <- apply( rs, 2, mean, trim = .1)
+ci4 <- quantile( bd, c(.005,.995) )
+ci4
+```
+
+We are 99% confident that the 10% trimmed population mean is between `r round(ci4[1],1)` mg and `r round(ci4[2],1)` mg.
+
+<div class='notes'>
+- audio13.mp3
+- The trimmed mean has become popular in recent years since it is a robust statistic.  
+- For the 10% trimmed mean, the data is put in order and 10% of the observations are removed from each end.  
+- This gives a measure of center that isn't as sensitive to outliers as the mean.  It's a sort of compromise between the mean and the median.  
+- We present it here to show you that it's possible to use bootstrapping to make CI's for just about anything
+</div>
+
+## BCa Bootstrap Interval
+
+- Bias corrected and accelerated interval corrects for bias and skewness in the bootstrap distribution.
+
+- More accurate than percentile intervals.
+
+- Details are beyond our scope, but we'll compute these using the `boot` package in R.
+
+<div class='notes'>
+- audio14.mp3
+- percentile confidence intervals are simple to compute, but they are what statisticians call first order accurate
+- what this means is that for small samples the true confidence levels are likely to be less than the stated confidence levels
+- BCa intervals are second order accurate which means that their true confidence levels are much closer to the stated confidence levels even for smaller sample sizes
+</div>
+
+## Boot package - powerful with a learning curve
+
+The "boot" package does a lot, but takes some effort to learn.
+
+```{r}
+require(boot)  # install 'boot' if needed
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Statistic function
+ 
+To use `boot()` you have have to write an auxiliary function of two inputs that computes the statistic you want to bootstrap.
+
+```{r}
+bootMedian <- function( x, i){
+  # x is a vector of data
+  # i is a vector of indices for the resampled
+  #   elements of x
+  median(x[i]) # gets returned
+}
+```
+
+## Statistic function (2)
+
+Here is a version with a print statement so we can see how it works.
+```{r}
+bootMedianPrint <- function( x, i){
+  # x is a vector of data
+  # i is a vector of indices for the resampled
+  #   elements of x
+  print(i)
+  print(x[i])
+  median(x[i]) # gets returned
+}
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## How it works
+
+```{r}
+set.seed(1)
+x <- c(.2,.3,.5,.7,1.1)
+boot.tmp <- boot(x,bootMedianPrint,R=2)
+```
+
+`boot.tmp` stores the bootstrap distribution and other stuff ...
+
+<div class='notes'>
+- audio15.mp3
+- the first line shows us the first index vector used by boot, it's 1 2 3 4 5 showing us that boot is first computing the statistic for the original sample
+- notice the second line is the 1,2,3,4,5 entries of x
+- the third line shows the index vector i = 2 3 2 5 4, remember we are resampling with replacement, so this is telling us to construct a new sample with the 2nd, third, 2nd, fifth, and fourth entries of x 
+- the fourth line shows the corresponding entries of x ... the bootMedian function will compute the median of the fourth line and return the result to boot()
+- the fifth and sixth lines show the process repeated 
+- in an actual bootstrap scenario we'd likely compute thousands of these resamples and bootMedian would return the median of each resample
+</div>
+
+## Bootstrapping the median
+
+Find the bootstrap distribution for the cholesterol levels we saw earlier.
+
+```{r,fig.height=2,fig.width=4,fig.align='center'}
+set.seed(NULL); boot.object <- boot(chol,bootMedian,R=5000)
+par(mar=c(4.5,0,0,0))
+hist(boot.object$t,breaks=40,main='t',xlab='sample median',yaxt='n')
+```
+<div class='notes'>
+- audio16.mp3
+- the bootstrap statistic is stored in the boot.object returned by boot().
+- To see what all is stored in the list boot.object you can apply the str() or structure command to the boot.object.
+</div>
+
+## Some things to try
+
+You try:
+```{r eval = FALSE}
+# see everything saved in the results of boot
+str(boot.object)
+# plot a boot object
+plot(boot.object)
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Bootstrap confidence intervals
+
+Build confidence intervals from the bootstrap object
+
+```{r, warning=F,eval=FALSE}
+boot.ci( boot.object, conf = .9)
+````
+
+```{r, echo=FALSE,warning=FALSE}
+require(utils)
+tmp <- noquote(capture.output(boot.ci(boot.object, conf = .9)))
+write.table(tmp[1:5],quote=F,row.names=F,col.names=F)
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+
+## Bootstrap confidence intervals (continued output)
+```{r,echo=FALSE}
+write.table(tmp[6:13],quote=F,row.names=F,col.names=F)
+```
+
+<div class='notes'>
+- audio17.mp3
+- there are multiple ways to compute a confidence interval from a bootstrap distribution
+- the one to focus on in this list is the 'bca' interval ... this is the Bias-Corrected Accelerated bootstrap and it adjusts for bias and skewness in the bootstrap distribution.  Of the intervals listed here, it is usually the most accurate.
+</div>
+
+    
+## Bootstrap trimmed mean
+
+```{r}
+bootTrMean <- function( x, i, trim=0){
+  mean(x[i],tr=trim) # gets returned
+}
+set.seed(43);
+x <- rlnorm(50); # very skewed distribution
+boot.object <- boot(x,bootTrMean,R=5000,trim=0.1)
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Bootstrap trimmed mean
+
+```{r}
+boot.ci(boot.object,type='bca')
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Bootstrap variance
+
+Estimate population variance (hint: it's 25)
+
+```{r}
+bootVar <- function( x, i){
+  var(x[i]) # gets returned
+}
+x <- rnorm(40,mean=10,sd=5)
+boot.object <- boot(x,bootVar,R=5000)
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Bootstrap variance (2)
+
+```{r}
+boot.ci(boot.object,type='bca')
+```
+
+<div class='notes'>
+- no audio
+</div>
