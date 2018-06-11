@@ -121,7 +121,9 @@ Use R to build a fake data set with exactly the same statistics (as shown in the
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# replace with your code
+# Compute sample and shift to mean 5.03 and stddev of 0.68, then use t test to compute 95% confidence interval.
+z <- rnorm(sample_size); fakeData <- 0.68*(z-mean(z))/sd(z) + 5.03
+t.test(fakeData,conf.level=.95)$conf.int
 ```
 
 ----
