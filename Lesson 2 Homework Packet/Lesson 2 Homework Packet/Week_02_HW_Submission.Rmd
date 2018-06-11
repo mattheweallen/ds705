@@ -91,7 +91,7 @@ sampleStat <- sampleExponentialMean(1000, 200)
 }
 ```
 
-The sample means from samples of size 200 do appear to be closer to normally distributed than the samples of size 10. The distribution for sample means from samples of size 200 is less right skewed and the left tail looks more inline with a distribution. The larger sample being closer to normally distributed is a consequence of the Central Limit Theorem.
+The sample means from samples of size 200 do appear to be closer to normally distributed than the samples of size 10. The distribution for sample means from samples of size 200 is less right skewed and the left tail looks more inline with a normal distribution. The larger sample being closer to normally distributed is a consequence of the Central Limit Theorem.
 
 ----
 
@@ -105,8 +105,11 @@ Using the data $\bar{x} = 5.0, s = 0.7, n = 50$ we can determine that the 95% $t
 
 ###  -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
 ```{r}
-# replace with your code
+# Use formula n = ((z_alpha/2)^2 * sigma^2)/E^2
+sample_size <- (1.96^2 * 0.7^2)/0.05^2
+sample_size
 ```
+#Sample Size rounded up is 753.
 
 ---- 
 
