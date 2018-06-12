@@ -252,7 +252,7 @@ The lower 90% confidence bound is 32 mg/kg.
 
 ### Part 3h
 
-We'd like to do a hypothesis test at the 10% significance level ($\alpha = 0.01$) to determine if the population mean lead concentration is greater that 30 mg/kg.  Using your 90% lower confidence bound from Part 3g, what conclusion would you reach for the hypothesis test?  Write a complete conclusion as you would for any hypothesis test.
+We'd like to do a hypothesis test at the 10% significance level ($\alpha = 0.1$) to determine if the population mean lead concentration is greater that 30 mg/kg.  Using your 90% lower confidence bound from Part 3g, what conclusion would you reach for the hypothesis test?  Write a complete conclusion as you would for any hypothesis test.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3h -|-|-|-|-|-|-|-|-|-|-|-
 
@@ -280,7 +280,7 @@ Suppose it would be worthwhile to be able to detect an alternative mean lead con
 
 ```{r}
 # Approximate the power of the t test.
-power.t.test(n = 37, delta = 10, sd = 37.1, sig.level = 0.1, type = "one.sample", alternative = "one.sided")
+power.t.test(n = 37, delta = 10, sd = 37.1, sig.level = 0.1, type = "one.sample", alternative = "one.sided")$power
 ```
 
 ----
@@ -293,7 +293,7 @@ Suppose we need the power to be 0.9 to be able to detect an alternative mean lea
 
 ```{r}
 # Find the sample size required for power = 0.9
-power.t.test(power = .9, delta = 10, sd = 37.1, sig.level = 0.1, type = "one.sample", alternative = "one.sided")
+power.t.test(power = .9, delta = 10, sd = 37.1, sig.level = 0.1, type = "one.sample", alternative = "one.sided")$n
 ```
 
 ----
