@@ -148,10 +148,11 @@ Before using a t distribution based procedure we need to determine if it is plau
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# replace with your code
+# Make a histogram of the data to see if it looks normally distributed.
+hist(lead, xlab = "Lead Concentrations", main = "Histogram of Lead Concentrations")
 ```
 
-Replace this text with your written answer.
+Based on the histogram, lead concentrations definitely do not look to be normally distributed. The histogram shows that lead concentrations are right skewed. 
 
 ----
 
@@ -163,9 +164,10 @@ Use `t.test` in R to construct a 80% CI for the population mean lead concentrati
 
 ```{r}
 # replace with your code
+t.test(lead,conf.level=.80)$conf.int
 ```
 
-Replace this text with your written answer.
+We are 80% confident that the population mean lead concentraion is between 30 and 46.
 
 ---- 
 
@@ -174,7 +176,7 @@ Note that your 80% CI for the population mean also gives you a 90% lower confide
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3c -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your written answer.
+Yes. The lower bound of the confidence interval suggests that the population mean lead concentration is larger that 30 mg/kg at a $\alpha = 0.10$ significance level. The 90% lower confidence bound is the same as an alternative hypothesis of greater than 30 mg/kg at a 10% level of significance.  
 
 ----
 
@@ -184,18 +186,23 @@ Use R to conduct a one-sample $t$-test to determine if the population mean lead 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3d -|-|-|-|-|-|-|-|-|-|-|-
 
-(Step 1) The hypotheses $H_0: \mu = 17$ and $H_a: \mu < 17$  (change!)
+(Step 1) The hypotheses $H_0: \mu = 30$ and $H_a: \mu > 30$
 
 (Step 2) Already did this in 3a.
 
 (Step 3) Compute:  
 ```{r}
+#Ho: mu = 30 and Ha: mu > 30 
+t.test(x = lead,
+       alternative = "greater",
+       mu = 30,
+       conf.level = 0.9)
 
 ```
 
 (Step 4) Conclusion:
 
-----
+At a 10% level of significance, we fail to reject the null hypothesis that lead concentration is less than or equal to 30 mg/kg.
 
 ### Part 3e
 
@@ -204,7 +211,10 @@ Since the lead concentrations are very skewed and the sample size is relatively 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3e -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+B <- 5000
+rs <- replicate(B, sample(lead, replace = T))
+bd <- apply(rs, 2, mean)
+quantile(bd, c(.1,.9))
 ```
 
 ---
@@ -216,6 +226,15 @@ Use the `boot` package to make an 80% percentile BCa CI for the population mean 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
+library(boot)
+bootMean <- function(x, i) {
+  # x is a numeric vector
+  # i is a vector of indices for the resampled elements of x
+  mean(x[i])
+}
+set.seed(NULL)
+boot.object <- boot(lead, bootMean, R=5000)
+boot.ci(boot.object, conf = .8)
 
 ```
 
@@ -227,7 +246,7 @@ Based on your BCa interval in Part 3f, what is the the lower 90% confidence boun
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3g -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your written answer.
+The lower 90% confidence bound is 32 mg/kg.
 
 ---
 
@@ -237,7 +256,7 @@ We'd like to do a hypothesis test at the 10% significance level ($\alpha = 0.01$
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3h -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this test with your written answer.
+At a 10% sigificance level, we reject the null hypothesis that the mean lead concentration is less than or equal to 30 mg/kg in favor of the alternative hypothesis that mean lead concentration is greater than 30 mg/kg.
 
 ----
 
@@ -247,7 +266,7 @@ Which do you trust more and why?  The results of the bootstrap procedures or the
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3i -|-|-|-|-|-|-|-|-|-|-|-
 
-You text replaces this .
+I trust the bootstrap procedure more. The t test is intended for distributions that are roughly normal. Lead Concentrations are right skewed, and so a t test is not the best choice. The bootstrap procedure transforms the lead concentrations into a distribution that is approximately normal.
 
 ----
 
