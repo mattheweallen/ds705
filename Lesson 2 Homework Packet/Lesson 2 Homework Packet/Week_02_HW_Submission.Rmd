@@ -279,7 +279,8 @@ Suppose it would be worthwhile to be able to detect an alternative mean lead con
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3j -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# your code goes here
+# Approximate the power of the t test.
+power.t.test(n = 37, delta = 10, sd = 37.1, sig.level = 0.1, type = "one.sample", alternative = "one.sided")
 ```
 
 ----
@@ -291,7 +292,8 @@ Suppose we need the power to be 0.9 to be able to detect an alternative mean lea
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3i -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# your code goes here
+# Find the sample size required for power = 0.9
+power.t.test(power = .9, delta = 10, sd = 37.1, sig.level = 0.1, type = "one.sample", alternative = "one.sided")
 ```
 
 ----
