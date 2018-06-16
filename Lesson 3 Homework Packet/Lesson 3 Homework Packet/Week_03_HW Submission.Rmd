@@ -17,7 +17,6 @@ if (!require(DS705data)){
 }
 require(DS705data)
 require(ggplot2)
-require(gridExtra)
 ```
    
 ## Exercise 1  
@@ -46,18 +45,11 @@ Create boxplots and histograms for each group (treated vs. untreated).  Be sure 
 
 ```{r}
 # Create Boxplots and Histograms for each group treated vs. untreated.
-ggplot(data = WormSheep, aes(x = treated, y = worms)) + geom_boxplot() + labs(x = "", y = "Worm Count")
-plotHistTreated <- ggplot(data = WormSheep[WormSheep$treated=="treated",], aes(x = worms)) +
-  geom_histogram(binwidth = 10, colour = "black") + labs(x = "Worms", y = "Count") +
-  ggtitle("Treated") +
-  theme(plot.title = element_text(hjust = 0.5))
+ggplot(data = WormSheep, aes(x = treated, y = worms)) + geom_boxplot() + labs(x = "")
 
-plotHistUntreated <- ggplot(data = WormSheep[WormSheep$treated=="untreated",], aes(x = worms)) +
-  geom_histogram(binwidth = 10, colour = "black")  + labs(x = "Worms", y = "Count") +
-  ggtitle("Untreated") +
-  theme(plot.title = element_text(hjust = 0.5))
-
-grid.arrange(plotHistTreated, plotHistUntreated, ncol = 2)
+ggplot(WormSheep, aes(x=worms)) + 
+  geom_histogram(binwidth=10, colour="black", fill="white") + 
+    facet_grid(. ~ treated)
 
 
 ```
