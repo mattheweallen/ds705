@@ -110,9 +110,14 @@ Conduct an appropriate test to determine if the worm counts in each population c
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Use Shapiro-Wilk normality test
+shapiro.test(treatedForWorms)
+shapiro.test(untreatedForWorms)
 
 ```
+With p-value= 0.6504, we fail to reject the null hypothesis that the treated group comes from a normal distribution at a 5% level of significance.
+
+With p-value= 0.5491, we fail to reject the null hypothesis that the untreated group comes from a normal distribution at a 5% level of significance.
 
 ---
 
@@ -129,8 +134,8 @@ State the null and alternative hypotheses for the test.  If you use symbols, ple
 Replace this text with your answer here.
 
 NOTE: You can typeset hypotheses like this (using LaTeX):
-$$H_0: \mu_\mbox{boys} = \mu_\mbox{girls}$$
-$$H_a: \mu_\mbox{boys} \neq \mu_\mbox{girls}$$
+$$H_0: \mu_\mbox{treated} \geq \mu_\mbox{untreated}$$
+$$H_a: \mu_\mbox{treated} < \mu_\mbox{untreated}$$
 
 
 #### Step 2
@@ -140,7 +145,8 @@ Use R to generate the output for the test you selected.
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g.step2 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# use Welch t-test.
+t.test(treatedForWorms,untreatedForWorms,alternative="less",conf.level=.95)
 
 ```
 
@@ -150,7 +156,9 @@ State both a statistical conclusion at $\alpha=0.05$ and interpret it in the con
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g.step3 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+At a 5% level of significance, we reject the null hypothesis that the treated group has the same or more number of worms than the untreated group in favor of the alternative that the treated group has fewer worms than the untreated group.
+
+Based on our statistical test, there is evidence that using the treatment leads to fewer worms in sheep than not treating at all.
 
 ---
 
@@ -162,11 +170,12 @@ Compute a 95% confidence interval for the difference in population means.  Write
 
 ```{r}
 # Insert your R code here.
+t.test(treatedForWorms,untreatedForWorms,conf.level=.95)$conf.int
 
 ```
 
 
-Replace this text with your answer here.
+At a 95% confidence level, using the treatment leads to between 1 and 25 fewer worms than not being treated at all. 
 
 ---
 
@@ -176,7 +185,9 @@ Did you use the Welch t-test or the Wilcoxon rank sum test?  Justify your choice
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1i -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+Based on the Shapiro-Wilk test for normality, the distributions are approximately normal. Since the Welch t-test is more powerful for approximately normally distributed data, it was used versus the Wilcoxon rank sum test.
+
+We are also assuming independent and random samples.
 
 ---
 
