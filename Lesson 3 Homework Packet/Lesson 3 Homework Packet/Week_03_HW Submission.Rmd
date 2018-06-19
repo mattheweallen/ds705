@@ -304,7 +304,7 @@ State the null and alternative hypotheses for the test (in words).
  
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d.step1 -|-|-|-|-|-|-|-|-|-|-|-
 
-The null hypothesis is that the median delay times of Skybird and Omega are the same against the alternative that the delay times are shifted from each other. 
+The null hypothesis is that the distribution of delay times of Skybird and Omega are the same against the alternative that the delay times are shifted from each other. 
 
 
 #### Step 2
@@ -325,7 +325,7 @@ State both a statistical conclusion at $\alpha=0.1$ and interpret it in the cont
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d.step3 -|-|-|-|-|-|-|-|-|-|-|-
 
-At a 10% level of significance, we fail to reject the null hypothesis that the median delay times are the same for Skybird and Omega.
+At a 10% level of significance, we fail to reject the null hypothesis that the distribution of delay times are the same for Skybird and Omega.
 
 In other words, both airlines are delayed about the same amount.
 
