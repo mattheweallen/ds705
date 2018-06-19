@@ -131,11 +131,13 @@ State the null and alternative hypotheses for the test.  If you use symbols, ple
  
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g.step1 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
 
-NOTE: You can typeset hypotheses like this (using LaTeX):
 $$H_0: \mu_\mbox{treated} \geq \mu_\mbox{untreated}$$
 $$H_a: \mu_\mbox{treated} < \mu_\mbox{untreated}$$
+where $$\mu_\mbox{treated}$$ is the mean worm count with treatment
+and $$\mu_\mbox{untreated}$$ is the mean worm count without treatment.
+
+
 
 
 #### Step 2
@@ -217,21 +219,21 @@ Begin by exploring the sample means, medians, and standard deviations for each a
 
 ```{r}
 # Find sample mean, median and standard deviation for the airlines Skybird and Omega
-skybird_delay <- delays[which(delays$airline == "Skybird"),]
+skybird_delay <- delays[delays$airline == "Skybird","delay"]
 #skybird_delay mean
-mean(skybird_delay$delay)
+mean(skybird_delay)
 #skybird_delay median
-median(skybird_delay$delay)
+median(skybird_delay)
 #skybird_delay standard deviation
-sd(skybird_delay$delay)
+sd(skybird_delay)
 
-omega_delay <- delays[which(delays$airline == "Omega"),]
+omega_delay <- delays[delays$airline == "Omega","delay"]
 #omega_delay mean
-mean(omega_delay$delay)
+mean(omega_delay)
 #omega_delay median
-median(omega_delay$delay)
+median(omega_delay)
 #omega_delay standard deviation
-sd(omega_delay$delay)
+sd(omega_delay)
 ```
 
 ---
@@ -245,12 +247,29 @@ Discuss the aspects of the plots that are relevant to the construction of the be
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Create Boxplots and Histograms for delay times of both airlines.
+ggplot(data = delays, aes(x = airline, y = delay)) + geom_boxplot() + labs(x = "")
+
+ggplot(delays, aes(x=delay)) + 
+  geom_histogram(binwidth=.5, colour="black", fill="white") + 
+    facet_grid(. ~ airline)
+
+# Make normal probability plot of Skybird airline and add fit line.
+{
+  qqnorm(skybird_delay, ylab="Skybird") 
+  qqline(skybird_delay)
+}
+
+# Make normal probability plot of Omega airline and add fit line.
+{
+  qqnorm(omega_delay, ylab="Omega") 
+  qqline(omega_delay)
+}
 
 ```
 
 
-Replace this text with your answer.
+Based on the boxplots, histograms, and normal probability plots both distributions are right skewed. The Wilcoxon test works best for data that is clearly non normal.
 
 ---
 
@@ -265,11 +284,13 @@ State the hypotheses and conclusion of the test. Include the P-value in your con
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Use Shapiro-Wilk normality test
+shapiro.test(skybird_delay)
+shapiro.test(omega_delay)
 
 ```
 
-Replace this text with your answer.
+The null hypothesis is that skybird_delay and omega_delay come from normal probability distributions. The alternative hypothesis is that they are non-normal. Based on a p-value = 6.027e-05 at a 5% level of significance, we reject the hypothesis that the distributions are normal in favor of the alternative that they are nonmormal.
  
 ---
 
@@ -283,7 +304,7 @@ State the null and alternative hypotheses for the test (in words).
  
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d.step1 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer.
+The null hypothesis is that the median delay times of Skybird and Omega are the same against the alternative that the delay times are shifted from each other. 
 
 
 #### Step 2
@@ -293,7 +314,8 @@ Use R to generate the output for the test you selected.
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d.step2 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Use Wilcox test to find if
+wilcox.test(delay~airline,data=delays,conf.int=TRUE,conf.level=.90)
 
 ```
 
@@ -303,7 +325,9 @@ State both a statistical conclusion at $\alpha=0.1$ and interpret it in the cont
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d.step3 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer.
+At a 10% level of significance, we fail to reject the null hypothesis that the median delay times are the same for Skybird and Omega.
+
+In other words, both airlines are delayed about the same amount.
 
 ---
 
@@ -314,11 +338,12 @@ Construct the most appropriate 95% confidence interval to compare population cen
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Create a 95% confidence interval to compare population central values.
+wilcox.test(delay~airline,data=delays,conf.int=TRUE,conf.level=.95)$conf.int
 
 ```
 
-Replace this text with your answer.
+The difference in flight delays between Omega and Skybird is between 16.8 minutes and 23.4 minutes. 
 
 ---
 
@@ -328,7 +353,7 @@ Did you use the Welch t-test and interval or the Wilcoxon rank sum test with the
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2f -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer.
+I used the Wilcoxon rank sum test. The problem statement stated that the delay times were independent and random. Due to the right skewness of the delay times, the Wilcoxon rank sum test that uses median as a measure of central tendency works better than Welch t-test which assumes the distributions are approximately normal.
 
 ---
 
@@ -338,7 +363,7 @@ What type of hypothesis testing error could have been made here?  Describe it in
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2g -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer.
+It is possible that we could have made a Type II error. We failed to find a difference in delay times when there may actually be a significant difference in delay times between Omega and Skybird airlines.
 
 ---
 
@@ -349,8 +374,17 @@ Construct a 95% bootstrap confidence interval to compare population medians for 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2g -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Construct 95% confidence interval for median delay times between Omega and Skybird
+library(boot)
+bootPctDiff <- function(d,i,p=.5){
+  pct <- tapply(d[i,1],d[,2],quantile,prob=p)
+  pct[1]-pct[2]
+}
+boot.object <- boot(delays, bootPctDiff, R = 2000,p=.5,
+strata=delays$airline)
+boot.ci(boot.object,type='bca')$bca[4:5]
+
 
 ```
 
-Replace this text with your answer.
+The wilcox.test function produced the interval [-0.3900065, 0.2800410] and the bootstrap confidence intervals [-0.665, 0.320]. They agree with each other that 0 is in the interval. The bootstrap interval is wider than the Wilcox interval at the same level of significance.
