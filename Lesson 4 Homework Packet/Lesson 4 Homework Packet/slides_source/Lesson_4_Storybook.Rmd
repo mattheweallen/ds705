@@ -1,0 +1,556 @@
+---
+title: 'Inference for Paired Data'
+author: "DS705"
+fontsize: '12pt,notes'
+output:
+  beamer_presentation:
+    template: '../beamer169experimental.tex'
+    colortheme: "seahorse"
+    keep_tex: true
+    fonttheme: default
+---
+
+```{r global_options, include=FALSE, echo=FALSE}
+# use for beamer
+knitr::opts_chunk$set(fig.width=4, fig.height=3, fig.align='center',warning=FALSE, message=FALSE)
+library(knitr)
+
+# use for word
+# knitr::opts_chunk$set(fig.width=4, fig.height=3,warning=FALSE, message=FALSE)
+```
+
+## What is Paired Data?
+
+\begin{center}
+"Before vs After"
+\end{center}
+
+\begin{center}
+"Method A vs Method B"
+\end{center}
+
+
+\begin{center}
+Any time two dependent observations are recorded for the same experimental unit.
+\end{center}
+
+<div class="notes">
+
+Paired data often arises from "Before vs After" scenarios, like a clinical trial where something like cholesterol level is measured before some treatment is given and again afterward for each person in the study.  
+
+Another common source of paired data is a "Method A vs Method B" scenario.  For example, suppose in a taste test a person is asked to rate the flavor on a scale from 1 to 20 of a chocolate pie compared to a piece of strawberry pie. Each person gets to taste *both* pies and give rating for each.  
+
+With that scenario, you may sense the importance of randomizing the order in which the pies are eaten to avoid the confounding of an order effect in addition to providing enough time between the pie tastings to avoid a carry-over effect.
+
+Notice in both cases that the same variable is being measured for each person at two different times or in two different ways.  These measurements won't be independent because they are being measured on the *same* individual.  Someone who had unusually high cholesterol before the treatment may still have a high cholesterol level afterward, but the *drop* in cholesterol for that person may be much greater than for other people in the study.  
+
+Some people in the taste test may tend to use the lower end of the rating scale all the time, but if they rate the strawberry pie above the chocolate pie, we know which pie they prefer even if both pies received a low rating.
+
+It is the *difference* that's important with paired data.
+
+The "Method A vs Method B" samples cannot be considered independent because they are taken from the either the same individual or on individuals that are paired together in some way.
+
+The Welsh, pooled-t, and Wilcoxon rank sum require the two samples to be independent of each other.  Since the samples are not independent for paired data, different statistical procedures need to be used, such as the paired data t-procedures, the Wilcoxon signed rank test, or the sign test.
+
+"What is an experimental unit?" you ask. It is the thing that we are taking measurements on. The experimental units could be called the subject, individual, participant, object . . the experimental unit could be a single person, or a married couple, or twins, or two components in the same piece of machinery, etc.
+
+Paired data can also be called matched pairs, because experimental units can be matched on certain characteristics to create the data pairs. Paired data is also the simplest case of the experimental design called repeated measures. 
+
+</div>
+
+----
+
+## What's the big difference between paired data and independent samples?
+
+The difference of means is the mean of the differences either way
+
+\begin{table}
+        \centering
+        \begin{tabular}{ccc}
+        \underline{Independent} & \hspace{3em} & \underline{Paired} \\ 
+        $\mu_{y_1-y_2}=\mu_1-\mu_2=\mu_d$ & \hspace{3em} & $\mu_{y_1-y_2}=\mu_1-\mu_2=\mu_d$   \\
+        \end{tabular}
+\end{table}
+
+But . . . the variance of the differences differs!
+
+\begin{table}
+        \centering
+        \begin{tabular}{ccc}
+        \underline{Independent} & \hspace{3em} & \underline{Paired} \\[1em]
+        $\sigma^2_{y_1-y_2}=\sigma^2_1 +\sigma^2_2$ & \hspace{3em} & $\sigma^2_{y_1-y_2}=\sigma^2_1 + \sigma^2_2 - 2 \sigma_1 \sigma_2 \rho$   \\
+        \end{tabular}
+\end{table}
+
+<div class="notes">
+
+There is a good mathematical reason for treating paired observations differently than independent ones.  It isn't because of the relationship of mean, because the difference of means is the mean of the differences either way.
+
+Its because when data pairs are independent, the correlation coefficient is zero.  The correlation coefficient is indicated here by the Greek letter rho.  Correlation coefficients will be covered more in depth in a future lesson.  
+
+Notice that if data pairs are negatively correlated for the paired data, the variance of the difference in random variables increases for paired data, since you can see in that third term we would be subtracting a negative number. But if the correlation is positive, which is typical with paired, the variance of the differences in the random variables will be smaller than if they were independent.  
+
+</div>
+
+----
+
+## Fast Facts: Paired *t* Procedures
+
+\vspace{-2em}
+
+\begin{table}
+        \centering
+        \begin{tabular}{ll}
+        \bf{Why}: & Hypothesis test - To $compare$ an unknown population mean difference, \\
+                  & $\mu_d$, to the hypothesized difference (usually 0). \\ 
+                  & Confidence interval - to $estimate$ an unknown population mean \\
+                  & difference $\mu_d$.  \\
+                  &  \\
+        \bf{When}: & Use these when two dependent measurements are observed for each subject. \\
+                  & The following conditions are necessary for these procedures to be accurate \\
+                  &  and valid.  Some may have to be assumed, but be careful in doing so. \\
+                  & \hspace{1em} 1. The sample is selected randomly. \\
+                  & \hspace{1em} 2. The population of differences is approximately normally distributed. \\
+                  &  \\
+        \bf{How}: & Use R function \bf{t.test()}, use the option \bf{paired=TRUE}.  \\
+        \end{tabular}
+\end{table}
+
+
+<div class="notes">
+
+No audio
+
+</div>
+
+----
+
+## Example: Paired *t* Interval and Hypothesis Test
+
+Suppose the owner of a pie shop would like to know which type of pie customers like the shop's Chocolate pies better than its Strawberry pies. 
+
+Consider a taste test experiment where 12 customers are asked to rate the taste of a piece of chocolate pie and a piece of strawberry pie on a scale from 1 (worst) to 20 (best).  
+
+
+<div class="notes">
+
+
+</div>
+
+----
+
+## Paired *t* Example: The Design
+
+To negate an order effect, we would randomize the order in which the pies are tasted, with half of the subjects tasting the chocolate pie first and the other half tasting the strawberry pie first.
+
+To avoid a carryover effect, we have the a 15-minute time gap between the tastings.
+
+
+<div class="notes">
+
+
+</div>
+
+----
+
+## Paired *t* Example: The Data
+
+```{r, echo=FALSE}
+Customer=seq(1,12,length=12)
+Chocolate=c(14,8,19,7,15,14,18,9,15,10,17,9)
+Strawberry=c(11,12,9,7,8,13,11,12,8,6,16,3)
+ratings <- data.frame(Customer,Chocolate,Strawberry)
+kable(ratings,align='c',format = "markdown")
+```
+
+<div class="notes">
+
+Suppose the data collected is as shown here. Note that each of the 12 subjects tasted and rated both kinds of pies.
+
+</div>
+
+----
+
+## Subtracting Eliminates the Problem of Dependent Samples
+
+```{r, echo=FALSE}
+Difference=Chocolate-Strawberry
+ratings2 <- cbind(ratings,Difference)
+kable(ratings2,align='c',format = "markdown")
+```
+
+<div class="notes">
+
+Subtracting eliminates the problem of dependent samples because now instead of having two dependent observations we have just one. It is extremely important to remember the order of subtraction.
+
+</div>
+
+----
+
+## Paired *t* Example: Define Parameters, State Hypotheses
+
+Let $\mu_d$ be the mean difference in taste ratings (Diff=Chocolate-Strawberry) for the population of all people.  
+
+$$H_0: \mu_d = 0$$
+
+$$H_a: \mu_d > 0$$
+
+
+<div class="notes">
+
+The mean of differences is equivalent to the difference of means, so a mean difference of 0 indicates that there is no difference in mean ratings for the chocolate and strawberry pies.
+
+If the mean for chocolate is larger than the mean for strawberry, then the order of subtraction would result in a positive number, whereas if the mean for the strawberry pies was larger and we do chocolate minus strawberry, the resulting mean would be a negative number.
+
+</div>
+
+----
+
+## Paired *t* Example: Assessing the Conditions
+
+Do we have a random sample?
+
+```{r, echo=FALSE, fig.height=2, fig.width=4}
+par(mfrow=c(1,2))
+par(mar=c(4,4,2,.25))
+boxplot(Difference,ylab='Difference')
+hist(Difference,main=' ')
+```
+
+Do the plots support the notion of normally distributed differences?
+
+<div class="notes">
+
+Truly random samples are hard to come by, and if the sample doesn't reflect the characteristics of the population, then the fanciest statistical procedures in the world can't produce a reliable inference.  Frequently, we are put in the position of having to assume that the sample is random and is a reasonable representation of the population from which it was drawn.  
+
+For a small sample like this, the Shapiro-Wilk normality test isn't necessary if the boxplot and histogram don't show severe departures from normality, especially in light of the robustness of the t-test.  It wouldn't have much power to detect departures from normality at a sample size of 12 anyway.
+
+</div>
+
+----
+
+## Paired *t* Example: Crunching the Numbers
+
+```{r}
+t.test(Chocolate,Strawberry,alternative = "greater",paired=TRUE)
+```
+
+<div class="notes">
+
+In R, the t.test function is used. This is the same one used for the independent sample t-procedures.  By default, paired is set to FALSE, but specifying paired to TRUE tells R that the data in the two vectors is paired and that it should treat them accordingly.  Note that the output indicates that we have chosen this option.
+
+In addition to providing the test statistic, degrees of freedom, and p-value, there is also a note describing the alternative hypothesis, which should match the alternative hypothesis we wrote down previously - that mu sub d is greater than zero.
+
+This note is the result of our indication on the R code that we want the alternative "greater."  The default alternative in R is two.sided, and if we don't specify the one sided alternative of "greater," then the p-value given would be twice as big as the one we are currently observing, since the p-value for two-sided t-tests is always 2 times the one-sided t-tests.  
+
+Because we have specified the alternative of "greater," the R output contains a one-sided confidence bound rather than a confidence interval, even though the R output labels it as a confidence interval.  The lower bound is shows the lowest plausible limit for the true underlying population mean difference in taste ratings.  
+
+Based on this output and a 5% level of significance, should the null hypothesis be rejected?  Is there a difference in the mean taste ratings of the pies?  If so, can you tell which kind of pie the average customer likes better?
+
+
+
+</div>
+
+----
+
+## Paired *t* Example: Making the Inference from the Test
+
+If the level of significance is 5%, $H_0$ would be rejected.  Therefore, the inference is that the mean taste rating for chocolate pie is higher than the mean for the strawberry pie for the entire population of customers. 
+
+
+<div class="notes">
+
+No audio.
+
+</div>
+
+----
+
+## Paired *t* Example: Making the Inference from the Interval
+
+```{r}
+t.test(Chocolate,Strawberry,alternative = "two.sided",paired=TRUE)
+```
+
+<div class="notes">
+
+With 95% confidence, the mean taste rating for chocolate pie is 0.485 to 6.015 units larger than for strawberry pie for the population of all customers.
+
+</div>
+
+----
+
+## Wilcoxon Signed Rank Test
+
+Alternative to t-test. Use ranks to test the median difference.
+
+Requirements:
+
+* must have random sample of differences
+* population of differences must be symmetric, but non-normal OK
+
+Pros and Cons
+
+* uses less information so less powerful than the t-test
+* more powerful than the sign test (coming up)
+* details in Section 6.5 of Ott
+
+----
+
+## Fast Facts: Wilcoxon Signed Rank Test
+
+\begin{table}
+        \centering
+        \begin{tabular}{ll}
+        \bf{Why}: & To compare an unknown median for a population of differences  \\
+        & to some hypothesized value (usually 0). \\ 
+                  &  \\
+        \bf{When}: & Use when two dependent measurements are observed for each subject. \\
+                  & The following conditions are necessary for this procedure to be accurate \\
+                  &  and valid.  Some may have to be assumed, but be careful in doing so. \\
+                  & \hspace{1em} 1. The sample is selected randomly. \\
+                  & \hspace{1em} 2. The population is differences is approximately symmetric about \\
+                  & \hspace{3em}the median. \\
+                  &  \\
+        \bf{How}: & Use R function \bf{wilcox.test()}.  \\
+        \end{tabular}
+\end{table}
+
+
+<div class="notes">
+
+No audio
+
+</div>
+
+----
+
+## Hypothesis Test for Median Difference
+
+```{r}
+wilcox.test(Chocolate,Strawberry,alternative="greater",
+            paired=TRUE)
+```
+
+
+<div class="notes">
+
+For the sake of demonstrating an example in R, the code and output for the Wilcoxon signed rank test are shown here.  
+
+The null hypothesis is that the median taste rating of the population of differences is 0 (or that the distributions of the taste ratings for chocolate and strawberry pies are not shifted from each other).
+
+The alternative hypothesis specified here is that the median taste rating for the chocolate pie is greater than the median for strawberry pies (or that the distribution for chocolate is shifted to the right of the distribution for strawberry)
+
+We see here that the Wilcoxon signed rank test also detects a difference in the locations of the distributions at a 5% level of significance with a p-value of 0.018, so even with a sample of only 12 observations, both procedures have the power to detect a shift of this size.
+
+Recall that the Wilcoxon signed rank test requires condition that the population be symmetric, and so the little bit of skewness observed in the sample was not severe enough to lower the power of this test so that it couldn't detect the shift.
+
+The continuity correction is simply an adjustment made to improve the normal approximation for finding the p-value.
+
+(see p. 193 in Ott for more on continuity corrections in general) <-for bottom panel note
+
+</div>
+
+----
+
+## Confidence Interval for the Median Difference
+
+```{r}
+wilcox.test(Chocolate,Strawberry,conf.int=TRUE,paired=TRUE)
+```
+
+<div class="notes">
+
+A confidence interval to estimate the median of the population of differences in taste ratings (in the order of chocolate minus strawberry) is given as 0.5 to about 7, with 95% confidence.
+
+</div>
+
+----
+
+## The Sign Test
+
+```{r echo=FALSE, fig.width=5, fig.height = 2.5}
+df=3
+p=.5
+med=qchisq(p,df)
+minx = 0
+maxx = qchisq(.993,df)
+x=seq(minx,maxx,length=200)
+y=dchisq(x,df)+.022
+par(mar=(c(1,.25,0,.25)),bty="n",xaxs="i",xaxt="n",yaxt="n",yaxs="i")
+plot(x,y,type="l", lwd=2, col="black",xlab="",ylab="",main=""
+     ,ylim=c(0,1.02*max(y)))
+points(c(med,med),c(0.022,dchisq(med,df)),type='l',col="red",lwd=2)
+xpts=seq(med,maxx,length=200)
+ypts=dchisq(xpts,df)+.022
+polygon(c(med,xpts,maxx),c(0.022,ypts,0.022),col="khaki1")
+abline(h=0.022,xlim=c(minx,maxx),col="black",lwd=2)
+text(med,.01,"Median")
+text(med+1.8,.072,"0.5?")
+```
+
+<div class="notes">
+
+There is another very basic nonparametric test for comparing an unknown population median to a hypothetical value.  It is called the sign test.  It only has the data condition that the sample is randomly selected (so that the sample adequately represents the population of interest for making an inference).  
+
+The sign test essentially tests that the proportion of values in the population that are above the hypothesized median is 0.5, since by definition, half the values in a distribution fall above the median.  This test only requires that the sample is randomly selected, but generally has a lower power than the t-test and Wilcoxon signed rank test when their conditions are met.
+
+With paired data, the null hypothesis is typically that the median in the population is 0 and the binomial distribution is used to find the probability of observing at least as many positive values in the sample as what is observed in the current sample, when the success probability is 0.5.  Differences of zero are omitted, since they provide no evidence against the null hypothesis.
+  
+</div>
+
+----
+
+## Sign Test in R
+
+```{r}
+require(signmedian.test)
+signmedian.test(Difference,mu=0,alternative="greater")
+```
+
+
+<div class="notes">
+
+The null hypothesis for the sign test is that the median in the population of differences is 0 vs the alternative that the median is greater than 0 since the original problem statement said that the owner of the pie shop wanted to test if the ratings for the chocolate pies were higher than for the strawberry pie and we decided to find the differences as chocolate minus strawberry. This is why the alternative is specified again as "greater"" in the R code. 
+
+Even the sign test detects that the median for chocolate is greater than for strawberry.
+
+Note that R tells you the number of positive differences in the sample is 9.
+
+</div>
+
+----
+
+## How the sign test looks at differences
+
+```{r, echo=FALSE}
+Sign=c("+","-","+","removed","+","+","+","-","+","+","+","+")
+ratings3=cbind(ratings2,Sign)
+kable(ratings3,align='c',format = "markdown")
+```
+
+<div class="notes">
+
+The sign test simply counts the number of positive differences, omitting any differences of 0 and uses the binomial distribution with n=11 and p=0.5 to find the probability of finding at least as much evidence in favor of whatever alternative is specified.  
+
+As in this example, the alternative is that the median is positive, so the p-value is the probability of seeing 9 or more positive differences if the median really was 0.  It would be like the probability of getting heads at least 9 times in 11 tosses of a fair coin.
+
+If we were testing for a negative median, the p-value would be the probability of seeing 9 or fewer heads in 11 tosses of a fair coin, because we would expect fewer positive differences if the true population median was less than 0 and the order of subtraction is chocolate minus strawberry.
+
+</div>
+
+----
+
+## When should I use the sign test?
+
+* Has only 1 requirement: random sampling
+
+* Uses limited information - so it isn't as powerful as the paired t-test or Wilcoxon signed rank test
+
+<div class="notes">
+
+The sign test only requires that the sample accurately reflects the characteristics of the population, so it has few limitations on when it can be used.  But it does not use much information from the data - only whether each value is bigger or smaller than the hypothesized median.
+
+Because of this, it isn't as powerful as the t-test or Wilcoxon signed rank test when their conditions are met. 
+
+However, for data that is strongly non-normal and non-symmetric, it gets the job done!
+
+</div>
+
+----
+
+## Stacked vs Side-by-Side Data Structure
+
+```{r echo=FALSE}
+# the following code stacks the pie tasting data set
+ratings2 <- stack(list('Chocolate'=Chocolate,'Strawberry'=Strawberry))
+names(ratings2) <- c('Rating','Flavor')
+```
+
+
+<div class="notes">
+
+No audio.
+
+</div>
+
+----
+
+## Fast Facts: Bootstrap CI for Mean Difference
+
+\begin{table}
+        \centering
+        \begin{tabular}{ll}
+        \bf{Why}: & To estimate an unknown population mean difference $\mu_d$ \\
+                  &   \\                
+        \bf{When}: & Use when two dependent measurements are observed for each subject \\
+                  & and the sample is randomly selected  \\
+                  &  \\
+        \bf{How}: & Use R functions \bf{boot()} and \bf{boot.ci()} \\
+        \end{tabular}
+\end{table}
+
+<div class="notes">
+
+No audio.
+
+</div>
+
+----
+
+## Bootstrap CI for Mean Difference for Pairs
+
+```{r}
+bootMeanPaired <- function(x,i){
+  # x is a vector of differences from paired data
+  # i is a vector of indices for the resampled elements of x
+  mean(x[i]) # the statistic that gets returned
+  }
+
+library(boot)
+boot.object <- boot(Difference, bootMeanPaired, R = 5000)
+boot.ci(boot.object,type='bca')$bca[4:5]
+```
+
+<div class="notes">
+
+A bootstrap interval can be obtained for the mean difference in the pie taste ratings using the code shown here.  Recall that you have to create a function to compute the statistic that you would like to bootstrap first and the use the boot package and both the boot and boot.ci functions to create the interval.
+
+This function is created to have the sample of differences fed into it.  Remember that previously in this lesson the variable Difference was created and contains the differences in taste ratings with Chocolate minus Strawberry for the 12 subjects in the sample.
+
+I'm using a bootstrap sample size of 5000 here and taking out the interval estimated using the bca method.
+
+The result here is very similar to the interval for both the t-interval and the interval produced by wilcox.test because the sample of differences showed no severe departures from normality.  With a data set that satisfies the conditions for both the t-interval and the Wilcoxon Signed Rank procedure, it makes sense that the resulting confidence intervals from each of the procedures would be very similar. 
+
+Since the bootstrap interval has no requirement on the shape of the distribution of differences, it also produces an interval that is very similar to the other two. 
+
+</div>
+
+----
+
+## Our 2 Cents
+
+- Must have random samples to make an inference to a population.  This may need to be assumed, but be careful doing so.
+- The paired $t$ test and $t$ interval are the go-to procedures for mean differences.
+- The $t$ tests are *robust* to mild skewness and a few mild outliers.
+- If distributions have strong skewness and numerous or extreme outliers:
+    + Modern approach: Bootstrap
+    + Traditional approach:  Wilcoxon Signed Rank or Sign Test
+- Be careful not to get Wilcoxon Rank Sum and Wilcoxon Signed Rank mixed up.
+
+<div class="notes">
+No audio.
+</div>
+
+----
+
+## Our 2 Cents (Continued)
+
+- If unsure, run all procedures; if results agree report $t$ (since it is the most widely recognized). If they don't agree, report the one for which conditions are most closely satisfied.
+- Bootstrap, Wilcoxon, and Sign Test procedures are also valid for normally distributed distributions, but the $t$ test has slightly higher power.
+- Confidence intervals for the mean of differences can provide a hypothesis test type conclusion. If the interval doesn't cover 0, there is a difference.
+- There is no “fix” for small sample sizes.
+
+<div class="notes">
+No audio.
+</div>
