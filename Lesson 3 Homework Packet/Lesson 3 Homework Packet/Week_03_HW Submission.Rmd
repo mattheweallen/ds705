@@ -269,7 +269,7 @@ ggplot(delays, aes(x=delay)) +
 ```
 
 
-Based on the boxplots, histograms, and normal probability plots both distributions are right skewed. The Wilcoxon test works best for data that is clearly non normal.
+Based on the boxplots, histograms, and normal probability plots both distributions are right skewed. The Wilcoxon test works best for data that is clearly non normal. Also the distributions look similar to each other. We just need to check whether or not they are shifted from each other.
 
 ---
 
@@ -353,7 +353,7 @@ Did you use the Welch t-test and interval or the Wilcoxon rank sum test with the
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2f -|-|-|-|-|-|-|-|-|-|-|-
 
-I used the Wilcoxon rank sum test. The problem statement stated that the delay times were independent and random. Due to the right skewness of the delay times, the Wilcoxon rank sum test that uses median as a measure of central tendency works better than Welch t-test which assumes the distributions are approximately normal.
+I used the Wilcoxon rank sum test. The problem statement stated that the delay times were independent and random. Due to the right skewness of the delay times, the Wilcoxon rank sum test that uses median as a measure of central tendency works better than Welch t-test which assumes the distributions are approximately normal. Also the distributions looked similar, and Wilcoxon rank test is a good choice to determine if they are shifted from each other.
 
 ---
 
