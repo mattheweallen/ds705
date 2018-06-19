@@ -202,7 +202,8 @@ Load the dataset delays from the DS705data package.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Load the data set delays
+data("delays")
 
 ```
 
@@ -215,8 +216,22 @@ Begin by exploring the sample means, medians, and standard deviations for each a
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Find sample mean, median and standard deviation for the airlines Skybird and Omega
+skybird_delay <- delays[which(delays$airline == "Skybird"),]
+#skybird_delay mean
+mean(skybird_delay$delay)
+#skybird_delay median
+median(skybird_delay$delay)
+#skybird_delay standard deviation
+sd(skybird_delay$delay)
 
+omega_delay <- delays[which(delays$airline == "Omega"),]
+#omega_delay mean
+mean(omega_delay$delay)
+#omega_delay median
+median(omega_delay$delay)
+#omega_delay standard deviation
+sd(omega_delay$delay)
 ```
 
 ---
