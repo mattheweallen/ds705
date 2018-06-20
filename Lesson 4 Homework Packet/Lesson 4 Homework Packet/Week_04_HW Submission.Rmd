@@ -36,7 +36,7 @@ Create a new variable of the differences, with the perceptions of the spatted an
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Create variable of difference in perception.
 perception_diff <- AnkleMovement$tape - AnkleMovement$spat
 
 ```
