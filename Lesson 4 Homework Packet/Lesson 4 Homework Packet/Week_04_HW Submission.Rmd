@@ -38,7 +38,6 @@ Create a new variable of the differences, with the perceptions of the spatted an
 ```{r}
 # Create variable of difference in perception.
 perception_diff <- AnkleMovement$tape - AnkleMovement$spat
-
 ```
 
 ---
@@ -50,7 +49,11 @@ Create a boxplot and histogram for the sample of differences.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Create Boxplots and Histograms for sample differences
+# https://www.r-bloggers.com/make-a-box-plot-with-single-column-data-using-ggplot2-tutorial/
+boxplot(perception_diff)
+
+hist(perception_diff)
 
 ```
 
