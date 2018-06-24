@@ -51,9 +51,25 @@ Create a boxplot and histogram for the sample of differences.
 ```{r}
 # Create Boxplots and Histograms for sample differences
 # https://www.r-bloggers.com/make-a-box-plot-with-single-column-data-using-ggplot2-tutorial/
-boxplot(perception_diff)
+library(ggplot2)
+perception_diff_df <- data.frame(perception_diff) 
+ggplot(data = perception_diff_df, aes(x = "", y = perception_diff)) + 
+  geom_boxplot() + labs(x="", y="Perception Diff") + ggtitle("Taped Minus Spatted Ankle") +
+  theme(plot.title = element_text(hjust = 0.5))
+  #coord_cartesian(ylim = c(0, 150)) # I set the y axis scale so the plot looks better.
 
-hist(perception_diff)
+#ggplot(data = WormSheep, aes(x = treated, y = worms)) + geom_boxplot() + labs(x = "")
+ggplot(perception_diff_df, aes(x=perception_diff)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white") + labs(x = "Perception Diff") +
+  ggtitle("Taped Minus Spatted Ankle") +
+  theme(plot.title = element_text(hjust = 0.5))
+#    facet_grid(. ~ treated)
+
+
+
+#boxplot(perception_diff, ylab = "Difference", main = "Tape minus Spat")
+#bins <- seq(-3.5,3.5,by=1)
+#hist(perception_diff, xlab = "Difference", main = "Tape minus Spat", breaks = bins)
 
 ```
 
@@ -65,7 +81,9 @@ Comment on the suitability of this data for the paired t-test, the Wilcoxon sign
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+It is difficult to judge if the distribution is normal, which would be be the best time to use a paired t-test. Also based on the box plot, the data may be left skewed, which may be more evidence the distribution of differences not being normal. Also the sample size is small. There is also no explicit statement that the sample is random. We must assume that the sample is random. Although the Wilcoxon signed rank test is less powerful than the t-test, it is a better choice when samples are random, but non-normal. The population of differences should also be approximately symmetric about the median. Based on the boxplot, it appears this is the case. 
+
+Wilcox signed rank test is more powerful than sign test. The sign test only requires that the sample data be randomly sampled. 
 
 ---
 
@@ -81,7 +99,7 @@ Define the parameter in words in the context of the problem.
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step1 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+Ho: Mu of d is Diff = Taped - Spat Mu of d = 0, Against alternative that Ha:Mu of d > 0. Hence perception of ankle movement is more for taping taping than spatting 
 
 
 #### Step 2
@@ -99,7 +117,8 @@ Use R to generate the output for the test you selected.
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step3 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# 
+t.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "greater", paired = TRUE, conf.level = .90)
 
 ```
 
@@ -109,7 +128,7 @@ State a statistical conclusion at $\alpha=0.10$ and interpret it in the context 
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step4 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+Given a significance level of 10%, we fail to reject the null hypothesis that for taped ankles the mean perceived ankle movement is equal to the mean for spatted ankles for the entire poplulation of athletes.
 
 #### Step 5
 
@@ -117,7 +136,7 @@ Write an interpretation in the context of the problem for the 90% CI for the pop
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step5 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+Taping and spatting lead to the same perception of movement on a 5 point Likert-type scale. The athletes did not notice a difference in ankle movement between the two methods.
 
 #### Step 6
 
@@ -127,6 +146,7 @@ Perform the Wilcoxon Signed Rank Test.
 
 ```{r}
 # Insert your R code here.
+wilcox.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "greater", paired = TRUE, conf.level = .90)
 
 ```
 
@@ -142,7 +162,8 @@ Perform the sign test.
 
 ```{r}
 # Insert your R code here.
-
+library(signmedian.test)
+signmedian.test(perception_diff, mu=0, alternative="greater", conf.level = .9)
 ```
 
 Replace this text with your answer here.
@@ -157,6 +178,16 @@ Construct a bootstrap confidence interval at a 90% level of confidence for the m
 
 ```{r}
 # Insert your R code here.
+
+library(boot)
+bootMean <- function(x, i) {
+  # x is a numeric vector
+  # i is a vector of indices for the resampled elements of x
+  mean(x[i])
+}
+set.seed(NULL)
+boot.object <- boot(perception_diff, bootMean, R=5000)
+boot.ci(boot.object, conf = .9, type = "bca")$bca[4:5]
 
 ```
 
@@ -188,7 +219,8 @@ Load the data SmallAuto from the DS705 package.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Load the data.
+data("SmallAuto")
 
 ```
 
@@ -202,10 +234,15 @@ Construct histograms and boxplots for both the estimated claims and actual for t
 
 ```{r}
 # Insert your R code here.
+ggplot(data = SmallAuto, aes(x = Category, y = Claim)) + geom_boxplot() + labs(x = "")
+
+ggplot(SmallAuto, aes(x=Claim)) + 
+  geom_histogram(binwidth=250, colour="black", fill="white") + 
+    facet_grid(. ~ Category)
 
 ```
 
-Replace this text with your answer here.
+Both the estimate and actual distributions are right skewed.
 
 
 ---
@@ -218,6 +255,11 @@ Create a new variable of the differences for small vehicles, with the difference
 
 ```{r}
 # Insert your R code here.
+
+estimated_claims <- SmallAuto[1:125,]$Claim
+actual_claims <- SmallAuto[126:250,]$Claim
+
+small_auto_est_act_diff <- estimated_claims - actual_claims 
 
 ```
 
@@ -232,6 +274,26 @@ Create a boxplot, histogram, and normal probability plot for the sample of diffe
 ```{r}
 # Insert your R code here.
 
+small_auto_est_act_diff_df <- data.frame(small_auto_est_act_diff) 
+
+ggplot(data = small_auto_est_act_diff_df, aes(x = "", y = small_auto_est_act_diff)) + 
+  geom_boxplot() + labs(x="", y="Estimated vs Actual Diff") + ggtitle("Estimated Minus Actual Claims") +
+  theme(plot.title = element_text(hjust = 0.5))
+  #coord_cartesian(ylim = c(0, 150)) # I set the y axis scale so the plot looks better.
+
+#ggplot(data = WormSheep, aes(x = treated, y = worms)) + geom_boxplot() + labs(x = "")
+ggplot(small_auto_est_act_diff_df, aes(x=small_auto_est_act_diff)) + 
+  geom_histogram(binwidth=10, colour="black", fill="white") + labs(x = "Estimated Minus Actual Claims") #+
+  #ggtitle("Estimated Minus Actual Claim") +
+  #theme(plot.title = element_text(hjust = 0.5))
+
+# Make normal probability plot of Estimated minus Actual and add fit line.
+{
+  qqnorm(small_auto_est_act_diff, ylab="Estimated Minus Actual") 
+  qqline(small_auto_est_act_diff)
+}
+
+shapiro.test(small_auto_est_act_diff)
 ```
 
 ---
@@ -242,7 +304,7 @@ Comment on the shape of the distribution of differences and the suitability of t
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+Use the t-test, the distribution is borderline normal, but the sample size is large enough and the t-test is robust enough to work.
 
 
 ---
@@ -276,6 +338,7 @@ Use R to generate the output for the test you selected. Pay close attention to t
 ```{r}
 # Insert your R code here.
 
+t.test(estimated_claims, actual_claims, alternative = "less", paired = TRUE, conf.level = .95)
 ```
 
 #### Step 4
@@ -327,8 +390,8 @@ Load the data AutoIns from the DS705 package and look at the structure of the da
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Load the data.
+data("AutoIns")
 ```
 
 ---
@@ -339,7 +402,7 @@ Is the data "stacked" or "side-by-side" ("tall" or "wide")?
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3b -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+The data is side by side.
 
 ---
 
