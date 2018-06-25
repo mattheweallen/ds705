@@ -72,7 +72,7 @@ Comment on the suitability of this data for the paired t-test, the Wilcoxon sign
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
-It is difficult to judge if the distribution is normal, which would be be the best time to use a paired t-test. Also based on the box plot, the data may be left skewed, which may be more evidence the distribution of differences not being normal. Also the sample size is small. There is also no explicit statement that the sample is random. We must assume that the sample is random. Although the Wilcoxon signed rank test is less powerful than the t-test, it is a better choice when samples are random, but non-normal. The population of differences should also be approximately symmetric about the median. Based on the boxplot and the histogram, it appears that the difference may not be symmetric about the median. Wilcox signed rank test is more powerful than sign test, but the sign test only requires that the sample data be randomly sampled.
+It is difficult to judge if the distribution is normal, which would be the best time to use a paired t-test. Also based on the box plot and the histogram, the data may be left skewed, which may be more evidence the distribution of differences not being normal. Also the sample size is small. There is also no explicit statement that the sample is random. We must assume that the sample is random. Although the Wilcoxon signed rank test is less powerful than the t-test, it is a better choice when samples are random, but non-normal. The population of differences should also be approximately symmetric about the median. Based on the boxplot and the histogram, it appears that the difference may not be symmetric about the median. Wilcox signed rank test is more powerful than sign test, but the sign test only requires that the sample data be randomly sampled.
 
 ---
 
@@ -87,8 +87,8 @@ Do the t-test first:
 Define the parameter in words in the context of the problem.
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step1 -|-|-|-|-|-|-|-|-|-|-|-
-
-Ho: Mu of d is Diff = Taped - Spat Mu of d = 0, Against alternative that Ha:Mu of d != 0. Hence perception of ankle movement is for for taping than spatting 
+ 
+$$\mu_\mbox{diff} \quad \textrm{is the mean of the difference in perception of a spatted ankle subtracted from the perception of a taped ankle.}$$
 
 
 #### Step 2
@@ -97,7 +97,8 @@ State the null and alternative hypotheses for the test using the symbol you defi
  
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step2 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+$$H_0: \mu_\mbox{diff} = 0$$
+$$H_a: \mu_\mbox{diff} \neq 0$$
 
 #### Step 3
 
@@ -106,7 +107,7 @@ Use R to generate the output for the test you selected.
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step3 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# 
+# paired t test
 t.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "two.sided", paired = TRUE, conf.level = .90)
 
 ```
@@ -134,12 +135,12 @@ Perform the Wilcoxon Signed Rank Test.
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step6 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Wilcoxon Signed Rank Test
 wilcox.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "two.sided", paired = TRUE, conf.level = .90)
 
 ```
 
-Replace this text with your answer here.
+As in the paired t-test, we fail to reject the null hypothesis.
 
 
 
@@ -150,12 +151,12 @@ Perform the sign test.
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step7 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# sign test
 library(signmedian.test)
 signmedian.test(perception_diff, mu=0, alternative="two.sided", conf.level = .9)
 ```
 
-Replace this text with your answer here.
+As in the paired t-test, we fail to reject the null hypothesis.
 
 ---
 
@@ -166,7 +167,7 @@ Construct a bootstrap confidence interval at a 90% level of confidence for the m
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step8 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Bootstrap.
 
 library(boot)
 bootMean <- function(x, i) {
@@ -222,7 +223,7 @@ Construct histograms and boxplots for both the estimated claims and actual for t
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# SmallAuto histogram and boxplot
 ggplot(data = SmallAuto, aes(x = Category, y = Claim)) + geom_boxplot() + labs(x = "")
 
 ggplot(SmallAuto, aes(x=Claim)) + 
@@ -243,7 +244,7 @@ Create a new variable of the differences for small vehicles, with the difference
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# create vector of differences between estimated and actual
 
 estimated_claims <- SmallAuto[1:125,]$Claim
 actual_claims <- SmallAuto[126:250,]$Claim
@@ -261,7 +262,7 @@ Create a boxplot, histogram, and normal probability plot for the sample of diffe
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# boxplot, histogram and normal probability plots for sample of differences
 
 small_auto_est_act_diff_df <- data.frame(small_auto_est_act_diff) 
 
@@ -304,7 +305,7 @@ Define the parameter in words in the context of the problem.
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step1 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+$$\mu_\mbox{diff} \quad \textrm{is the mean of the difference between paired estimated claims minus its actual.}$$
 
 #### Step 2
 
@@ -312,7 +313,8 @@ State the null and alternative hypotheses for the test using the symbol you defi
  
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step2 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+$$H_0: \mu_\mbox{diff} \geq 0$$
+$$H_a: \mu_\mbox{diff} < 0$$
 
 #### Step 3
 
@@ -323,8 +325,8 @@ Use R to generate the output for the test you selected. Pay close attention to t
 ```{r}
 # Insert your R code here.
 
-#this probably subtracts actual_claims - estimated_claims, because alphabetical order of subtraction.
-t.test(estimated_claims, actual_claims, alternative = "less", paired = TRUE, conf.level = .95)
+#this subtracts actual_claims - estimated_claims, because alphabetical order of subtraction, so reverse arguments.
+t.test(actual_claims, estimated_claims, alternative = "less", paired = TRUE, conf.level = .95)
 ```
 
 #### Step 4
@@ -333,7 +335,7 @@ State a statistical conclusion at $\alpha=0.05$ and interpret it in the context 
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step4 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+At a 5% level of significance, we fail to reject the null hypothesis that the mean difference in the population of estimated claims minus actual claims is greater that or equal to zero.
 
 ---
 
@@ -343,11 +345,12 @@ Write an interpretation in the context of the problem for a 95% two-sided confid
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2f -|-|-|-|-|-|-|-|-|-|-|-
 ```{r}
-# Insert your R code here.
+# calculate confidence interval
+t.test(actual_claims, estimated_claims, alternative = "two.sided", paired = TRUE, conf.level = .95)$conf.int
 
 ```
 
-Replace this text with your answer here.
+The 95% two-sided confidence interval of the mean difference in the population of estimated claims minus actual claims is [0.4632425, 10.9739093]. This means that the estimate of future claims is greater than the actual. This is important in insurance. The insurance company can reserve conservatively for future claims. 
 
 ---
 
