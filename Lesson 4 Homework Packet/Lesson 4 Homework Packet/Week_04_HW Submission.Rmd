@@ -56,20 +56,11 @@ perception_diff_df <- data.frame(perception_diff)
 ggplot(data = perception_diff_df, aes(x = "", y = perception_diff)) + 
   geom_boxplot() + labs(x="", y="Perception Diff") + ggtitle("Taped Minus Spatted Ankle") +
   theme(plot.title = element_text(hjust = 0.5))
-  #coord_cartesian(ylim = c(0, 150)) # I set the y axis scale so the plot looks better.
 
-#ggplot(data = WormSheep, aes(x = treated, y = worms)) + geom_boxplot() + labs(x = "")
 ggplot(perception_diff_df, aes(x=perception_diff)) + 
   geom_histogram(binwidth=1, colour="black", fill="white") + labs(x = "Perception Diff") +
   ggtitle("Taped Minus Spatted Ankle") +
   theme(plot.title = element_text(hjust = 0.5))
-#    facet_grid(. ~ treated)
-
-
-
-#boxplot(perception_diff, ylab = "Difference", main = "Tape minus Spat")
-#bins <- seq(-3.5,3.5,by=1)
-#hist(perception_diff, xlab = "Difference", main = "Tape minus Spat", breaks = bins)
 
 ```
 
@@ -81,9 +72,7 @@ Comment on the suitability of this data for the paired t-test, the Wilcoxon sign
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
-It is difficult to judge if the distribution is normal, which would be be the best time to use a paired t-test. Also based on the box plot, the data may be left skewed, which may be more evidence the distribution of differences not being normal. Also the sample size is small. There is also no explicit statement that the sample is random. We must assume that the sample is random. Although the Wilcoxon signed rank test is less powerful than the t-test, it is a better choice when samples are random, but non-normal. The population of differences should also be approximately symmetric about the median. Based on the boxplot, it appears this is the case. 
-
-Wilcox signed rank test is more powerful than sign test. The sign test only requires that the sample data be randomly sampled. 
+It is difficult to judge if the distribution is normal, which would be be the best time to use a paired t-test. Also based on the box plot, the data may be left skewed, which may be more evidence the distribution of differences not being normal. Also the sample size is small. There is also no explicit statement that the sample is random. We must assume that the sample is random. Although the Wilcoxon signed rank test is less powerful than the t-test, it is a better choice when samples are random, but non-normal. The population of differences should also be approximately symmetric about the median. Based on the boxplot and the histogram, it appears that the difference may not be symmetric about the median. Wilcox signed rank test is more powerful than sign test, but the sign test only requires that the sample data be randomly sampled.
 
 ---
 
@@ -99,7 +88,7 @@ Define the parameter in words in the context of the problem.
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step1 -|-|-|-|-|-|-|-|-|-|-|-
 
-Ho: Mu of d is Diff = Taped - Spat Mu of d = 0, Against alternative that Ha:Mu of d > 0. Hence perception of ankle movement is more for taping taping than spatting 
+Ho: Mu of d is Diff = Taped - Spat Mu of d = 0, Against alternative that Ha:Mu of d != 0. Hence perception of ankle movement is for for taping than spatting 
 
 
 #### Step 2
@@ -118,7 +107,7 @@ Use R to generate the output for the test you selected.
 
 ```{r}
 # 
-t.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "greater", paired = TRUE, conf.level = .90)
+t.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "two.sided", paired = TRUE, conf.level = .90)
 
 ```
 
@@ -146,7 +135,7 @@ Perform the Wilcoxon Signed Rank Test.
 
 ```{r}
 # Insert your R code here.
-wilcox.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "greater", paired = TRUE, conf.level = .90)
+wilcox.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "two.sided", paired = TRUE, conf.level = .90)
 
 ```
 
@@ -163,7 +152,7 @@ Perform the sign test.
 ```{r}
 # Insert your R code here.
 library(signmedian.test)
-signmedian.test(perception_diff, mu=0, alternative="greater", conf.level = .9)
+signmedian.test(perception_diff, mu=0, alternative="two.sided", conf.level = .9)
 ```
 
 Replace this text with your answer here.
@@ -191,7 +180,7 @@ boot.ci(boot.object, conf = .9, type = "bca")$bca[4:5]
 
 ```
 
-Replace this text with your answer here.
+The 90% confidence interval from the paired t-test is [-0.1874990,0.9017847] is similar to the 90% bootstrap confidence interval. They both have the same conclusion that the difference of zero lies in the interval.
 
 ---
 
@@ -201,7 +190,7 @@ Compare the results of the three hypothesis tests and also whether or not the 90
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step9 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+All the tests including the bootstrap interval agree, so use the t-test because it is the most powerful and most commonly reported.
 
 
 ## Exercise 2
@@ -279,13 +268,9 @@ small_auto_est_act_diff_df <- data.frame(small_auto_est_act_diff)
 ggplot(data = small_auto_est_act_diff_df, aes(x = "", y = small_auto_est_act_diff)) + 
   geom_boxplot() + labs(x="", y="Estimated vs Actual Diff") + ggtitle("Estimated Minus Actual Claims") +
   theme(plot.title = element_text(hjust = 0.5))
-  #coord_cartesian(ylim = c(0, 150)) # I set the y axis scale so the plot looks better.
 
-#ggplot(data = WormSheep, aes(x = treated, y = worms)) + geom_boxplot() + labs(x = "")
 ggplot(small_auto_est_act_diff_df, aes(x=small_auto_est_act_diff)) + 
   geom_histogram(binwidth=10, colour="black", fill="white") + labs(x = "Estimated Minus Actual Claims") #+
-  #ggtitle("Estimated Minus Actual Claim") +
-  #theme(plot.title = element_text(hjust = 0.5))
 
 # Make normal probability plot of Estimated minus Actual and add fit line.
 {
@@ -338,6 +323,7 @@ Use R to generate the output for the test you selected. Pay close attention to t
 ```{r}
 # Insert your R code here.
 
+#this probably subtracts actual_claims - estimated_claims, because alphabetical order of subtraction.
 t.test(estimated_claims, actual_claims, alternative = "less", paired = TRUE, conf.level = .95)
 ```
 
@@ -412,7 +398,7 @@ Which pairs of variables in the data frame are independent of each other?  You c
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3c -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+claim.small and claim.standard should be independent of each other. est.small and est.standard should also be independent of each other.
 
 ---
 
@@ -422,6 +408,6 @@ Which pairs of variables in the data frame are paired (matched pairs)? You can u
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3d -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+claim.small and est.small are paired with each other, and claim.standard and est.standard are paired with each other.
 
 ---
