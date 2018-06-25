@@ -1,7 +1,7 @@
 ---
 title: 'Inference for Categorical Data'
-author: "Your name here"
-date: "mm/dd/yyyy"
+author: "Matt Allen"
+date: "06/25/2018"
 output: word_document
 fontsize: 12pt
 ---
