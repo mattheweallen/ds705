@@ -6,8 +6,6 @@ output: word_document
 fontsize: 12pt
 ---
 
-Create a Word docx from this R Markdown file for the following exercise.  Submit the R markdown file and resulting Word docx file via D2L Dropbox.
-
 ## Exercise 1  
 
 To reduce ankle injuries, restrictive appliances such as taping and spatting (applying tape over the shoe and sock) have been employed. As part of a study at UWL, subjects also completed a 5-point Likert-type scale survey regarding their perceptions of the movement of each ankle appliance during exercise.
@@ -88,7 +86,7 @@ Define the parameter in words in the context of the problem.
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step1 -|-|-|-|-|-|-|-|-|-|-|-
  
-$$\mu_\mbox{diff} \quad \textrm{is the mean of the difference in perception of a spatted ankle subtracted from the perception of a taped ankle.}$$
+$\mu_\mbox{diff}$ is defined as the mean of the difference in perception of a spatted ankle subtracted from the perception of a taped ankle.
 
 
 #### Step 2
@@ -136,7 +134,7 @@ Perform the Wilcoxon Signed Rank Test.
 
 ```{r}
 # Wilcoxon Signed Rank Test
-wilcox.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "two.sided", paired = TRUE, conf.level = .90)
+wilcox.test(AnkleMovement$tape, AnkleMovement$spat, alternative = "two.sided", paired = TRUE, conf.level = .90, conf.int = TRUE)
 
 ```
 
@@ -153,7 +151,7 @@ Perform the sign test.
 ```{r}
 # sign test
 library(signmedian.test)
-signmedian.test(perception_diff, mu=0, alternative="two.sided", conf.level = .9)
+signmedian.test(perception_diff, mu=0, alternative="two.sided", conf.level = .9, conf.int = TRUE)
 ```
 
 As in the paired t-test, we fail to reject the null hypothesis.
@@ -182,7 +180,7 @@ boot.ci(boot.object, conf = .9, type = "bca")$bca[4:5]
 ```
 
 The 90% confidence interval from the paired t-test is [-0.1874990,0.9017847] is similar to the 90% bootstrap confidence interval. They both have the same conclusion that the difference of zero lies in the interval.
-
+ 
 ---
 
 #### Step 9
@@ -191,8 +189,13 @@ Compare the results of the three hypothesis tests and also whether or not the 90
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step9 -|-|-|-|-|-|-|-|-|-|-|-
 
-All the tests including the bootstrap interval agree, so use the t-test because it is the most powerful and most commonly reported.
+The paired t-test reports a 90% confidence interval of [-0.1874990, 0.9017847].
 
+Wilcox Signed Rank Test reports a 90% confidence interval of [-0.5000113, 2.0000000].
+
+The sign test reports a 90% confidence interval of [-1,2].
+
+All the tests agree with the bootstrap interval that a difference of 0 is in the 90% confidence interval, so use the t-test because it is the most powerful and most commonly reported.
 
 ## Exercise 2
 
@@ -305,7 +308,7 @@ Define the parameter in words in the context of the problem.
 
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step1 -|-|-|-|-|-|-|-|-|-|-|-
 
-$$\mu_\mbox{diff} \quad \textrm{is the mean of the difference between paired estimated claims minus its actual.}$$
+$\mu_\mbox{diff}$ is the mean of the difference between paired estimated claims minus its actual.
 
 #### Step 2
 
@@ -323,8 +326,6 @@ Use R to generate the output for the test you selected. Pay close attention to t
 #### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step3 -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
 #this subtracts actual_claims - estimated_claims, because alphabetical order of subtraction, so reverse arguments.
 t.test(actual_claims, estimated_claims, alternative = "less", paired = TRUE, conf.level = .95)
 ```
@@ -350,7 +351,7 @@ t.test(actual_claims, estimated_claims, alternative = "two.sided", paired = TRUE
 
 ```
 
-The 95% two-sided confidence interval of the mean difference in the population of estimated claims minus actual claims is [0.4632425, 10.9739093]. This means that the estimate of future claims is greater than the actual. This is important in insurance. The insurance company can reserve conservatively for future claims. 
+The 95% confidence interval of the mean difference in the population of estimated claims minus actual claims is [0.4632425, 10.9739093]. This means that the estimate of future claims is greater than the actual. This is important in insurance. The insurance company can reserve conservatively for future claims. 
 
 ---
 
