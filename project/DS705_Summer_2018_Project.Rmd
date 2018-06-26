@@ -29,3 +29,19 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+## R Markdown
+
+
+## 1. Executive Summary
+## 2. Introduction
+
+Hello Matt!
+
+## 3. Preparing and Cleaning the Data
+## 4. Exploring and Transforming the Data
+## 5. The Logistic Model
+## 6. Optimizing the Threshold for Accuracy
+## 7. Optimizing the Threshold for Profit
+## 8. Results Summary
