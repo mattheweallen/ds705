@@ -24,7 +24,18 @@ Create the table in R from the data and display it with the margins. Include the
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Create table and display it with margins
+#https://www.cyclismo.org/tutorial/R/tables.html
+
+institution <- c("Bank", "Credit Union")
+outstanding <- c(70,66)
+not_outstanding <- c(150,81)
+
+ratings <- matrix(c(outstanding, not_outstanding),ncol=2)
+colnames(ratings) <- c("Outstanding","Not Outstanding")
+rownames(ratings) <- institution
+ratings <- addmargins(as.table(ratings))
+ratings
 
 ```
 
@@ -35,11 +46,11 @@ For the population of all credit unions, construct and interpret a 95% confidenc
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Construct 95% Confidence Interval for proportion of Credit Unions rated as Outstanding.
+prop.test(ratings["Credit Union","Outstanding"],ratings["Credit Union","Sum"],correct = FALSE)$conf.int
 ```
 
-Replace this text with your answer here.
+With 95% confidence, the true population proportion of outstanding credit unions is between [0.37, 0.53].
 
 
 ### Part 1c  
@@ -50,10 +61,10 @@ Compare the proportions of credit unions that are rated as Outstanding to the pr
 
 ```{r}
 # Insert your R code here.
-
+prop.test(abs(ratings["Credit Union","Outstanding"]-ratings["Bank","Outstanding"]),abs(ratings["Credit Union","Sum"]-ratings["Bank","Sum"]),correct = FALSE)$conf.int
 ```
 
-Replace this text with your answer here.
+With 95% confidence, the true proportion of credit unions rated as outstanding is between [.02,.13] greater than banks rated as outstanding.
 
 
 ### Part 1d
@@ -63,11 +74,12 @@ If one bank is selected randomly, what is the estimated risk of not being rated 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# what is the estimated risk of a bank not being rated as outstanding?
+bank_risk_not_outstanding <- ratings["Bank","Not Outstanding"]/ratings["Bank","Sum"]
+bank_risk_not_outstanding
 ```
 
-Replace this text with your answer here.
+The estimated risk of a bank not being outstanding is equivalent to the proportion of not outstanding banks to all banks, which is equal to 0.68.
 
 
 ### Part 1e 
@@ -77,11 +89,12 @@ If one credit union is selected randomly, what is the estimated risk of not bein
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# what is the estimated risk of a Credit not being rated as outstanding?
+credit_union_risk_not_outstanding <- ratings["Credit Union","Not Outstanding"]/ratings["Credit Union","Sum"]
+credit_union_risk_not_outstanding
 ```
 
-Replace this text with your answer here.
+The estimated risk of a credit union not being outstanding is equivalent to the proportion of not outstanding credit unions to all credit unions, which is equal to 0.55.
 
 
 ### Part 1f
