@@ -34,8 +34,8 @@ not_outstanding <- c(150,81)
 ratings <- matrix(c(outstanding, not_outstanding),ncol=2)
 colnames(ratings) <- c("Outstanding","Not Outstanding")
 rownames(ratings) <- institution
-ratings <- addmargins(as.table(ratings))
-ratings
+ratings_with_margins <- addmargins(as.table(ratings))
+ratings_with_margins
 
 ```
 
@@ -47,7 +47,7 @@ For the population of all credit unions, construct and interpret a 95% confidenc
 
 ```{r}
 # Construct 95% Confidence Interval for proportion of Credit Unions rated as Outstanding.
-prop.test(ratings["Credit Union","Outstanding"],ratings["Credit Union","Sum"],correct = FALSE)$conf.int
+prop.test(ratings_with_margins["Credit Union","Outstanding"],ratings_with_margins["Credit Union","Sum"],correct = FALSE)$conf.int
 ```
 
 With 95% confidence, the true population proportion of outstanding credit unions is between [0.37, 0.53].
@@ -61,7 +61,7 @@ Compare the proportions of credit unions that are rated as Outstanding to the pr
 
 ```{r}
 # Insert your R code here.
-prop.test(abs(ratings["Credit Union","Outstanding"]-ratings["Bank","Outstanding"]),abs(ratings["Credit Union","Sum"]-ratings["Bank","Sum"]),correct = FALSE)$conf.int
+prop.test(abs(ratings_with_margins["Credit Union","Outstanding"]-ratings_with_margins["Bank","Outstanding"]),abs(ratings_with_margins["Credit Union","Sum"]-ratings_with_margins["Bank","Sum"]),correct = FALSE)$conf.int
 ```
 
 With 95% confidence, the true proportion of credit unions rated as outstanding is between [.02,.13] greater than banks rated as outstanding.
@@ -75,6 +75,10 @@ If one bank is selected randomly, what is the estimated risk of not being rated 
 
 ```{r}
 # what is the estimated risk of a bank not being rated as outstanding?
+library(mosaic)
+
+oddsRatio(ratings, verbose=TRUE)
+
 bank_risk_not_outstanding <- ratings["Bank","Not Outstanding"]/ratings["Bank","Sum"]
 bank_risk_not_outstanding
 ```
