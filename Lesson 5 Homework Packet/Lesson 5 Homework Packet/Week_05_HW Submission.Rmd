@@ -75,11 +75,7 @@ If one bank is selected randomly, what is the estimated risk of not being rated 
 
 ```{r}
 # what is the estimated risk of a bank not being rated as outstanding?
-library(mosaic)
-
-oddsRatio(ratings, verbose=TRUE)
-
-bank_risk_not_outstanding <- ratings["Bank","Not Outstanding"]/ratings["Bank","Sum"]
+bank_risk_not_outstanding <- ratings_with_margins["Bank","Not Outstanding"]/ratings_with_margins["Bank","Sum"]
 bank_risk_not_outstanding
 ```
 
@@ -94,7 +90,7 @@ If one credit union is selected randomly, what is the estimated risk of not bein
 
 ```{r}
 # what is the estimated risk of a Credit not being rated as outstanding?
-credit_union_risk_not_outstanding <- ratings["Credit Union","Not Outstanding"]/ratings["Credit Union","Sum"]
+credit_union_risk_not_outstanding <- ratings_with_margins["Credit Union","Not Outstanding"]/ratings_with_margins["Credit Union","Sum"]
 credit_union_risk_not_outstanding
 ```
 
@@ -108,11 +104,12 @@ Compute the relative risk of not being rated as Outstanding for banks compared t
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Relative risk banks not outstanding compared to credit unions
+bank_risk_not_outstanding/credit_union_risk_not_outstanding
 
 ```
 
-Replace this text with your answer here.
+A bank is 1.24 times more likely to be rated not outstanding.
 
 
 ### Part 1g
@@ -122,11 +119,17 @@ What are the estimated odds of a credit union being rated as Outstanding?
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Estimated odds of credit union being rated as outstanding
+#calculate by manually
+odds_credit_union_outstanding <- (1-credit_union_risk_not_outstanding)/credit_union_risk_not_outstanding
+odds_credit_union_outstanding
+#calculate with mosaic
+require(mosaic)
+oddsRatio(ratings,verbose = TRUE)
 
 ```
 
-Replace this text with your answer here.
+The estimated odds of a credit union being rated outstanding is .81.
 
 
 ### Part 1h
@@ -137,10 +140,13 @@ What are the estimated odds of a bank being rated as Outstanding?
 
 ```{r}
 # Insert your R code here.
+#manual calculation of bank being rated as outstanding
+odds_bank_outstanding <- (1-bank_risk_not_outstanding)/bank_risk_not_outstanding
+odds_bank_outstanding
 
 ```
 
-Replace this text with your answer here.
+The estimated odds of a bank being rated outstanding is .47.
 
 
 ### Part 1i
@@ -150,11 +156,11 @@ Compute the estimated odds ratio of being rated as Outstanding for credit unions
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1i -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Compute the estimated odds ratio of being rated as outstanding for credit unions compared to banks.
+odds_credit_union_outstanding/odds_bank_outstanding
 ```
 
-Replace this text with your answer here.
+The estimated odds ratio of being rated as Outstanding for credit unions compared to banks is 1.75.
 
 
 ### Part 1j
@@ -163,7 +169,7 @@ Write an interpretation of the odds ratio of being rated as Outstanding for cred
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1j -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+For every 4 banks rated as outstanding, there are 7 credit unions rated as outstanding.
 
 
 ### Part 1k

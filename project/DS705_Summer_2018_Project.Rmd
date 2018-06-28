@@ -40,6 +40,11 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 Hello Matt!
 
 ## 3. Preparing and Cleaning the Data
+
+Create a new column loan_status that will have the values Good and Bad. Where a good
+
+Eliminate employment column which is a description of the borrower's occupation. These are difficult to categorize and better indicators of ability to pay the loan related to employment would be income and length of continuous employment.
+
 ## 4. Exploring and Transforming the Data
 ## 5. The Logistic Model
 ## 6. Optimizing the Threshold for Accuracy
