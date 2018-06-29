@@ -179,12 +179,11 @@ Construct a 95% confidence interval for the population odds ratio of being rated
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1k -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Computed above in 1g.
 
 ```
 
-Replace this text with your answer here.
-
+A 95% confidence interval for the population odds ratio of being rated outstanding for credit unions compared to banks is between 1.134 and 2.688. 
 
 ### Part 1l
 
@@ -192,7 +191,7 @@ Based on the 95% CI for the odds ratio, is there significant evidence of an asso
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1l -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+The interval is [1.134,2.688] which does not include 1. If it did include 1, we would fail to reject the null hypothesis that the odds are the same. Since 1 is not included in the interval, we can say there is significant evidence that credit unions are 1.134 to 2.688 times more likely to be rated as outstanding compared to banks.
 
 
 ## Exercise 2
@@ -214,12 +213,20 @@ Use $\alpha = 0.05$.  State the hypotheses for the test and use R to compute the
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
+$H_0 \text{: } \pi_{Under18}=0.13, \pi_{18to35}=0.32, \pi_{36to50}=0.38, \pi_{Over50}=0.17$
 
+$H_a \text{: At least one } \pi_i \text{ differs from its hypothesized value}$
+
+
+```{r}
+# Run Chi Squared test
+observed <- c(28,44,54,39)
+proportions <- c(.13,.32,.38,.17)
+chisq.test(x=observed,p=proportions)
 ```
 
-Replace this text with your answer here.
+
+We reject the null hypothesis at a 5% level of significance that online purchases are distributed among age groups as the internet market research company claims. The p-value reported is 0.02998. From p. 519 of the Ott & Longnecker textbook, a p-value in this range indicates a poor fit.
 
 ### Part 2b  
 
@@ -228,11 +235,14 @@ Compute the expected cell counts and verify that they are all large enough for t
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Compute expected cell counts
+expected_counts <- sum(observed) * proportions
+expected_counts
+# Verify that they are large enough
 
 ```
 
-Replace this text with your answer here.
+Based on the exprected cell counts they are large enough for the chi-square test to be valid. From Chapter 10 of the Ott & Longnecker textbook p. 516 Cochran's guidelines, no expected count should be less than 1 and no more than 20% are less than 5.
 
 ### Part 2c
 
@@ -241,8 +251,9 @@ Display the data in a bar graph and comment on its features.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Insert your R code here. MEALLEN mayb plot with expected_counts?
+barplot(observed,names.arg=c("Under 18", "18 to 35", "36 to 50","Over 50"),
+        ylab="Count",col=c("purple","blue","red","green"), main = "Sample of Online Purchases by Age Group")
 ```
 
 Replace this text with your answer here.
@@ -258,7 +269,15 @@ Create a 2x2 matrix with the correct cell counts.  Arrange it so that the column
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Create 2X2 matrix for seat belt data
+age_group <- c("Teen", "Senior")
+always_wear <- c(17,12)
+not_always_wear <- c(2,8)
+
+seat_belt_usage <- matrix(c(always_wear, not_always_wear),ncol=2,byrow = TRUE)
+colnames(seat_belt_usage) <- age_group
+rownames(seat_belt_usage) <- c("always_wear", "not_always_wear")
+seat_belt_usage
 
 ```
 
@@ -270,7 +289,8 @@ With the small cell counts in mind, use the appropriate test to determine if pro
 
 ```{r}
 # Insert your R code here.
-
+#p.511-512 Fisher Exact Test
+#fisher.test
 ```
 
 Replace this text with your answer here.
@@ -313,6 +333,7 @@ State the hypotheses (in words) and conclusion of the test. Use R to compute the
 
 ```{r}
 # Insert your R code here.
+#p 521
 
 ```
 
