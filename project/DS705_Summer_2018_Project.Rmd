@@ -72,6 +72,15 @@ table(loans$response)
 columns_to_keep <- c("response", "income", "amount", "rate", "grade", "debtIncRat", "length")
 loans <- loans[columns_to_keep]
 summary(loans)
+
+summary(loans$income)
+
+#eliminate length, many missing values what is another a proxy? show count of n/a.
+table(loans$length)
+class(loans$length)
+#1823 as n/a
+length(which(loans$length == "n/a"))
+loans$length[NA]
 ```
 
 
