@@ -291,6 +291,8 @@ With the small cell counts in mind, use the appropriate test to determine if pro
 # Insert your R code here.
 #p.511-512 Fisher Exact Test
 #fisher.test
+fisher.test(seat_belt_usage,alternative="two.sided")
+
 ```
 
 Replace this text with your answer here.
@@ -315,11 +317,22 @@ Comment on any potential relationships between nausea and type of anesthetic you
 
 ```{r}
 # Insert your R code here.
-
+require(DS705data)
+data("anesthesia")
+anesthetic_nausea <- with(anesthesia,table(anesthetic,nausea))
+addmargins(anesthetic_nausea)
+barplot(anesthetic_nausea,xlab="Region", ylab="Frequency", 
+        col=c("khaki","cyan"),legend=rownames(anesthetic_nausea),beside=T)
 ```
 
 
 Replace this text with your answer here.
+          nausea
+anesthetic No Yes Sum
+       A   13  26  39
+       B   23  10  33
+       Sum 36  36  72
+
 
 ---
 
@@ -334,6 +347,7 @@ State the hypotheses (in words) and conclusion of the test. Use R to compute the
 ```{r}
 # Insert your R code here.
 #p 521
+chisq.test(anesthetic_nausea, correct=FALSE)
 
 ```
 
