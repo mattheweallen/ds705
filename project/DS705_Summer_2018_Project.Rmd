@@ -45,6 +45,36 @@ Create a new column loan_status that will have the values Good and Bad. Where a 
 
 Eliminate employment column which is a description of the borrower's occupation. These are difficult to categorize and better indicators of ability to pay the loan related to employment would be income and length of continuous employment.
 
+```{r pressure, echo=FALSE}
+#import data
+loans <- read.csv2("C:/Users/matt/source/repos/ds705/project/loans50k.csv", header = TRUE, sep = ",")
+loans$response <- loans$status
+#Good loans are those that have a status of "Fully Paid". Bad loans are those that have a status of "Charged Off" or "Default".
+#loans$response <- 
+#c("Charged Off","Default","Fully Paid")
+#c("Bad","Bad","Good")
+#loans$response[which(loans$response == "Charged Off")] <- "Bad" 
+table(loans$response)
+
+levels(loans$response)[levels(loans$response)==c("Charged Off")] <- "Bad"
+levels(loans$response)[levels(loans$response)==c("Default")] <- "Bad"
+levels(loans$response)[levels(loans$response)==c("Fully Paid")] <- "Good"
+
+loans <- loans[which(loans$response=="Bad" | loans$response=="Good"), ]
+#remove unuused levels
+loans$response <- factor(loans$response)
+#loans <- loans[loans$response == c("Good","Bad"),]
+table(loans$response)
+#drop columns
+#https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
+
+#
+columns_to_keep <- c("response", "income", "amount", "rate", "grade", "debtIncRat", "length")
+loans <- loans[columns_to_keep]
+summary(loans)
+```
+
+
 ## 4. Exploring and Transforming the Data
 ## 5. The Logistic Model
 ## 6. Optimizing the Threshold for Accuracy
