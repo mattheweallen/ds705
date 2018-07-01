@@ -69,11 +69,23 @@ table(loans$response)
 #https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
 
 #
-columns_to_keep <- c("response", "income", "amount", "rate", "grade", "debtIncRat", "length")
+#columns_to_keep <- c("response", "income", "amount", "rate", "grade", "debtIncRat", "length")
+#
+columns_to_keep <- c("response","amount","payment","home","income","delinq2yr","inq6mth","openAcc","totalBal","totalIlLim")
+
+
 loans <- loans[columns_to_keep]
 summary(loans)
 
 summary(loans$income)
+
+class(loans$payment) #make numeric
+class(loans$income) #make numeric
+loans$income <- as.numeric(loans$income)
+loans$payment <- as.numeric(loans$payment)
+
+
+
 
 #eliminate length, many missing values what is another a proxy? show count of n/a.
 table(loans$length)
@@ -82,6 +94,18 @@ class(loans$length)
 length(which(loans$length == "n/a"))
 loans$length[NA]
 ```
+
+
+Eliminate variables you think are clearly not useful. 
+
+Remove status variable, because it has been transformed into the response variable. Remove totalPaid variable, because it is not knowable at the time of issue of a loan. Remove employment, which is a variable indicating job title, because there is so much variation. It would be possible to create a new variable with job title that puts them in more general categories, but it probably is still not useful. A better indicator may be income from job. The variable loanID can be removed. It is not necessary in the loan analysis, and may have ethical implications as it has the potential to trace a loan back to an individual. The variable verified indicates verification of annual income completed. This can be removed, because the current study is not meant to test the loan applicaitons truthfulness. The variable reason indicates the applicants purpose of the loan. Some of the categories like medical and debt_consolidation if used in the model could introduce bias against particular vulnerable groups that despite some setbacks may still be able to pay off a loan. Although the variable state is broader than zip code, it can still be discriminatory by geography. Also since  state is a somewhat general geography, it may not have much predictive power, and can be removed. The variable length indicates the length of employment. This could be a good indicator, but there are more than 1300 missing values. It should be removed, because removing the rows with missing income would significantly reduce the data set, and imputation methods may be challenging for this much missing data where there is not necessarily a good proxy. The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. totalBal and totalLim can be used as proxies for totalRevLim, totalRevBal, totalBcLim,bcOpen, and totalIlLim. Further debtIncRatio, avgBal can be removed because they can be derived from other variables like income, totalBal, and openAcc. Remove totalAcc, because we are interested in accounts that are currently open and this is already captured in openAcc. Remove the variable term, because payment caputures this information. The loan term and payment amount are dependent on each other.   
+
+The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth. The variable grade indicates the risk of the loan. I would consider it to be another response variable like status or the response variable derived from status, but with more levels. For this reason, it should be eliminated. The variable rate can be removed for similar reasons as grade. The loan rate is an indication of the borrower's risk. The greater the risk the higher the rate. The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
+
+After elimination of variables, the predictors that are left are amount, payment, home, income, delinq2yr, inq6mth, openAcc, totalBal, and totalIlLim. I converted income and payment to numeric, because they were showing up as factors. With the remaining vairables, there is imputation or record removal needed.
+
+#TODO remove? debtIncRatio can be removed, because total debt and income are variables, and thus is already captured.
+
 
 
 ## 4. Exploring and Transforming the Data
