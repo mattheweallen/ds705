@@ -45,7 +45,7 @@ Create a new column loan_status that will have the values Good and Bad. Where a 
 
 Eliminate employment column which is a description of the borrower's occupation. These are difficult to categorize and better indicators of ability to pay the loan related to employment would be income and length of continuous employment.
 
-```{r pressure, echo=FALSE}
+```{r echo=FALSE}
 #import data
 loans <- read.csv2("C:/Users/matt/source/repos/ds705/project/loans50k.csv", header = TRUE, sep = ",")
 loans$response <- loans$status
@@ -81,8 +81,8 @@ summary(loans$income)
 
 class(loans$payment) #make numeric
 class(loans$income) #make numeric
-loans$income <- as.numeric(loans$income)
-loans$payment <- as.numeric(loans$payment)
+loans$income <- as.numeric(as.character(loans$income))
+loans$payment <- as.numeric(as.character(loans$payment))
 
 
 
@@ -109,6 +109,22 @@ After elimination of variables, the predictors that are left are amount, payment
 
 
 ## 4. Exploring and Transforming the Data
+
+
+```{r echo=FALSE}
+#"response","amount","payment","home","income","delinq2yr","inq6mth","openAcc","totalBal","totalIlLim"
+
+hist(loans$amount)
+hist(loans$payment)
+hist(loans$income)
+hist(loans$delinq2yr)
+hist(loans$inq6mth)
+hist(loans$openAcc)
+hist(loans$totalBal)
+hist(loans$totalIlLim)
+```
+
+
 ## 5. The Logistic Model
 ## 6. Optimizing the Threshold for Accuracy
 ## 7. Optimizing the Threshold for Profit
