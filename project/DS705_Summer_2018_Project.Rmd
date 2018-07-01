@@ -120,13 +120,31 @@ hist(loans$payment)
 hist(sqrt(loans$payment))
 hist(loans$income)
 hist(log(loans$income))
-hist(loans$delinq2yr) #do not transform does not appear to help
+hist(loans$delinq2yr) #do not transform does not appear to help, 
 summary(loans$delinq2yr)
 hist(loans$inq6mth) #do not transform because not help
 summary(loans$inq6mth)
 hist(sqrt(loans$openAcc))
 hist(log(loans$totalBal))
 hist(log(loans$totalIlLim))
+
+#https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
+require(ggplot2)
+ggplot(aes(y = amount, x = response), data = loans) + geom_boxplot()
+
+#maybe remove delinq2yr does not seem to predict
+hist(loans$delinq2yr[which(loans$response == "Good")])
+hist(loans$delinq2yr[which(loans$response == "Bad")])
+#this one as well, the distributions do not look any different from good to bad.
+hist(loans$inq6mth[which(loans$response == "Good")])
+hist(loans$inq6mth[which(loans$response == "Bad")])
+
+#this one as well, put the side by side hist up top in cleaning section. cannot discern if gives information.
+hist(loans$openAcc[which(loans$response == "Good")])
+median(loans$openAcc[which(loans$response == "Good")])
+hist(loans$openAcc[which(loans$response == "Bad")])
+median(loans$openAcc[which(loans$response == "Bad")])
+
 ```
 
 
