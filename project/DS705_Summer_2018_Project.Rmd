@@ -115,13 +115,18 @@ After elimination of variables, the predictors that are left are amount, payment
 #"response","amount","payment","home","income","delinq2yr","inq6mth","openAcc","totalBal","totalIlLim"
 
 hist(loans$amount)
+hist(sqrt(loans$amount))
 hist(loans$payment)
+hist(sqrt(loans$payment))
 hist(loans$income)
-hist(loans$delinq2yr)
-hist(loans$inq6mth)
-hist(loans$openAcc)
-hist(loans$totalBal)
-hist(loans$totalIlLim)
+hist(log(loans$income))
+hist(loans$delinq2yr) #do not transform does not appear to help
+summary(loans$delinq2yr)
+hist(loans$inq6mth) #do not transform because not help
+summary(loans$inq6mth)
+hist(sqrt(loans$openAcc))
+hist(log(loans$totalBal))
+hist(log(loans$totalIlLim))
 ```
 
 
