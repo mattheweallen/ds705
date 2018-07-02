@@ -135,6 +135,8 @@ ggplot(aes(y = amount, x = response), data = loans) + geom_boxplot()
 #maybe remove delinq2yr does not seem to predict
 hist(loans$delinq2yr[which(loans$response == "Good")])
 hist(loans$delinq2yr[which(loans$response == "Bad")])
+plot(loans$response~loans$delinq2yr)
+
 #this one as well, the distributions do not look any different from good to bad.
 hist(loans$inq6mth[which(loans$response == "Good")])
 hist(loans$inq6mth[which(loans$response == "Bad")])
