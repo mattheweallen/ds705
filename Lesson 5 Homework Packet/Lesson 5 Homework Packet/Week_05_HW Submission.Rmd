@@ -78,7 +78,7 @@ bank_risk_not_outstanding <- ratings_with_margins["Bank","Not Outstanding"]/rati
 bank_risk_not_outstanding
 ```
 
-The estimated risk of a bank not being outstanding is equivalent to the proportion of not outstanding banks to all banks, which is equal to 0.68.
+The estimated risk of a bank not being outstanding is equivalent to the proportion of banks rated not outstanding to all banks, which is equal to 0.68.
 
 
 ### Part 1e 
@@ -93,7 +93,7 @@ credit_union_risk_not_outstanding <- ratings_with_margins["Credit Union","Not Ou
 credit_union_risk_not_outstanding
 ```
 
-The estimated risk of a credit union not being outstanding is equivalent to the proportion of not outstanding credit unions to all credit unions, which is equal to 0.55.
+The estimated risk of a credit union not being outstanding is equivalent to the proportion of credit unions rated not outstanding to all credit unions, which is equal to 0.55.
 
 
 ### Part 1f
@@ -117,7 +117,7 @@ What are the estimated odds of a credit union being rated as Outstanding?
     
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r echo=FALSE}
+```{r include=FALSE}
 # Estimated odds of credit union being rated as outstanding
 #calculate by manually
 odds_credit_union_outstanding <- (1-credit_union_risk_not_outstanding)/credit_union_risk_not_outstanding
@@ -286,7 +286,6 @@ With the small cell counts in mind, use the appropriate test to determine if pro
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
 #p.511-512 Fisher Exact Test
 #fisher.test
 fisher.test(seat_belt_usage,alternative="two.sided")
@@ -319,18 +318,14 @@ require(DS705data)
 data("anesthesia")
 anesthetic_nausea <- with(anesthesia,table(anesthetic,nausea))
 addmargins(anesthetic_nausea)
+#anesthetic_nausea
 #create barplot
-barplot(anesthetic_nausea,xlab="Region", ylab="Frequency", 
+barplot(anesthetic_nausea,xlab="Nausea", ylab="Frequency", main = "Patient Nausea for Anesthetic A and B",
         col=c("khaki","cyan"),legend=rownames(anesthetic_nausea),beside=T)
 ```
 
 
-Replace this text with your answer here.
-          nausea
-anesthetic No Yes Sum
-       A   13  26  39
-       B   23  10  33
-       Sum 36  36  72
+From inspection of the bar graph, it appears anesthetic A is much more likely to cause nausea than anethetic B.
 
 
 ---
@@ -348,8 +343,7 @@ Ha: There is a dependency between an anesthetic and nausea.
 
 
 ```{r}
-# Insert your R code here.
-#p 521
+#p 521 chisq test for independence
 chisq.test(anesthetic_nausea, correct=FALSE)
 
 ```
