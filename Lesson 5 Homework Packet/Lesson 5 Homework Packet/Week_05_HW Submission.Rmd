@@ -25,7 +25,6 @@ Create the table in R from the data and display it with the margins. Include the
 
 ```{r}
 # Create table and display it with margins
-#https://www.cyclismo.org/tutorial/R/tables.html
 
 institution <- c("Bank", "Credit Union")
 outstanding <- c(70,66)
@@ -64,7 +63,7 @@ Compare the proportions of credit unions that are rated as Outstanding to the pr
 prop.test(abs(ratings_with_margins["Credit Union","Outstanding"]-ratings_with_margins["Bank","Outstanding"]),abs(ratings_with_margins["Credit Union","Sum"]-ratings_with_margins["Bank","Sum"]),correct = FALSE)$conf.int
 ```
 
-With 95% confidence, the true proportion of credit unions rated as outstanding is between [.02,.13] greater than banks rated as outstanding.
+With 95% confidence, the true population proportion of credit unions rated as outstanding is between [.02,.13] greater than banks rated as outstanding.
 
 
 ### Part 1d
@@ -118,7 +117,7 @@ What are the estimated odds of a credit union being rated as Outstanding?
     
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r echo=FALSE}
 # Estimated odds of credit union being rated as outstanding
 #calculate by manually
 odds_credit_union_outstanding <- (1-credit_union_risk_not_outstanding)/credit_union_risk_not_outstanding
@@ -139,7 +138,6 @@ What are the estimated odds of a bank being rated as Outstanding?
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
 #manual calculation of bank being rated as outstanding
 odds_bank_outstanding <- (1-bank_risk_not_outstanding)/bank_risk_not_outstanding
 odds_bank_outstanding
@@ -251,12 +249,12 @@ Display the data in a bar graph and comment on its features.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here. MEALLEN mayb plot with expected_counts?
+# 
 barplot(observed,names.arg=c("Under 18", "18 to 35", "36 to 50","Over 50"),
         ylab="Count",col=c("purple","blue","red","green"), main = "Sample of Online Purchases by Age Group")
 ```
 
-Replace this text with your answer here.
+People between ages 36 to 50 are making most of the online purchases.
 
 ## Exercise 3
 
@@ -295,7 +293,7 @@ fisher.test(seat_belt_usage,alternative="two.sided")
 
 ```
 
-Replace this text with your answer here.
+At a 5% level of significance, we fail to reject the null hypothesis that those who claim "alway wear" a seat belt is the same for teens and seniors. Looking at the confidence interval [0.8666289, 61.3203702] for the odd ratio, we see that 1 is included in the interval.
 
 ## Exercise 4
 
@@ -316,11 +314,12 @@ Comment on any potential relationships between nausea and type of anesthetic you
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Create contingency table from anesthesia data
 require(DS705data)
 data("anesthesia")
 anesthetic_nausea <- with(anesthesia,table(anesthetic,nausea))
 addmargins(anesthetic_nausea)
+#create barplot
 barplot(anesthetic_nausea,xlab="Region", ylab="Frequency", 
         col=c("khaki","cyan"),legend=rownames(anesthetic_nausea),beside=T)
 ```
@@ -344,6 +343,10 @@ State the hypotheses (in words) and conclusion of the test. Use R to compute the
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4b -|-|-|-|-|-|-|-|-|-|-|-
 
+Ho: The type of anesthetic and whether or not patients become nauseated are independent of each other.
+Ha: There is a dependency between an anesthetic and nausea.
+
+
 ```{r}
 # Insert your R code here.
 #p 521
@@ -352,5 +355,5 @@ chisq.test(anesthetic_nausea, correct=FALSE)
 ```
 
 
-Replace this text with your answer here.
+ The p-value for the test is 0.002106. Thus at a 10% level of significance, we can conclude that there is evidence that an anesthetic is associated with nausea.
 
