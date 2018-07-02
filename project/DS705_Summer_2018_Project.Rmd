@@ -7,53 +7,25 @@ fontsize: 12pt
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-
-## R Markdown
-
 
 ## 1. Executive Summary
 ## 2. Introduction
 
-Hello Matt!
+The purpose of this project is to build a model to predict whether or not a borrower will pay back a loan. The desciption of the data set is [here](https://datascienceuwl.github.io/Project2018/loans50k.csv).
 
 ## 3. Preparing and Cleaning the Data
 
-Create a new column loan_status that will have the values Good and Bad. Where a good
+The first step in preparing the data is to create a new column named repsonse that will have the values "Good" and "Bad". It is based on the variable status. Only the rows with status of "Fully Paid", "Charged off", and "Default" will be kept."Fully Paid" maps to "Good", and "Charged off" and "Default" are mapped to "Bad".
 
-Eliminate employment column which is a description of the borrower's occupation. These are difficult to categorize and better indicators of ability to pay the loan related to employment would be income and length of continuous employment.
+```{r create_response_column, include=FALSE}
 
-```{r echo=FALSE}
-#import data
-loans <- read.csv2("C:/Users/matt/source/repos/ds705/project/loans50k.csv", header = TRUE, sep = ",")
+#filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
+filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
+loans <- read.csv2(filePath, header = TRUE, sep = ",")
 loans$response <- loans$status
 #Good loans are those that have a status of "Fully Paid". Bad loans are those that have a status of "Charged Off" or "Default".
-#loans$response <- 
-#c("Charged Off","Default","Fully Paid")
-#c("Bad","Bad","Good")
-#loans$response[which(loans$response == "Charged Off")] <- "Bad" 
 table(loans$response)
 
 levels(loans$response)[levels(loans$response)==c("Charged Off")] <- "Bad"
@@ -65,82 +37,96 @@ loans <- loans[which(loans$response=="Bad" | loans$response=="Good"), ]
 loans$response <- factor(loans$response)
 #loans <- loans[loans$response == c("Good","Bad"),]
 table(loans$response)
-#drop columns
-#https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
+```
 
-#
-#columns_to_keep <- c("response", "income", "amount", "rate", "grade", "debtIncRat", "length")
-#
-columns_to_keep <- c("response","amount","payment","home","income","delinq2yr","inq6mth","openAcc","totalBal","totalIlLim")
+The initial dataset consisted of 50,000 records. After reducing "Good" and "Bad", the total number of records left were 34,655 records. The number of records with the variable response equal to "Good" is 27,074, and "Bad" is 7,581.
 
+There are columns that can be removed, because they are not useful. For example, the status variable may be removed, because it has been transformed into the response variable. The totalPaid variable can be removed, because it is not knowable at the time of issue of a loan. Remove employment, which is a variable indicating job title, because there is so much variation. It would be possible to create a new variable with job title that puts them in more general categories, but it probably is still not useful. A better indicator may be income from job. The variable loanID can be removed. It is not necessary in the loan analysis, and may have ethical implications as it has the potential to trace a loan back to an individual. The variable verified indicates verification of annual income completed. This can be removed, because the current study is not meant to test the loan applicaitons truthfulness. 
 
-loans <- loans[columns_to_keep]
-summary(loans)
+Some of the categories like medical and debt_consolidation if used in the model could introduce bias against particular vulnerable groups that despite some setbacks may still be able to pay off a loan. Although the variable state is broader than zip code, it can still be discriminatory by geography. Also since  state is a somewhat general geography, it may not have much predictive power, and can be removed. 
+The variable length indicates the length of employment. This could be a good indicator, but there are more than 1300 missing values. It should be removed, because removing the rows with missing income would significantly reduce the data set, and imputation methods may be challenging for this much missing data where there is not necessarily a good proxy.
 
-summary(loans$income)
+The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. totalBal and totalLim can be used as proxies for totalRevLim, totalRevBal, totalBcLim,bcOpen, and totalIlLim. Further debtIncRatio, avgBal can be removed because they can be derived from other variables like income, totalBal, and openAcc. Remove totalAcc, because we are interested in accounts that are currently open and this is already captured in openAcc. Remove the variable term, because payment caputures this information. The loan term and payment amount are dependent on each other. The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth. 
 
-class(loans$payment) #make numeric
-class(loans$income) #make numeric
-loans$income <- as.numeric(as.character(loans$income))
-loans$payment <- as.numeric(as.character(loans$payment))
+The variable grade indicates the risk of the loan. I would consider it to be another response variable like status or the response variable derived from status, but with more levels. For this reason, it should be eliminated. The variable rate can be removed for similar reasons as grade. The loan rate is an indication of the borrower's risk. The greater the risk the higher the rate. The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
 
+After elimination of variables, the predictors that are left are amount, payment, home, income, delinq2yr, inq6mth, openAcc, totalBal, and totalIlLim. I converted income and payment to numeric, because they were showing up as factors. With the remaining vairables, there is no imputation or record removal needed.
 
-
-
+```{r reduce_variables, include=FALSE}
 #eliminate length, many missing values what is another a proxy? show count of n/a.
 table(loans$length)
 class(loans$length)
 #1823 as n/a
 length(which(loans$length == "n/a"))
-loans$length[NA]
+
+columns_to_keep <- c("response","amount","payment","home","income","openAcc","totalBal","totalIlLim") #,"delinq2yr","inq6mth" removed
+
+loans <- loans[columns_to_keep]
+
+#convert income and payment to numeric
+loans$income <- as.numeric(as.character(loans$income))
+loans$payment <- as.numeric(as.character(loans$payment))
 ```
-
-
-Eliminate variables you think are clearly not useful. 
-
-Remove status variable, because it has been transformed into the response variable. Remove totalPaid variable, because it is not knowable at the time of issue of a loan. Remove employment, which is a variable indicating job title, because there is so much variation. It would be possible to create a new variable with job title that puts them in more general categories, but it probably is still not useful. A better indicator may be income from job. The variable loanID can be removed. It is not necessary in the loan analysis, and may have ethical implications as it has the potential to trace a loan back to an individual. The variable verified indicates verification of annual income completed. This can be removed, because the current study is not meant to test the loan applicaitons truthfulness. The variable reason indicates the applicants purpose of the loan. Some of the categories like medical and debt_consolidation if used in the model could introduce bias against particular vulnerable groups that despite some setbacks may still be able to pay off a loan. Although the variable state is broader than zip code, it can still be discriminatory by geography. Also since  state is a somewhat general geography, it may not have much predictive power, and can be removed. The variable length indicates the length of employment. This could be a good indicator, but there are more than 1300 missing values. It should be removed, because removing the rows with missing income would significantly reduce the data set, and imputation methods may be challenging for this much missing data where there is not necessarily a good proxy. The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. totalBal and totalLim can be used as proxies for totalRevLim, totalRevBal, totalBcLim,bcOpen, and totalIlLim. Further debtIncRatio, avgBal can be removed because they can be derived from other variables like income, totalBal, and openAcc. Remove totalAcc, because we are interested in accounts that are currently open and this is already captured in openAcc. Remove the variable term, because payment caputures this information. The loan term and payment amount are dependent on each other.   
-
-The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth. The variable grade indicates the risk of the loan. I would consider it to be another response variable like status or the response variable derived from status, but with more levels. For this reason, it should be eliminated. The variable rate can be removed for similar reasons as grade. The loan rate is an indication of the borrower's risk. The greater the risk the higher the rate. The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
-
-After elimination of variables, the predictors that are left are amount, payment, home, income, delinq2yr, inq6mth, openAcc, totalBal, and totalIlLim. I converted income and payment to numeric, because they were showing up as factors. With the remaining vairables, there is imputation or record removal needed.
-
-#TODO remove? debtIncRatio can be removed, because total debt and income are variables, and thus is already captured.
-
 
 
 ## 4. Exploring and Transforming the Data
 
 
 ```{r echo=FALSE}
-#"response","amount","payment","home","income","delinq2yr","inq6mth","openAcc","totalBal","totalIlLim"
+#"response","amount","payment","home","income", "openAcc","totalBal","totalIlLim"
+#transform variables
+loans$log_amount <- log(loans$amount)
+
+loans$log_payment <- log(loans$payment)
+loans$log_income <- log(loans$income)
+loans$sqrt_openAcc <- sqrt(loans$openAcc)
+loans$cube_rt_totalBal <- (loans$totalBal)^(1/3)
+loans$sqrt_totalIlLim <- sqrt(loans$totalIlLim)
+
+summary(loans)
 
 hist(loans$amount)
-hist(sqrt(loans$amount))
+hist(loans$log_amount)
 hist(loans$payment)
-hist(sqrt(loans$payment))
+hist(loans$log_payment)
 hist(loans$income)
-hist(log(loans$income))
-hist(loans$delinq2yr) #do not transform does not appear to help, 
-summary(loans$delinq2yr)
-hist(loans$inq6mth) #do not transform because not help
-summary(loans$inq6mth)
-hist(sqrt(loans$openAcc))
-hist(log(loans$totalBal))
-hist(log(loans$totalIlLim))
+hist(loans$log_income)
+#hist(loans$delinq2yr) #do not transform does not appear to help, 
+#summary(loans$delinq2yr)
+#hist(loans$inq6mth) #do not transform because not help
+#summary(loans$inq6mth)
+hist(loans$sqrt_openAcc)
+hist(loans$cube_rt_totalBal)
+hist(loans$sqrt_totalIlLim)
 
 #https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
 require(ggplot2)
+require(grid)
+require(gridExtra)
+log_amount_plot <- ggplot(loans, aes(x=log_amount)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white") + labs(x = "Log of Amount")
+
+log_payment_plot <- ggplot(loans, aes(x=log_payment)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white") + labs(x = "Log of Payment")
+
+#https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
+
+grid.arrange(log_amount_plot, log_payment_plot, nrow=1,
+             top="Movie Characteristics")
+
+
+
 ggplot(aes(y = amount, x = response), data = loans) + geom_boxplot()
 
 #maybe remove delinq2yr does not seem to predict
-hist(loans$delinq2yr[which(loans$response == "Good")])
-hist(loans$delinq2yr[which(loans$response == "Bad")])
-plot(loans$response~loans$delinq2yr)
+#hist(loans$delinq2yr[which(loans$response == "Good")])
+#hist(loans$delinq2yr[which(loans$response == "Bad")])
+#plot(loans$response~loans$delinq2yr)
 #cor(loans$response,loans$delinq2yr)
 
 #this one as well, the distributions do not look any different from good to bad.
-hist(loans$inq6mth[which(loans$response == "Good")])
-hist(loans$inq6mth[which(loans$response == "Bad")])
+#hist(loans$inq6mth[which(loans$response == "Good")])
+#hist(loans$inq6mth[which(loans$response == "Bad")])
 
 #this one as well, put the side by side hist up top in cleaning section. cannot discern if gives information.
 hist(loans$openAcc[which(loans$response == "Good")])
