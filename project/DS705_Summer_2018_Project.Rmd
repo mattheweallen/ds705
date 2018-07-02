@@ -116,8 +116,14 @@ grid.arrange(log_amount_plot, log_payment_plot, nrow=1,
 
 
 
-ggplot(aes(y = amount, x = response), data = loans) + geom_boxplot()
+ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
+ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
+ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
+ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
 
+ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
+
+ggplot(aes(y = sqrt_totalIlLim, x = response), data = loans) + geom_boxplot()
 #maybe remove delinq2yr does not seem to predict
 #hist(loans$delinq2yr[which(loans$response == "Good")])
 #hist(loans$delinq2yr[which(loans$response == "Bad")])
