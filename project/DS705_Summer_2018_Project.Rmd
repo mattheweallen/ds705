@@ -136,6 +136,7 @@ ggplot(aes(y = amount, x = response), data = loans) + geom_boxplot()
 hist(loans$delinq2yr[which(loans$response == "Good")])
 hist(loans$delinq2yr[which(loans$response == "Bad")])
 plot(loans$response~loans$delinq2yr)
+#cor(loans$response,loans$delinq2yr)
 
 #this one as well, the distributions do not look any different from good to bad.
 hist(loans$inq6mth[which(loans$response == "Good")])
