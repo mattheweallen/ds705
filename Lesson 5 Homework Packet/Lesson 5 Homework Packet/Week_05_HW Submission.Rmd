@@ -59,7 +59,7 @@ Compare the proportions of credit unions that are rated as Outstanding to the pr
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Compare proportions of credit unions that are rated as outstanding to the proportion of banks
 prop.test(abs(ratings_with_margins["Credit Union","Outstanding"]-ratings_with_margins["Bank","Outstanding"]),abs(ratings_with_margins["Credit Union","Sum"]-ratings_with_margins["Bank","Sum"]),correct = FALSE)$conf.int
 ```
 
