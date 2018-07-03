@@ -21,8 +21,8 @@ The first step in preparing the data is to create a new column named repsonse th
 
 ```{r create_response_column, include=FALSE}
 
-#filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
-filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
+filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
+#filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
 loans <- read.csv2(filePath, header = TRUE, sep = ",")
 loans$response <- loans$status
 #Good loans are those that have a status of "Fully Paid". Bad loans are those that have a status of "Charged Off" or "Default".
@@ -81,49 +81,65 @@ loans$log_payment <- log(loans$payment)
 loans$log_income <- log(loans$income)
 loans$sqrt_openAcc <- sqrt(loans$openAcc)
 loans$cube_rt_totalBal <- (loans$totalBal)^(1/3)
-loans$sqrt_totalIlLim <- sqrt(loans$totalIlLim)
+loans$cube_rt_totalIlLim <- (loans$totalIlLim)^(1/3)
 
-summary(loans)
+#summary(loans)
 
-hist(loans$amount)
-hist(loans$log_amount)
-hist(loans$payment)
-hist(loans$log_payment)
-hist(loans$income)
-hist(loans$log_income)
+# hist(loans$amount)
+# hist(loans$log_amount)
+# hist(loans$payment)
+# hist(loans$log_payment)
+# hist(loans$income)
+# hist(loans$log_income)
 #hist(loans$delinq2yr) #do not transform does not appear to help, 
 #summary(loans$delinq2yr)
 #hist(loans$inq6mth) #do not transform because not help
 #summary(loans$inq6mth)
-hist(loans$sqrt_openAcc)
-hist(loans$cube_rt_totalBal)
-hist(loans$sqrt_totalIlLim)
+# hist(loans$sqrt_openAcc)
+# hist(loans$cube_rt_totalBal)
+# hist(loans$sqrt_totalIlLim)
 
 #https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
 require(ggplot2)
 require(grid)
 require(gridExtra)
 log_amount_plot <- ggplot(loans, aes(x=log_amount)) + 
-  geom_histogram(binwidth=.1, colour="black", fill="white") + labs(x = "Log of Amount")
+  geom_histogram(binwidth=.1, colour="black", fill="white")
 
 log_payment_plot <- ggplot(loans, aes(x=log_payment)) + 
-  geom_histogram(binwidth=.1, colour="black", fill="white") + labs(x = "Log of Payment")
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+log_income_plot <- ggplot(loans, aes(x=log_income)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+sqrt_openAcc_plot <- ggplot(loans, aes(x=sqrt_openAcc)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+cube_rt_totalBal_plot <- ggplot(loans, aes(x=cube_rt_totalBal)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+cube_rt_totalIlLim_plot <- ggplot(loans, aes(x=cube_rt_totalIlLim)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+
 
 #https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
 
-grid.arrange(log_amount_plot, log_payment_plot, nrow=1,
-             top="Movie Characteristics")
+grid.arrange(log_amount_plot, log_payment_plot, log_income_plot, sqrt_openAcc_plot, cube_rt_totalBal_plot, cube_rt_totalIlLim_plot, nrow=2, ncol=3,
+             top="Predictors")
 
 
 
-ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
-ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
-ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
-ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
+log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
+log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
+log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
+sqrt_openAcc_boxplot <- ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
+cube_rt_totalBal_boxplot <- ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
+sqrt_totalIlLim_boxplot <- ggplot(aes(y = cube_rt_totalIlLim, x = response), data = loans) + geom_boxplot()
 
-ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
+grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, sqrt_openAcc_boxplot, cube_rt_totalBal_boxplot, sqrt_totalIlLim_boxplot, nrow=2, ncol=3,
+             top="Predictors by Response")
 
-ggplot(aes(y = sqrt_totalIlLim, x = response), data = loans) + geom_boxplot()
 #maybe remove delinq2yr does not seem to predict
 #hist(loans$delinq2yr[which(loans$response == "Good")])
 #hist(loans$delinq2yr[which(loans$response == "Bad")])
