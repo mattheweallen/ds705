@@ -154,6 +154,12 @@ Obtain the residuals and plot them against the predicted values and also against
 
 ```{r}
 # Insert your R code here.
+#line 347
+resids <- linear.heartratetemp.model$resid # extract residuals from model
+temp <- normtemp$temp
+hr <- normtemp$hr
+fit <- linear.heartratetemp.model$fitted.values
+
 
 ```
 
