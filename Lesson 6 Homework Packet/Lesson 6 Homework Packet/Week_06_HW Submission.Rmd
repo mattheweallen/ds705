@@ -157,10 +157,17 @@ Obtain the residuals and plot them against the predicted values and also against
 #line 347
 resids <- linear.heartratetemp.model$resid # extract residuals from model
 temp <- normtemp$temp
-hr <- normtemp$hr
+#hr <- normtemp$hr
 fit <- linear.heartratetemp.model$fitted.values
-
-
+plot(fit,resids) #variance looks random
+plot(temp,resids)
+hist(resids)
+# Make normal probability plot of resids and add fit line.
+{
+  qqnorm(resids) #, ylab="Exponential Sample Means Size 10") 
+  qqline(resids)
+}
+boxplot(resids)
 ```
 
 Replace this text with your answer here
