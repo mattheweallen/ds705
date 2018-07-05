@@ -1,8 +1,8 @@
 
 ---
 title: 'Simple and Multiple Linear Regression'
-author: "Your name here"
-date: "mm/dd/yyyy"
+author: "Matt Allen"
+date: "07/04/2018"
 output: word_document
 fontsize: 12pt
 ---
@@ -21,16 +21,25 @@ Create a scatterplot with heart rate in the vertical axis and plot the estimated
 
 Note:  this data set needs a little cleaning first.  The heart rates are missing for two of the rows.  You can delete these rows from the data frame using the R function na.omit().  Just put the name of the data frame in the parenthesis.
 
-Does it appear that a linear model is at least possibly a plausible model for the relationship between hear rate and body temperature?  Explain your answer.
+Does it appear that a linear model is at least possibly a plausible model for the relationship between heart rate and body temperature?  Explain your answer.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Get data
+require(DS705data)
+data("normtemp")
+# Remove Missing Values
+normtemp <- na.omit(normtemp)
+loess_line <- loess(hr~temp,normtemp)
+{
+  # Create Scatter Plot
+  plot(normtemp$hr~normtemp$temp, xlab ="Body Temperature F", ylab = "Heart Rate bpm")  
+  lines(predict(loess_line), col='red', lwd=2)
+}
 ```
 
-Replace this text with your answer here.
+From visual inspection of the scatter plot, the points appear to be scattered randomly, but it is possible that there is  a positive relationship between body temperature and heart rate. Based on the loess line, however, the relationship between heart rate and body temperature appears to be random. The line has zero slope, so a linear model should be created to confirm. 
 
 ---
 
@@ -40,7 +49,16 @@ Write the statistical model for estimating heart rate from body temperature, def
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+$$\hat{hr} = \hat{\beta_0} + \hat{\beta_1} temp$$
+where $temp$ is body temperature in degrees Fahrenheit, $\hat{hr}$ is heart rate in beats per minute, $\hat{\beta_0}$ is the heart rate when body temperature is 0, and $\hat{\beta_1}$ is the rate of increase in heart rate for an increase of 1 degree in body temperature.
+
+Model Assumptions:
+
+1. errors have mean 0
+2. errors have the same variance for all $temp$
+3. errors are independent of each other
+4. errors are normally distributed.
+
 
 ---
 
@@ -51,13 +69,14 @@ Obtain the estimated slope and y-intercept for the estimated regression equation
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Obtain estimated slope and y-intercept.
+linear.heartratetemp.model<-with(normtemp,lm(hr~temp))
+linear.heartratetemp.model
 ```
 
-Replace the ## symbols with your slope and intercept.
+Based on the output from the model, the intercept and coefficient of the estimated regression equation is
 
-$\widehat{\text{hr}}$ = ## + ##temp  
+$\widehat{\text{hr}}$ = -179.119 + 2.574 * temp  
 
 ---
 
@@ -68,11 +87,15 @@ Test whether or not a positive linear relationship exists between heart rate and
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Summary of linear model
+summary(linear.heartratetemp.model)
 ```
 
-Replace this text with your answer here.
+$H_0 \text{: } \hat{\beta_1}=0$
+
+$H_a \text{: } \hat{\beta_1}>0$
+
+The test statistic is t = 2.878. The p-value is 0.0047. At a 5% level of significance, there is evidence that a positive relationship exists between heart rate and body temperature.
 
 ---
 
@@ -83,11 +106,11 @@ Provide a 95% confidence interval to estimate the slope of the regression equati
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# 95% confidence interval of rate of change heart rate for 1 degree change in temperature
+confint(linear.heartratetemp.model)
 ```
 
-Replace this text with your answer here.
+We are 95% confident that the population mean of heart rate increases 0.80 to 4.34 beats per minute for a one degree increase in temperature.
 
 ---
 
