@@ -121,11 +121,12 @@ Provide a 95% confidence interval to estimate the mean heart rate for all adults
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Compute confidence interval
+temp_df <- data.frame( temp = 98.6 )
+predict(linear.heartratetemp.model, temp_df , interval="confidence")
 ```
 
-Replace this text with your answer here
+We are 95% confident that, for a body temperature of $98.6^o$ F, the average heart rate is between 73.3 and 76.08 beats per minute.
 
 ---
 
@@ -136,11 +137,12 @@ Provide a 95% prediction interval to estimate the expected heart rate for a rand
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Compute prediction interval
+temp_df <- data.frame( temp = 98.6 )
+predict(linear.heartratetemp.model, temp_df, interval="prediction")
 ```
 
-Replace this text with your answer here
+We are 95% confident that, for a body temperature of $98.6^o$ F of a randomly selected adult, their heart rate will be between 60.96 and 88.43 beats per minute.
 
 ---
 
