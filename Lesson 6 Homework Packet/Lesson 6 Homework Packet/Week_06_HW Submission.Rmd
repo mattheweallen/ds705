@@ -34,7 +34,7 @@ normtemp <- na.omit(normtemp)
 loess_line <- loess(hr~temp,normtemp)
 {
   # Create Scatter Plot
-  plot(normtemp$hr~normtemp$temp, xlab ="Body Temperature F", ylab = "Heart Rate bpm")  
+  plot(normtemp$hr~normtemp$temp, xlab ="Body Temperature (F)", ylab = "Heart Rate (bpm)")  
   lines(predict(loess_line), col='red', lwd=2)
 }
 ```
@@ -153,43 +153,80 @@ Obtain the residuals and plot them against the predicted values and also against
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Plots and Shapiro-Wilk test.
+# Plot resids~pred, resids~temp, resids hist, resids normal prob, and box plot and Shapiro-Wilk test.
+#install.packages('ggplot2')
 require(ggplot2)
+require(qqplotr)
 require(grid)
 require(gridExtra)
+#install.packages("qqplotr")
+
 
 #line 347
 resids <- linear.heartratetemp.model$resid # extract residuals from model
 temp <- normtemp$temp
 #hr <- normtemp$hr
 fit <- linear.heartratetemp.model$fitted.values
-plot(fit,resids) #variance looks random
-plot(temp,resids)
-hist(resids)
-# Make normal probability plot of resids and add fit line.
-{
-  qqnorm(resids) #, ylab="Exponential Sample Means Size 10") 
-  qqline(resids)
-}
+# plot(fit,resids) #variance looks random
+# plot(temp,resids)
+# hist(resids)
+# # Make normal probability plot of resids and add fit line.
+# {
+#   qqnorm(resids) #, ylab="Exponential Sample Means Size 10")
+#   qqline(resids)
+# }
 boxplot(resids)
-#https://ggplot2.tidyverse.org/reference/geom_qq.html
+# #https://ggplot2.tidyverse.org/reference/geom_qq.html
+# 
+# 
+# 
+# 
+# log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
+# log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
+# log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
+# sqrt_openAcc_boxplot <- ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
+# cube_rt_totalBal_boxplot <- ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
+# sqrt_totalLim_boxplot <- ggplot(aes(y = cube_rt_totalLim, x = response), data = loans) + geom_boxplot()
+# 
+# grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, sqrt_openAcc_boxplot, cube_rt_totalBal_boxplot, sqrt_totalLim_boxplot, nrow=2, ncol=3, top="Predictors by Response", bottom = "Figure 2 Boxplots of Predictors by Response")
 
+resids_df <- data.frame(residuals = resids, pred = fit, temp = temp)
+#p <- ggplot(data = resids_df, mapping = aes(sample = residuals_meallen))
+#p + stat_qq() + stat_qq_line()
 
+# class(resids_df$residuals)
+# 
+# any( !is.finite( resids_df$residuals ) )
+# any( !is.na( resids_df$residuals ) )
+# 
+# 
+# resids_df <- resids_df[is.finite(rowSums(resids_df)),]
+# 
+# df <- data.frame(resids_df[is.finite(rowSums(resids_df)), ])
 
+#class(resids_df$residuals_meallen)
 
-log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
-log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
-log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
-sqrt_openAcc_boxplot <- ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
-cube_rt_totalBal_boxplot <- ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
-sqrt_totalLim_boxplot <- ggplot(aes(y = cube_rt_totalLim, x = response), data = loans) + geom_boxplot()
+#resids~pred, resids~temp, resids hist, resids normal prob, and box plot
 
-grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, sqrt_openAcc_boxplot, cube_rt_totalBal_boxplot, sqrt_totalLim_boxplot, nrow=2, ncol=3, top="Predictors by Response", bottom = "Figure 2 Boxplots of Predictors by Response")
+resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() 
+resids_pred
 
-p <- ggplot(df, aes(sample = y))
-p + stat_qq() + stat_qq_line()
+resids_temp <- ggplot(resids_df,aes(x=temp, y=residuals)) + geom_point() 
+resids_temp
 
+#https://cran.r-project.org/web/packages/qqplotr/vignettes/introduction.html
+resid_normal_qq <- ggplot(data = resids_df, mapping = aes(sample = residuals)) +
+    stat_qq_band() +
+    stat_qq_line() +
+    stat_qq_point() +
+    labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+    ggtitle("Normal Q-Q Plot")
+resid_normal_qq
 
+resids_boxplot <- ggplot(aes(y = residuals), data = resids_df) + geom_boxplot() +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank())
+resids_boxplot
+resids_hist <- ggplot(data=resids_df, aes(residuals)) + geom_histogram(breaks=seq(-15, 15, by=1))
 ```
 
 Replace this text with your answer here
