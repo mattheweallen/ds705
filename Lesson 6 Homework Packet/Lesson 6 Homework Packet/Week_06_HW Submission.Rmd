@@ -153,7 +153,11 @@ Obtain the residuals and plot them against the predicted values and also against
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Plots and Shapiro-Wilk test.
+require(ggplot2)
+require(grid)
+require(gridExtra)
+
 #line 347
 resids <- linear.heartratetemp.model$resid # extract residuals from model
 temp <- normtemp$temp
@@ -168,6 +172,24 @@ hist(resids)
   qqline(resids)
 }
 boxplot(resids)
+#https://ggplot2.tidyverse.org/reference/geom_qq.html
+
+
+
+
+log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
+log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
+log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
+sqrt_openAcc_boxplot <- ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
+cube_rt_totalBal_boxplot <- ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
+sqrt_totalLim_boxplot <- ggplot(aes(y = cube_rt_totalLim, x = response), data = loans) + geom_boxplot()
+
+grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, sqrt_openAcc_boxplot, cube_rt_totalBal_boxplot, sqrt_totalLim_boxplot, nrow=2, ncol=3, top="Predictors by Response", bottom = "Figure 2 Boxplots of Predictors by Response")
+
+p <- ggplot(df, aes(sample = y))
+p + stat_qq() + stat_qq_line()
+
+
 ```
 
 Replace this text with your answer here
