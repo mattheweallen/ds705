@@ -151,69 +151,39 @@ We are 95% confident that, for a body temperature of $98.6^o$ F of a randomly se
 Obtain the residuals and plot them against the predicted values and also against the independent variable.  Also construct a histogram, normal probability plot, and boxplot of the residuals and perform a Shapiro-Wilk test for normality.  Based on your observation of the plot of residuals against the predicted values, does the regression line appear to be a good fit?  Do the model assumptions appear to be satisfied?  Comment. 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
-
-```{r}
-# Plot resids~pred, resids~temp, resids hist, resids normal prob, and box plot and Shapiro-Wilk test.
-#install.packages('ggplot2')
+```{r include=FALSE}
+# Add plotting libraries
 require(ggplot2)
 require(qqplotr)
 require(grid)
 require(gridExtra)
-#install.packages("qqplotr")
+```
 
-
-#line 347
+```{r echo=FALSE}
+# Plot resids~pred, resids~temp, resids hist, resids normal prob, and box plot. Perform a Shapiro-Wilk test.
 resids <- linear.heartratetemp.model$resid # extract residuals from model
-temp <- normtemp$temp
-#hr <- normtemp$hr
-fit <- linear.heartratetemp.model$fitted.values
-# plot(fit,resids) #variance looks random
-# plot(temp,resids)
-# hist(resids)
-# # Make normal probability plot of resids and add fit line.
-# {
-#   qqnorm(resids) #, ylab="Exponential Sample Means Size 10")
-#   qqline(resids)
-# }
-boxplot(resids)
-# #https://ggplot2.tidyverse.org/reference/geom_qq.html
-# 
-# 
-# 
-# 
-# log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
-# log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
-# log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
-# sqrt_openAcc_boxplot <- ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
-# cube_rt_totalBal_boxplot <- ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
-# sqrt_totalLim_boxplot <- ggplot(aes(y = cube_rt_totalLim, x = response), data = loans) + geom_boxplot()
-# 
-# grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, sqrt_openAcc_boxplot, cube_rt_totalBal_boxplot, sqrt_totalLim_boxplot, nrow=2, ncol=3, top="Predictors by Response", bottom = "Figure 2 Boxplots of Predictors by Response")
-
+temp <- normtemp$temp #temperature values
+fit <- linear.heartratetemp.model$fitted.values #fitted values
 resids_df <- data.frame(residuals = resids, pred = fit, temp = temp)
-#p <- ggplot(data = resids_df, mapping = aes(sample = residuals_meallen))
-#p + stat_qq() + stat_qq_line()
+```
 
-# class(resids_df$residuals)
-# 
-# any( !is.finite( resids_df$residuals ) )
-# any( !is.na( resids_df$residuals ) )
-# 
-# 
-# resids_df <- resids_df[is.finite(rowSums(resids_df)),]
-# 
-# df <- data.frame(resids_df[is.finite(rowSums(resids_df)), ])
-
-#class(resids_df$residuals_meallen)
-
-#resids~pred, resids~temp, resids hist, resids normal prob, and box plot
-
+```{r echo=FALSE}
 resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() 
 resids_pred
+#resids_temp <- ggplot(resids_df,aes(x=temp, y=residuals)) + geom_point() 
+#grid.arrange(resids_pred, resids_temp,nrow=1, ncol=2, top="Residual Plots")
+```
 
+
+```{r echo=FALSE}
+#resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() 
 resids_temp <- ggplot(resids_df,aes(x=temp, y=residuals)) + geom_point() 
 resids_temp
+#grid.arrange(resids_pred, resids_temp,nrow=1, ncol=2, top="Residual Plots")
+```
 
+
+```{r echo=FALSE, fig.width=4, fig.height=4}
 #https://cran.r-project.org/web/packages/qqplotr/vignettes/introduction.html
 resid_normal_qq <- ggplot(data = resids_df, mapping = aes(sample = residuals)) +
     stat_qq_band() +
@@ -222,14 +192,27 @@ resid_normal_qq <- ggplot(data = resids_df, mapping = aes(sample = residuals)) +
     labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
     ggtitle("Normal Q-Q Plot")
 resid_normal_qq
+#grid.arrange(resid_normal_qq,nrow=1, ncol=1)
 
-resids_boxplot <- ggplot(aes(y = residuals), data = resids_df) + geom_boxplot() +
-  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank())
-resids_boxplot
-resids_hist <- ggplot(data=resids_df, aes(residuals)) + geom_histogram(breaks=seq(-15, 15, by=1))
 ```
 
-Replace this text with your answer here
+```{r echo=FALSE}
+resids_boxplot <- ggplot(aes(y = residuals), data = resids_df) + geom_boxplot() +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank())
+resids_hist <- ggplot(data=resids_df, aes(residuals)) + geom_histogram(breaks=seq(-15, 15, by=1))
+
+grid.arrange(resids_boxplot, resids_hist,nrow=1, ncol=2)
+```
+
+
+```{r echo=FALSE}
+
+#shapiro-wilk test for normality
+shapiro.test(resids)
+
+```
+
+Based on the sharpiro-wilk test, we fail to reject that the residuals are normally distributed.
 
 ---
 
