@@ -168,7 +168,7 @@ resids_df <- data.frame(residuals = resids, pred = fit, temp = temp)
 ```
 
 ```{r echo=FALSE}
-resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() 
+resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() + geom_hline(yintercept = 0)
 resids_pred
 #resids_temp <- ggplot(resids_df,aes(x=temp, y=residuals)) + geom_point() 
 #grid.arrange(resids_pred, resids_temp,nrow=1, ncol=2, top="Residual Plots")
@@ -212,7 +212,24 @@ shapiro.test(resids)
 
 ```
 
-Based on the sharpiro-wilk test, we fail to reject that the residuals are normally distributed.
+```{r echo=TRUE}
+
+#Check that the mean of the residuals is 0.
+mean(resids)
+
+```
+
+
+Based on your observation of the plot of residuals against the predicted values, does the regression line appear to be a good fit?  Do the model assumptions appear to be satisfied?
+
+Model Assumptions:
+
+1. errors have mean 0, look at boxplot, histogram or take mean of residuals.
+2. errors have the same variance for all $temp$
+3. errors are independent of each other
+4. errors are normally distributed.
+
+From the plot of residuals against the predicted values, it can be seen that the residuals are scattered evenly around the zero horizontal line. This suggests that the relationship is linear, and that the errors have the same variance. The errors appear scattered, which would suggest that the errors are independent of each other. The mean of the reisuals is close to zero. Also, based on the sharpiro-wilk test, we fail to reject that the residuals are normally distributed. We can conclude that the regression line does appear to be a good fit and that the model assumptions are satisfied.
 
 ---
 
@@ -222,7 +239,7 @@ Examine the original scatterplot and the residual plot. Do any observations appe
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1i -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here
+There are high and low points in the middle. I think that there strong influence in high and low direction cancels out an effect on the estimated regression equation. However, due to greater variability, it may have some influence on the confidence interval. 
 
 ---
 
