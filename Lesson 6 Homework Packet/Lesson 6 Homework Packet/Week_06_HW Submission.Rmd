@@ -250,11 +250,17 @@ Perform the F test to determine whether there is lack of fit in the linear regre
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1j -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Create full model.
+heartratetemp.model.full<-with(normtemp,lm(hr~factor(temp)))
+results <- anova( linear.heartratetemp.model, heartratetemp.model.full )
+#results$F
+#results$'Pr(>F)'
+results
 ```
 
-Replace this text with your answer here.
+$$ H_0: \mbox{line model}, \hspace{1in} H_a: \mbox{full model} $$.
+
+The F-statistic 1.403484 and the p-value is 0.1103044. At a 5% level of significance, we fail to reject the null hypothesis that the line model is a good fit for the data.
 
 ---
 
@@ -265,11 +271,13 @@ Conduct the Breusch-Pagan test for the constancy of error variance.  Use α = 0.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1k -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Breusch-Pagan test for the constancy of error variance
+require(lmtest) # install if needed
+bptest(linear.heartratetemp.model)
 ```
 
-Replace this text with your answer here.
+$$ H_0: \mbox{equal variances}, \hspace{.5in} H_1: \mbox{unequal variances}$$
+The BP statistic is 0.19584 and the p-value is 0.6581. At a 5% level of significance, we fail to reject the null hypothesis that the model has equal variances.
 
 ---
 
@@ -280,11 +288,12 @@ Calculate and interpret the Pearson correlation coefficient $r$.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1l -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Calculate and interpret Pearson correlation coefficient
+correlation.test <- with(normtemp, cor.test(temp, hr, method="pearson") )
+correlation.test$estimate
 ```
 
-Replace this text with your interpretation here.
+The pearson correlation coefficient of .25 indicates a weak positive relationship between body temperature and heart rate.
 
 ---
 
@@ -295,7 +304,8 @@ Construct a 95% confidence interval for the Pearson correlation coefficient $r$.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1m -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Construct a 95% CI for the Pearson correlation coefficient.
+correlation.test$conf.int
 
 ```
 
@@ -307,12 +317,13 @@ Calculate and interpret the coefficient of determination $r^2_{yx}$ (same as $R^
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1n -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
+```{r echo=false}
+# Calculate and interpret the coefficient of determination.
+summary(linear.heartratetemp.model)
 
 ```
 
-Replace this text with your interpretation here.
+The adjusted R-squared is 0.05424. That means only 5.4% of the variation is explained by the model. 
 
 ---
 
@@ -322,7 +333,7 @@ Should the regression equation obtained for heart rate and temperature be used f
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1o -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+Based on the adjusted R squared, the model does not have signficant predictive powers, and probably should not be used to predict heart rate. However, there is some explanatory power in temperature to heart rate, and the model could be updated to include more factors like age for example in order to make better predictions.
 
 ---
 
@@ -332,8 +343,10 @@ Calculate the Spearman correlation coefficient $r_s$ (just for practice).
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1p -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
+```{r echo=FALSE}
+# Calculate the Spearman correlation coefficient.
+correlation.test <- with(normtemp, cor.test(temp, hr, method = "spearman") )
+correlation.test$estimate
 
 ```
 
@@ -343,8 +356,23 @@ Calculate the Spearman correlation coefficient $r_s$ (just for practice).
 
 Create 95% prediction and confidence limits for the predicted mean heartrate for each temperature given in the sample data and plot them along with a scatterplot of the data. (Look for the slides titled "Confidence Bands" in the presentation.)
 
-```{r}
-# Insert your R code here.
+```{r echo = FALSE}
+# 95% prediction and confidence limits.
+xplot <- data.frame( NumItems = seq( 95, 100, length=128) )
+fittedC <- predict(linear.heartratetemp.model,xplot,interval="confidence")
+fittedP <- predict(linear.heartratetemp.model,xplot,interval="prediction")
+
+# scatterplot
+ylimits <- c(min(fittedP[,"lwr"]),max(fittedP[,"upr"]))
+{
+  plot(normtemp$temp,normtemp$hr,ylim=ylimits, xlab ="Body Temperature (F)", ylab = "Heart Rate (bpm)")
+  abline(linear.heartratetemp.model)
+  # plot the confidence and prediction  bands
+  lines(xplot[,1], fittedC[, "lwr"], lty = "dashed",col='darkgreen')
+  lines(xplot[,1], fittedC[, "upr"], lty = "dashed",col='darkgreen')
+  lines(xplot[,1], fittedP[, "lwr"], lty = "dotted",col='blue')
+  lines(xplot[,1], fittedP[, "upr"], lty = "dotted",col='blue')
+}             
 
 ```
 
