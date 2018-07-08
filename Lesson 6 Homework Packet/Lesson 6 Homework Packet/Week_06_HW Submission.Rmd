@@ -496,11 +496,13 @@ Should the quadratic term be retained in the model at a 5% level of significance
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Add quadratic term
+x2sq =JobProf$x2^2
+linear.model.with.xsquared <- lm(y~x1 + x2 + x3 + x2sq, data=JobProf)
+summary(linear.model.with.xsquared)
 ```
 
-Replace this text with your answer here.
+The p-value for the x2 squared term is 0.353. At at 5% level of signficance, it should not be retained.
 
 ---
 
@@ -511,7 +513,9 @@ If you've been successful so far, then you should realize that the none of inter
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2g -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Estimate final and smaller model
+linear.model.final.first.order <- lm(y~x1 + x3, data=JobProf)
+summary(linear.model.final.first.order)
 
 ```
 
@@ -524,11 +528,11 @@ From the final first order model in 2g, obtain a 90% confidence interval for the
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2g -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# 90% confidence interval
+confint(linear.model.final.first.order, level = .9)
 ```
 
-Replace this text with your answer here.
+A 90% confidence interval for x3 is [1.61, 2.03]. One additional point on the third aptitude test corresponds to an increase in between 1.61 and 2.03 points in the job proficiency score.     
 
 ---
 
@@ -539,11 +543,13 @@ Using the final first order model from 2g, construct a 95% prediction interval f
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2i -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Compute prediction interval
+temp_df <- data.frame( x1=99,x2=112,x3=105 )
+predict(linear.model.final.first.order, temp_df, interval="prediction")
 
 ```
 
-Replace this text with your answer here.
+With 95% confidence, a randomly selected employee who scores x1=99, x2=112, and x3=105 on the aptitude tests will have a job proficiency score of between 87 and 110.
 
 ---
 
