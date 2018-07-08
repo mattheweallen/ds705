@@ -568,8 +568,10 @@ Obtain the estimated intercept and coefficients and state the estimated mean Eng
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Get the data and estimate coefficients.
+data("English")
+model <- lm(y~x1 + x2, data=English)
+summary(model)
 ```
 
 Replace this text with your answer here.
