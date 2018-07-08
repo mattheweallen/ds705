@@ -398,8 +398,10 @@ Use R to find the corresponding estimated model and also obtain the `summary()`.
 ## -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Get the data
+data("JobProf")
+linear.model <- lm(y~x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3, data=JobProf)
+summary(linear.model)
 ```
 
 ---
@@ -410,19 +412,19 @@ Use R to compute the VIF for each term in the model.  Are any of the VIFs over 1
 
 ## -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r echo=FALSE}
 # Change this code so it computes VIF's for the model in the problem
 # if necessary install.packages('HH'), but do it in the console and reply 'n'
 # if it asks if you want to compile a binary package
 # in this case the low VIF's indicate collinearity is not a problem for the terms
 require(HH)
-require(DS705data)
-data(HealthExam)
-fit <- lm(Weight~Height+Waist+SysBP,HealthExam)
-vif(fit)
+#require(DS705data)
+#data(HealthExam)
+#fit <- lm(Weight~Height+Waist+SysBP,HealthExam)
+vif(linear.model)
 ```
 
-Replace this text with your answer here.
+All of the VIFs are greater than 10. There is a high degree of collinearity.
 
 --- 
 
@@ -434,7 +436,7 @@ Using the model summary from 2a what do you notice about the overall model p-val
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+The overall model p-value from the F-statistic is 4.042e-10 which indicates a very good fit, but the individual p-values for each term is large indicating that none of the individual terms are signficant. The small p-value on the F statistic implies overall the predictors together are significant in explaining the variation in the predictor variable. The high p-values on individual terms are caused by the high degree of collinearity between the terms. Due to the high degree of collinearity and after accounting for the other variables, adding a new variable does not explain much more of the variation, and thus has a high p-value. 
 
 ---
 
@@ -449,11 +451,12 @@ Is the first order model significant?
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Estimate and summarize a first order model.
+linear.model.witoutinteractionterms <- lm(y~x1 + x2 + x3, data=JobProf)
+summary(linear.model.witoutinteractionterms)
 ```
 
-Replace this text with your answer here.
+This model is more significant since it has a smaller p-value in the F-statistic, and two out of the three terms are now statistically significant.
 
 ---
 
@@ -466,11 +469,17 @@ Test the significance of all three coefficients for the interaction terms as a s
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+#Compare the models
+results <- anova( linear.model, linear.model.witoutinteractionterms )
+#results$F
+#results$'Pr(>F)'
+results
 ```
 
-Replace this text with your answer here.
+$$ H_0: \mbox{interaction model}, \hspace{1in} H_a: \mbox{no interaction model} $$.
+
+The F-statistic 0.7444 and the p-value is 0.5395. At a 5% level of significance, we fail to reject the null hypothesis that the model with interaction terms is a good fit for the data.
+
 
 ---
 
