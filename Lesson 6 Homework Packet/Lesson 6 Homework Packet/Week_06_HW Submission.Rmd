@@ -317,7 +317,7 @@ Calculate and interpret the coefficient of determination $r^2_{yx}$ (same as $R^
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1n -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r echo=false}
+```{r echo=FALSE}
 # Calculate and interpret the coefficient of determination.
 summary(linear.heartratetemp.model)
 
@@ -574,7 +574,8 @@ model <- lm(y~x1 + x2, data=English)
 summary(model)
 ```
 
-Replace this text with your answer here.
+The intercept is 44.75. x1 is 61.4. x2 is 3.95.
+The estimated mean English proficiency score for method 1 is 61.4 + 44.75 = 106.15, method 2 is 3.95 + 44.75 = 48.7, and method 3 is just the value of the intercept 44.75.
 
 ---
 
@@ -589,8 +590,19 @@ Using the estimated coefficients, write three separate estimated models, one for
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Fit model
+model <- lm(y~x4 + x1 + x2 + x1:x4 + x2:x4, data=English)
+summary(model)
 
 ```
 
-Replace this text with your answer here.
+Model 1:
+
+$$y=39.2585 + 0.1220 x_4 - 20.3014 x_1 + 1.7797 x_1 x_4 + \epsilon$$
+
+Model 2:
+
+$$y=39.2585 + 0.1220 x_4 - 9.4661 x_2 + 0.3038 x_2 x_4 + \epsilon$$
+Model 3:
+
+$$y=39.2585 + 0.1220 x_4 + \epsilon$$
