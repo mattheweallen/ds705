@@ -258,7 +258,7 @@ results <- anova( linear.heartratetemp.model, heartratetemp.model.full )
 results
 ```
 
-$$ H_0: \mbox{line model}, \hspace{1in} H_a: \mbox{full model} $$.
+$$ H_0: \mbox{line model}, \quad H_a: \mbox{full model} $$.
 
 The F-statistic 1.403484 and the p-value is 0.1103044. At a 5% level of significance, we fail to reject the null hypothesis that the line model is a good fit for the data.
 
@@ -276,7 +276,7 @@ require(lmtest) # install if needed
 bptest(linear.heartratetemp.model)
 ```
 
-$$ H_0: \mbox{equal variances}, \hspace{.5in} H_1: \mbox{unequal variances}$$
+$$ H_0: \mbox{equal variances}, \quad H_1: \mbox{unequal variances}$$
 The BP statistic is 0.19584 and the p-value is 0.6581. At a 5% level of significance, we fail to reject the null hypothesis that the model has equal variances.
 
 ---
@@ -412,7 +412,7 @@ Use R to compute the VIF for each term in the model.  Are any of the VIFs over 1
 
 ## -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r echo=FALSE}
+```{r include=FALSE}
 # Change this code so it computes VIF's for the model in the problem
 # if necessary install.packages('HH'), but do it in the console and reply 'n'
 # if it asks if you want to compile a binary package
@@ -421,9 +421,12 @@ require(HH)
 #require(DS705data)
 #data(HealthExam)
 #fit <- lm(Weight~Height+Waist+SysBP,HealthExam)
-vif(linear.model)
+#vif(linear.model)
 ```
 
+```{r}
+vif(linear.model)
+```
 All of the VIFs are greater than 10. There is a high degree of collinearity.
 
 --- 
@@ -476,7 +479,7 @@ results <- anova( linear.model, linear.model.witoutinteractionterms )
 results
 ```
 
-$$ H_0: \mbox{interaction model}, \hspace{1in} H_a: \mbox{no interaction model} $$.
+$$ H_0: \mbox{interaction model}, \quad H_a: \mbox{no interaction model} $$.
 
 The F-statistic 0.7444 and the p-value is 0.5395. At a 5% level of significance, we fail to reject the null hypothesis that the model with interaction terms is a good fit for the data.
 
