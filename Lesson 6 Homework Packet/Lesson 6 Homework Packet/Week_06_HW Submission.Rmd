@@ -168,7 +168,8 @@ resids_df <- data.frame(residuals = resids, pred = fit, temp = temp)
 ```
 
 ```{r echo=FALSE}
-resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() + geom_hline(yintercept = 0)
+resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() + geom_hline(yintercept = 0) +
+    ggtitle("Residuals against Predicted Values")
 resids_pred
 #resids_temp <- ggplot(resids_df,aes(x=temp, y=residuals)) + geom_point() 
 #grid.arrange(resids_pred, resids_temp,nrow=1, ncol=2, top="Residual Plots")
@@ -177,7 +178,8 @@ resids_pred
 
 ```{r echo=FALSE}
 #resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() 
-resids_temp <- ggplot(resids_df,aes(x=temp, y=residuals)) + geom_point() 
+resids_temp <- ggplot(resids_df,aes(x=temp, y=residuals)) + geom_point() +
+    ggtitle("Residuals against Independent Variable")
 resids_temp
 #grid.arrange(resids_pred, resids_temp,nrow=1, ncol=2, top="Residual Plots")
 ```
@@ -201,7 +203,7 @@ resids_boxplot <- ggplot(aes(y = residuals), data = resids_df) + geom_boxplot() 
   theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank())
 resids_hist <- ggplot(data=resids_df, aes(residuals)) + geom_histogram(breaks=seq(-15, 15, by=1))
 
-grid.arrange(resids_boxplot, resids_hist,nrow=1, ncol=2)
+grid.arrange(resids_boxplot, resids_hist,nrow=1, ncol=2, top="Boxplot and Histogram of Residuals")
 ```
 
 
