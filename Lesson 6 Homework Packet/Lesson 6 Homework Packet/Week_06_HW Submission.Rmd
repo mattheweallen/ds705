@@ -126,7 +126,7 @@ temp_df <- data.frame( temp = 98.6 )
 predict(linear.heartratetemp.model, temp_df , interval="confidence")
 ```
 
-We are 95% confident that, for a body temperature of $98.6^o$ F, the average heart rate is between 73.3 and 76.08 beats per minute.
+We are 95% confident that, for a body temperature of $98.6^o$ F, the mean heart rate for all adults is between 73.3 and 76.08 beats per minute.
 
 ---
 
@@ -258,7 +258,7 @@ results <- anova( linear.heartratetemp.model, heartratetemp.model.full )
 results
 ```
 
-$$ H_0: \mbox{line model}, \quad H_a: \mbox{full model} $$.
+$$ H_0: \mbox{line model}, \quad H_a: \mbox{full model} $$
 
 The F-statistic 1.403484 and the p-value is 0.1103044. At a 5% level of significance, we fail to reject the null hypothesis that the line model is a good fit for the data.
 
@@ -270,9 +270,13 @@ Conduct the Breusch-Pagan test for the constancy of error variance.  Use α = 0.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1k -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r include=FALSE}
 # Breusch-Pagan test for the constancy of error variance
 require(lmtest) # install if needed
+```
+
+```{r}
+# Breusch-Pagan test for the constancy of error variance
 bptest(linear.heartratetemp.model)
 ```
 
@@ -317,7 +321,7 @@ Calculate and interpret the coefficient of determination $r^2_{yx}$ (same as $R^
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1n -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r echo=FALSE}
+```{r include=FALSE}
 # Calculate and interpret the coefficient of determination.
 summary(linear.heartratetemp.model)
 
@@ -474,12 +478,10 @@ Test the significance of all three coefficients for the interaction terms as a s
 ```{r}
 #Compare the models
 results <- anova( linear.model, linear.model.witoutinteractionterms )
-#results$F
-#results$'Pr(>F)'
 results
 ```
 
-$$ H_0: \mbox{interaction model}, \quad H_a: \mbox{no interaction model} $$.
+$$ H_0: \mbox{interaction model}, \quad H_a: \mbox{no interaction model} $$
 
 The F-statistic 0.7444 and the p-value is 0.5395. At a 5% level of significance, we fail to reject the null hypothesis that the model with interaction terms is a good fit for the data.
 
@@ -552,7 +554,7 @@ predict(linear.model.final.first.order, temp_df, interval="prediction")
 
 ```
 
-With 95% confidence, a randomly selected employee who scores x1=99, x2=112, and x3=105 on the aptitude tests will have a job proficiency score of between 87 and 110.
+With 95% confidence, a randomly selected employee who has a score of 99 on test 1, 112 on test 2, and 105 on test 3 on the aptitude tests will have a job proficiency score of between 87 and 110.
 
 ---
 
