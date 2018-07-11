@@ -26,11 +26,15 @@ Is there an association between these two categorical variables at a 5% level of
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Create contingency table from anesthesia data
+require(DS705data)
+data("anesthesia")
+anesthetic_nausea <- with(anesthesia,table(anesthetic,nausea))
+addmargins(anesthetic_nausea)
+chisq.test(anesthetic_nausea, correct=FALSE)
 ```
 
-Replace this text with your answer to the question about an association.
+The p-value for the test is 0.002106. Thus at a 5% level of significance, we can conclude that there is evidence that an anesthetic is associated with nausea.
 
 ### Part 1b
 
@@ -39,8 +43,9 @@ Obtain the output from R (including the Wald tests for coefficients - so use "su
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Create and summarize logistic model of nausea as a function of anesthetic
+logistic.model <- glm(nausea~anesthetic,data=anesthesia,family="binomial")
+summary(logistic.model)
 ```
 
 
@@ -50,7 +55,7 @@ What is the outcome of the hypothesis test that the coefficient of **anesthetic*
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer.
+The value of the Wald test statistic from the model summary is the z-value, which is -2.999. The p-value from the standard normal distribution is 0.00271. At a 5% level of significance, we have evidence to support that the coefficient of anesthetic is not zero.
 
 ### Part 1d
 
@@ -59,8 +64,8 @@ Convert the estimated coefficient of **anesthetic** to an odds ratio and interpr
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Exponentiate the anesthetic coefficient to get the odds ratio 
+exp(-1.5261)
 ```
 
 Replace this text with your written answer.
