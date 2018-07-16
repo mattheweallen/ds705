@@ -46,6 +46,13 @@ Obtain the output from R (including the Wald tests for coefficients - so use "su
 # Create and summarize logistic model of nausea as a function of anesthetic
 logistic.model <- glm(nausea~anesthetic,data=anesthesia,family="binomial")
 summary(logistic.model)
+#anesthesia$is_nausea <- ifelse(anesthesia$nausea == "Yes",1,0)
+#anesthesia$anesthetic_A <- ifelse(anesthesia$anesthetic == "A",0,1)
+#logistic.model <- glm(is_nausea~anesthetic_A,data=anesthesia,family="binomial")
+#summary(logistic.model)
+#try with 0 and 1
+
+
 ```
 
 
@@ -69,7 +76,7 @@ exp(-1.5261)
 #(13*10)/(26*23)
 ```
 
-The odds of having nausea with anesthetic B are 78% less than anesthetic A. 
+The odds of not having nausea with anesthetic B are 78% less than with anesthetic A. 
 
 ### Part 1e
 
@@ -83,8 +90,8 @@ require(mosaic)
 
 ```{r}
 # Use mosaic to compute the odds ratio for having nausea for anesthetic A vs B.
-anestheticA.oddsRatio <- oddsRatio(anesthetic_nausea)
-anestheticA.oddsRatio
+anestheticA.oddsRatio <- oddsRatio(anesthetic_nausea, verbose = FALSE)
+1/anestheticA.oddsRatio
 ```
 
 
@@ -98,10 +105,10 @@ Interpret this odds ratio in the context of the problem.
 
 ```{r}
 # Compute the reciprocal of odds ratio from part 1 d
-1/exp(-1.5261)
+1/exp(1.5261)
 ```
 
-Odds of getting
+The odds of not having nausea with anesthetic B is 4.6 times more compared to anesthetic A
 
 ### Part 1g
     
@@ -110,8 +117,10 @@ Compute the predicted probability of a reconstructive knee surgery patient havin
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Compute Predicted Probaility of nausea when anesthetic A was used.
+newdata <- data.frame(anesthetic='A')
+pred <- predict(logistic.model,newdata,type="response",se.fit = TRUE)
+pred$fit
 ```
 
 ----
@@ -123,8 +132,12 @@ Compute a 95% confidence interval for the predicted probability of a reconstruct
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Compute a 95% confidence interval for the predicted probability of nausea when anesthetic A was used.
+C = .95  # define the level of confidence
+crit = qnorm(1-(1-C)/2)  # get the appropriate critical value
+lower = exp(pred$fit-crit*pred$se.fit)/(1+exp(pred$fit-crit*pred$se.fit))
+upper = exp(pred$fit+crit*pred$se.fit)/(1+exp(pred$fit+crit*pred$se.fit))
+c(lower,upper)
 ```
 
 ## Exercise 2
@@ -140,11 +153,12 @@ At $\alpha = 0.05$, is there a statistically significant relationship between na
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Calculate model with pain medication as the predictor variable
+logistic.model <- glm(nausea~painmed,data=anesthesia,family="binomial")
+summary(logistic.model)
 ```
 
-Replace this text with your written answer here.
+The p-value for the test is 2.20e-05. Thus at a 5% level of significance, we can conclude that there is evidence that the amount of pain medication taken is associated with nausea.
 
 ### Part 2b  
 
@@ -153,11 +167,11 @@ Convert the estimated coefficient of **painmed** to an odds ratio and interpret 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Convert the estimate coefficient paind to an odds ratio.
+exp(0.037487)
 ```
+The odds of having nauseau increase by 4% for every unit increase in pain medication.
 
-Replace this text with your interpretation here.
 
 ### Part 2c
 
@@ -168,8 +182,16 @@ Comment on these two probabilities.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Compute probability of having nausea  when 50 and 100 units of pain medication are used.
+newdata <- data.frame(painmed=50)
+pred50 <- predict(logistic.model,newdata,type="response",se.fit = TRUE)
+pred50$fit
 
+newdata <- data.frame(painmed=100)
+pred100 <- predict(logistic.model,newdata,type="response",se.fit = TRUE)
+pred100$fit
+
+pred100$fit/pred50$fit
 ```
 
-Replace this text with your written answer here.
+Increasing pain medication from 50 units to 100 increases the odds of having nausea by 2.85 times.
