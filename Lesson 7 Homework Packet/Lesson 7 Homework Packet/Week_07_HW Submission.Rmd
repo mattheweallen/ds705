@@ -46,15 +46,15 @@ Obtain the output from R (including the Wald tests for coefficients - so use "su
 # Create and summarize logistic model of nausea as a function of anesthetic
 logistic.model <- glm(nausea~anesthetic,data=anesthesia,family="binomial")
 summary(logistic.model)
+```
+```{r echo=FALSE, eval=FALSE, include=FALSE}
+# Create and summarize logistic model of nausea as a function of anesthetic
+#try with 0 and 1
 #anesthesia$is_nausea <- ifelse(anesthesia$nausea == "Yes",1,0)
 #anesthesia$anesthetic_A <- ifelse(anesthesia$anesthetic == "A",0,1)
 #logistic.model <- glm(is_nausea~anesthetic_A,data=anesthesia,family="binomial")
 #summary(logistic.model)
-#try with 0 and 1
-
-
 ```
-
 
 ### Part 1c  
 
