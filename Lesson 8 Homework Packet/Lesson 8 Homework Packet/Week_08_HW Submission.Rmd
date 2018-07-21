@@ -21,67 +21,91 @@ Data is in the file rowtime.rda in the DS705data package.  The race times are in
 
 Load the data and use summary(rowtime) to see a numerical summary of the values of each.  
 
-(i) What type of variable is the response variable racetime (categorical or quantitative)?  
-
-(ii) Does this indicate linear regression or logistic regression?
-
-(iii) What types of variables are there in the pool of potential predictors? Categorical, quantitative, or a mixture of each?
-
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Load the data and do summary.
+require(DS705data)
+data("rowtime")
+#convert expvarsity and preexper to categorical
+rowtime$expvarsity <- factor(rowtime$expvarsity)
+rowtime$preexper <- factor(rowtime$preexper)
+summary(rowtime)
 ```
 
-Replace this text with your answer here.
+(i) What type of variable is the response variable racetime (categorical or quantitative)?  
+
+The response variable racetime is quantitive.
+
+(ii) Does this indicate linear regression or logistic regression?
+
+This indicates use of linear regression vs logistic regression, because the response variable can have a range of values versus a binary interpretation in logistic regression.
+
+(iii) What types of variables are there in the pool of potential predictors? Categorical, quantitative, or a mixture of each?
+
+There appears to be a mixture. The summary statement does not interpret expvarsity and preexper as categorical; however, from inspection of the data, they only takes on the values 0 and 1, and could be classified as categorical. All the other variables are quantitative.   
 
 ### Part 1b
 
 Use the **regsubsets** function to find the "best" first-order model for predicting the response variable racetime with up to 8 of the 19 predictor variables in the data set.  Produce the summary and the plot for the best single models with up to 8 predictors according to $R^2_{adj}$.
 
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
+```{r include=FALSE}
+require("leaps")
+require("lmtest")
+require("HH")
+```
+
+```{r}
+# Use regsubsets to find the "best" first-order model with up 8 predictors
+allmods <- regsubsets(racetime~.,nvmax=8,data=rowtime)
+summary(allmods)
+summary(allmods)$adjr2
+plot(allmods, scale="adjr2")
+```
+
 Which independent variables are in the best first-order model with 8 predictors when the $R^2_{adj}$ is the criterion for selection?
+
+The variables in the best first-order model with 8 predictors are calfcir, biceps, bestvj, legpower, meso, ecto, expvarsity, and preexper.
 
 What is the $R^2_{adj}$ for the best first-order model?
 
-### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
-
-```{r}
-# Insert your R code here.
-
-```
-
-Replace this text with your answer here.
+The $R^2_{adj}$ for the best first-order model is 0.6162122.
 
 ### Part 1c
 
 Use the **step** function with backward selection to find the "best" first-order model for predicting the response variable racetime.  Recall that the formula structure y~. will produce the model using y as the response variable and all other variables in the data set as the predictors; in this set "racetime" is the response (not y) and all other variables are potential predictors.
 
-Which independent variables are in this model?  What is the AIC value for this model? 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Use step with backward selection to find the "best" first-order model.
+full <- lm(racetime~.,data=rowtime)
+step(full,direction = "backward")
 ```
 
-Replace this text with your answer here.
+Which independent variables are in this model?  What is the AIC value for this model? 
+
+The independent variables in the model with the lowest AIC of 497.22 are tall, calfcir, biceps, estfm, bestvj, legpower, meso, expvarsity, and preexper.
  
 ### Part 1d
 
 Use the **step** function with forward selection to find the "best" model for predicting the response variable racetime.   Recall that the formula structure y~1 will produce the model using y as the response variable and no variables in the data set as the predictors, only an intercept.
-
-Which independent variables are in the model selected?  What is the AIC value for this model? 
+ 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Use step with forward selection to find the "best" first-order model.
+null <- lm(racetime~1,data=rowtime)
+step(null,scope=list(lower=null,upper=full),direction = "forward")
 ```
 
-Replace this text with your answer here.
+Which independent variables are in the model selected?  What is the AIC value for this model?
+
+The independent variables in the model with the lowest AIC of 497.65 are estffm, expvarsity, tall, preexper, biceps, meso, calfcir and bestvj.
 
 ### Part 1e
 
@@ -92,11 +116,18 @@ So far, which first-order model is the "best" according to the AIC?  (remember, 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Get AIC from first order-model with 8 predictors.
+regsubsets.best.aic <- lm(racetime~calfcir+biceps+bestvj+legpower+meso+ecto+expvarsity+preexper,data=rowtime)
+extractAIC(regsubsets.best.aic)
 ```
 
-Replace this text with your answer here.
+The AIC for regsubsets function is in between the forward and backward selection procedure.
+
+(ForwardStepAIC = 497.65) > (RegsubsetsAIC = 497.3196) > (BackwardStepAIC = 497.22)
+
+The model with the lowest AIC was produced by the backward selection procedure.
+
+racetime ~ tall + calfcir + biceps + estfm + bestvj + legpower + meso + expvarsity + preexper
 
 ### Part 1f
 

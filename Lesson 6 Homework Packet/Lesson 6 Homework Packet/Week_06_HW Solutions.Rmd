@@ -1,0 +1,536 @@
+
+---
+title: "Simple and Multiple Linear Regression"
+author: "Solutions"
+output:
+  word_document: default
+  pdf_document: default
+fontsize: 12pt
+---
+
+Knit a Word file from this R Markdown file for the following exercises.  Submit the R markdown file and resulting Word file via D2L Dropbox.   
+
+## Exercise 1
+
+The data for this problem comes from a dataset presented in Mackowiak, P. A., Wasserman, S. S., and Levine, M. M.  (1992), "A Critical Appraisal of 98.6 Degrees F, the Upper Limit of the Normal Body Temperature, and Other Legacies of Carl Reinhold August Wunderlich," Journal of the American Medical Association, 268, 1578-1580.  Body temperature (in degrees Fahrenheit) and heart rate (in beats per minute) were two variables that were measured for a random sample of 130 adults.  A simple linear regression was used to see if body temperature had an effect on heart rate.
+
+The data are in the file normtemp.rda, this data is included in the DS705data package so you can access it by loading the package and typing data(normtemp).
+
+### Part 1a
+
+Create a scatterplot with heart rate in the vertical axis and plot the estimated linear regression line in the scatterplot. Include descriptive labels for the x and y-axes (not just the variable names as they are in the data file). 
+
+Note:  this data set needs a little cleaning first.  The heart rates are missing for two of the rows.  You can delete these rows from the data frame using the R function na.omit().  Just put the name of the data frame in the parenthesis.
+
+Does it appear that a linear model is at least possibly a plausible model for the relationship between heart rate and body temperature?  Explain your answer.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+require(DS705data)
+data(normtemp)
+normtemp <- na.omit(normtemp)
+temp <- normtemp$temp
+hr <- normtemp$hr
+plot(temp,hr,xlab="Temperature",ylab="Heart Rate",main="")
+```
+
+There seems to be a weak, positive, linear relationship between heart rate and body temperature.  A model might be plausible, but may have limited predictive value.
+
+---
+
+### Part 1b
+
+Write the statistical model for estimating heart rate from body temperature, define each term in the model in the context of this application, and write the model assumptions. (Hint: find the slide titled Simple Linear Regression Model in the presentation).
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
+
+$$\mbox{Heart Rate } = \beta_0 + \beta_1 \mbox{ Temperature } + \epsilon$$
+
+* $\beta_0$ is the population mean heart rate when the Temperature is 0 degrees Fahrenheit.  This number can't be expected to be physically meaningful in this context since body temperatures are far from 0.
+
+* $\beta_1$ is the rate of change of the population mean heart rate for each additional degree of body temperature.
+
+* $\epsilon$ is the normally distributed model error that represents the natural variation in heart rates.
+
+---
+
+### Part 1c  
+
+Obtain the estimated slope and y-intercept for the estimated regression equation and write the equation in the form hr$=\hat{\beta_0} + \hat{\beta_1}temp$ (only with $\hat{\beta_0}$ and $\hat{\beta_1}$ replaced with the numerical estimates from your R output).
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+linear.model <- lm(hr~temp,data=normtemp)
+b0 <- linear.model$coef[1]
+b1 <- linear.model$coef[2]
+b0
+b1
+```
+
+$\widehat{\text{hr}}$ = `r b0` + `r b1` temp  
+
+---
+
+### Part 1d
+
+Test whether or not a positive linear relationship exists between heart rate and body temperature using a 5% level of significance.  State the null and alternative hypotheses, test statistic, the p-value, and conclusion.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+out <- summary(linear.model)
+p2 <- out$coefficients[2,4] # two sided p-value
+p1 <- p2/2
+p1
+
+p1cor <- cor.test(temp,hr,alternative="greater")$p.value
+p1cor
+# notice that p1 and p1cor are the same ...
+```
+
+By default, the summary() method displays an ANOVA analysis of the linear regression model.  The $P$-value given here is for a two-sided test of "is there a linear relationship?"  For univariate regression it is possible to test one-sided hypotheses. For one-variable the test of correlation, cor.test(), is equivalent to the ANOVA test of a linear relationship, but cor.test() can also be one-sided.  An alternative simple linear regression is to divide the P-value, from ANOVA, by 2 to get a one-sided P-value.  We'll use the latter approach here.
+
+$H_0:$ There is no linear relationship between heart rate and body temperature ($\beta_1=0$)
+
+$H_1:$ There is a positive linear relationship between heart rate and body temperature ($\beta_1>0$)
+
+Reject $H_0$ at $\alpha=0.05$ ($P =$ `r round(p1,4)`).   There is significant evidence of a positive linear relationship between heart rate and body temperature.
+
+
+---
+
+### Part 1e
+
+Provide a 95% confidence interval to estimate the slope of the regression equation and interpret the interval in the context of the application (do not us the word “slope” in your interpretation).
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+ci <- confint(linear.model)
+ci
+```
+
+We are 95% confident the population heart rate increases `r round(ci[2,1],1)` to `r round(ci[2,2],1)` beats per minute for each additional degree Fahrenheit of body temperature.
+
+---
+
+### Part 1f
+
+Provide a 95% confidence interval to estimate the mean heart rate for all adults with body temperature $98.6^o$ F.  Interpret the interval in the context of the problem.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+x <- data.frame( temp = 98.6 )
+ci <- predict( linear.model, x, interval="confidence")
+ci
+```
+
+We are 95% confident the population mean heart rate for adults with body temperature $98.6^o$ is between `r round(ci[2],1)` and `r round(ci[3],1)` beats per minute.
+
+---
+
+### Part 1g
+    
+Provide a 95% prediction interval to estimate the expected heart rate for a randomly selected adult with body temperature $98.6^o$ F.  Interpret the interval in the context of the problem.
+ 
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1g -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+preTemp <- predict( linear.model, x, interval="prediction")
+```
+
+We are 95% confident that the heart rate of an adult whose body temperature is $98.6^0$ F will be between `r round(preTemp[2],1)` and `r round(preTemp[3],1)` beats per minute.
+
+---
+
+### Part 1h
+
+Obtain the residuals and plot them against the predicted values and also against the independent variable.  Also construct a histogram, normal probability plot, and boxplot of the residuals and perform a Shapiro-Wilk test for normality.  Based on your observation of the plot of residuals against the predicted values, does the regression line appear to be a good fit?  Do the model assumptions appear to be satisfied?  Comment. 
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+resids <- linear.model$resid
+hr.fit <- linear.model$fitted.values
+plot(hr.fit,resids)
+plot(temp,resids)
+hist(resids)
+qqnorm(resids)
+qqline(resids)
+shapiro.test(resids)
+```
+
+Based on the residual plots the regression line seems to be a good fit in that there don't appear to be outliers and residuals seem "balanced" around 0 without any clear evidence of a pattern.  Moreover, the model assumptions appear to met. The residuals appear to be heteroscedastic (have the same variance for each value of the independent variable, temperature in this case).  The residuals also appear to be approximately normally distributed.
+
+---
+
+### Part 1i
+
+Examine the original scatterplot and the residual plot. Do any observations appear to be influential or be high leverage points?  If so, describe them and what effect they appear to be having on the estimated regression equation.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1i -|-|-|-|-|-|-|-|-|-|-|-
+
+An observation with an unusual $x$ value has high leverage, but there are no points outside the overall pattern in the horizontal direction.  Neither do there appear to be any outliers that might be influential.  Influential points often, but not always, have large residuals and nothing sticks out here.  This can be confirmed by plotting the regression line with and without the suspected influential point(s).
+
+
+
+---
+
+### Part 1j
+
+Perform the F test to determine whether there is lack of fit in the linear regression function for predicting heart rate from body temperature.  Use $\alpha = 0.05$.  State the null and alternative hypotheses, test statistic, the p-value, and the conclusion.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1j -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+linear.model <- lm( hr ~ temp)
+full.model <- lm( hr ~ factor(temp))
+out <- anova(linear.model, full.model)
+out
+p <- out$Pr
+```
+
+$H_0:$ A linear regression model is appropriate (line model)
+
+$H_1:$ A linear regression model is not appropriate (full model)
+
+Do not reject $H_0$ at $\alpha=0.05$ ($P=$ `r round(p[2],4)`).   There is not significant evidence that the linear model is not appropriate, therefore the linear model is a good fit for this data.
+
+---
+
+### Part 1k
+
+Conduct the Breusch-Pagan test for the constancy of error variance.  Use α = 0.05.  State the null and alternative hypotheses, test statistic, the P-value, and the conclusion.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1k -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+require(lmtest)
+out <- bptest(linear.model)
+p <- out$p.value
+```
+
+$H_0:$ the population variance is the same for all $x$ (homoscedastic)
+
+$H_a:$ the population variance is not the same for all $x$ (heteroscedastic)
+
+According to the Breusch-Pagan test:  Do not reject $H_0$ at $\alpha=0.05$ ($P =$ `r round(p,4)`).  There is not conclusive evidence to suggest the population variances differs at different values of $x$.  It is plausible that the population variance is the same for all $x$.
+
+---
+
+### Part 1l
+
+Calculate and interpret the Pearson correlation coefficient $r$.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1l -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+out <- cor.test(temp,hr)
+rPearson <- out$estimate
+rPearson
+```
+
+The Pearson correlation coefficient is $r = `r round(rPearson,2)`$.  This suggests that there is a weak positive linear relationship between body temperature and heart rate.
+
+---
+
+### Part 1m
+
+Construct a 95% confidence interval for the Pearson correlation coefficient $r$.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1m -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+ci <- out$conf.int
+```
+
+We are 95% confident the population correlation between body temperateure and heart rate lies in the range `r round(ci[1],3)` to `r round(ci[2],2)`.
+
+---
+
+### Part 1n
+
+Calculate and interpret the coefficient of determination $r^2_{yx}$ (same as $R^2$).
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1n -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+out <- summary(linear.model)
+r.sq <- out$r.squared
+r.sq.adj <- out$adj.r.squared
+```
+
+$R^2 =$ `r round(r.sq,3)`, $R^2_{\text{adj}} =$ `r round(r.sq.adj,3)`.
+
+The coefficient of determination, `r round(r.sq,3)` suggests that `r 100*round(r.sq,3)`% of the total variation in heart rates is explained by the linear relationship between body temperature and heart rate.  We can also say that `r 100*(1-round(r.sq,3))`% of the total variation in heart rates is not explained by the linear relationship.
+
+---
+
+### Part 1o
+
+Should the regression equation obtained for heart rate and temperature be used for making predictions?  Explain your answer.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1o -|-|-|-|-|-|-|-|-|-|-|-
+
+While there is a statistically significant linear relationship, it only explains about `r 100*round(r.sq,3)`% of the total variation in heart rates.  Thus the linear model is not very useful in predicitng heart rate as a function of body temperature.
+
+---
+
+### Part 1p
+
+Calculate the Spearman correlation coefficient $r_s$ (just for practice).
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1p -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+out <- cor.test(temp,hr,method = "spearman")
+rSpearman <- out$estimate
+rSpearman
+
+```
+
+---
+
+### Part 1q
+
+Create 95% prediction and confidence limits for the predicted mean heartrate for each temperature given in the sample data and plot them along with a scatterplot of the data. (Look for the slides titled "Confidence Bands" in the presentation.)
+
+```{r}
+plot(temp,hr,xlab="Temperature",ylab="Heart Rate",main="")
+abline(linear.model)
+dfTemp <- data.frame(temp=seq(96.25,100,length.out=100))
+fittedC <- predict(linear.model,dfTemp,interval="confidence")
+fittedP <- predict(linear.model,dfTemp,interval="prediction")
+#plot with conf. and pred. bands (fittedC and P)
+lines(dfTemp$temp, fittedC[, "lwr"], lty="dashed", col="darkgreen")
+lines(dfTemp$temp, fittedC[, "upr"], lty="dashed", col="darkgreen")
+lines(dfTemp$temp, fittedP[, "lwr"], lty="dotted", col="blue")
+lines(dfTemp$temp, fittedP[, "upr"], lty="dotted", col="blue")
+```
+
+---
+
+## Exercise 2
+
+A personnel officer in a governmental agency administered three newly developed aptitude tests to a random sample of 25 applicants for entry-level positions in the agency.  For the purpose of the study, all 25 applicants were accepted for positions irrespective of their test scores.  After a probationary period, each applicant was rated for proficiency on the job.  
+
+The scores on the three tests (x1, x2, x3) and the job proficiency score (y) for the 25 employees are in the file JobProf.rda (or load JobProf from DS705data package).
+
+(Based on an exercise from Applied Linear Statistical Models, 5th ed. by Kutner, Nachtsheim, Neter, & Li)
+
+### Part 2a
+
+We'd like to explore using interaction terms in a statistical model 
+including the three first-order terms and the three cross-product interaction terms:
+
+$$y=\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_1 x_2 + \beta_5 x_1 x_3 + \beta_6 x_2 x_3 + \epsilon$$
+
+Use R to find the corresponding estimated model and also obtain the `summary()`.
+
+## -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+data(JobProf)
+fit <- lm(y~x1+x2+x3+x1:x2+x1:x3+x2:x3,data=JobProf)
+summary(fit)
+```
+
+---
+
+### Part 2b
+
+Use R to compute the VIF for each term in the model.  Are any of the VIFs over 10?  (We need to add this into Lesson 6, but it's covered in the Lesson 8 Swirl - I've put an example in the chunk below.  Replace the chunk with code to find the VIF's for this model.)
+
+## -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r message=FALSE}
+require(HH) # the 'car' package also has a vif() function 
+vif(fit)
+```
+
+All of the VIF's are over 10 indicating there are multicollinearity issues with this model.  The estimates of the coefficients and the individual p-values may not be accurate.
+
+--- 
+
+### Part 2c
+
+The model from 2a is suffering from the effects of collinearity (which you should see in 2b), which inflates the standard errors of the estimated coefficients.
+
+Using the model summary from 2a what do you notice about the overall model p-value (from the F-statistic) and the individual p-values for each term in the model?  Does it make sense that the overall model shows statistical significance but no individual term does?  
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
+
+The overall all p-value is tiny ($P = 4.042e-10$) so we can say that the variation in the job proficiency scores explained by the model is statistically significant.  However, all of the individual p-values are large.  This can happen when the predictors have multicollinearity so that we can't trust the individual p-values.  
+
+---
+
+### Part 2d
+
+Use R to estimate and `summarize()` the first order model corresponding to 
+
+$$y=\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon$$
+
+Is the first order model significant?
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+fit2 <- lm(y~x1+x2+x3,data=JobProf)
+summary(fit2)
+vif(fit2)
+```
+
+Yes, the very small overall p-value tells us the overall model is significant.  You weren't asked to do so here, but the low VIF's tell us there are no multicollinearity problems with these predictors and the large p-value associated with the x2 term shows us that the x2 term is not significant.
+
+---
+
+### Part 2e
+
+Do the interaction terms in 2a really add anything significant beyond the first order model in 2d?  Now we'll compare the models with and without interaction terms to see if the interaction terms make a statistically significant improvement to the fit of our models.
+
+Test the significance of all three coefficients for the interaction terms as a subset by using `anova()` to compare the model from Part 2a to the first order model from Part 2d. Use a 5% level of significance.  State $H_0$ and $H_a$ and provide the R output as well as a written conclusion which includes the P-value.  Should we keep the interaction terms?
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+subset <- anova(fit2,fit)
+p = subset$`Pr(>F)`[2]
+p
+```
+
+$H_0$: $\beta_4=\beta_5=\beta_6=0$
+
+$H_a$: $H_0$ is not true.
+
+Do not reject $H_0$ at $\alpha=0.05$.  There is insufficient evidence to conclude that any of the coefficients of the interaction terms differ from zero ($P=$ `r round(p,3)`).
+
+---
+
+### Part 2f
+
+There are more methodical approaches to exploring different models that we'll learn about in a later lesson, but we'll try one more model here to get a bit more experience.  In this case we'll add a quadratic term $x_2^2$.  To do this you'll want to create a new variable `x2sq = x2^2` and include it in your model.  Use R to estimate and `summarize()` the model corresponding to: 
+
+$$y=\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_2^2 +\epsilon$$
+
+Examine the p-value corresponding to the quadratic term.  If the quadratic term is significant at significance level $\alpha = 0.05$, then according to the hierarchical approach we should retain it and the $x_2$ term.  If it isn't significant, then we won't retain it but we'll have to evaluate the significance of the $x_2$ term separately.
+
+Should the quadratic term be retained in the model at a 5% level of significance?  
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2f -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+x2sq <- JobProf$x2*JobProf$x2
+fit3 <- lm(y~x1+x2+x3+x2sq,data=JobProf)
+summary(fit3)
+# we already know the x2 term is insignificant, let's ignore hierarchical mdoeling for
+# a bit and try the model without x2
+fit4 <- lm(y~x1+x3+x2sq,data=JobProf)
+summary(fit4)
+```
+
+The large p-value(s) associated with the quadratic term show that it does not need to be retained.
+
+---
+
+### Part 2g
+
+If you've been successful so far, then you should realize that the none of interaction terms nor the quadratic term have been significant (if you concluded otherwise, then review your work). This brings us back to the first order model in Part 2d.  Look at that model summary again.  There should be one term that is insignificant so omit it and use R to estimate our final and smaller first order model.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2g -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+fit.final <- lm(y~x1+x3,data=JobProf)
+summary(fit.final)
+```
+
+---
+
+### Part 2h
+
+From the final first order model in 2g, obtain a 90% confidence interval for the coefficient of $x_3$ and interpret it in the context of this problem.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2h -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+ci <- confint(fit.final,level=.9)
+ci
+```
+
+With 95% confidence, the mean job proficiency score increases by `r round(ci[3,1],2)` to `r round(ci[3,2],2)` points for each 1 unit increase in the aptitude score $x_3$.
+
+
+---
+
+### Part 2i
+
+Using the final first order model from 2g, construct a 95% prediction interval for a randomly selected employee with aptitude scores of $x_1=99, x_2=112,$ and $x_3=105$ to forecast their proficiency rating at the end of the probationary period. Write an interpretation for the interval in the context of this problem.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2i -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+newdata <- data.frame(x1=99,x2=112,x3=105)
+pred <- predict.lm(fit.final,newdata,interval="prediction")
+pred
+```
+
+With 95% confidence, the predicted proficiency score for a randomly selected employee with $x_1=99, x_2=112,$ and $x_3=105$ is between `r round(pred[2],1)` and `r round(pred[3],1)`.
+
+---
+
+## Exercise 3
+
+Consider the scenario from Exercises 12.5 and 12.7 on page 725 of Ott's textbook.  There are two categorical variables (Method and Gender) and one quantitative variable (index of English proficiency prior to the program).  See the textbook for details on how the qualitative variables are coded using indicator variables.
+
+### Part 3a
+
+Use data in the file English.rda in the DS705data package to estimate the coefficients for the model in Exercise 12.5:
+
+$$y=\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \epsilon$$ 
+
+Obtain the estimated intercept and coefficients and state the estimated mean English proficiency scores for each of the 3 methods of teaching English as a second language.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+data(English)
+fit <- lm(y~x1+x2,data=English)
+summary(fit)
+```
+
+Replace the ## symbols with the parameter estimates:
+
+y = 44.75 + 61.4 $x_1$ + 3.95 $x_2$
+
+State the estimated mean English proficiency scores for each of the 3 methods:
+
+Estimated mean for Method 1 = 44.75
+
+Estimated mean for Method 2 = 44.75 + 61.4 = 106.15
+
+Estimated mean for Method 3 = 44.75 + 3.95 = 48.7
+
+---
+
+### Part 3b  
+
+Fit the model for Exercise 12.7:
+
+$$y=\beta_0 + \beta_1 x_4 + \beta_2 x_1 + \beta_3 x_2 + \beta_5 x_1 x_4 + \beta_6 x_2 x_4 + \epsilon$$
+
+Using the estimated coefficients, write three separate estimated models, one for each method, relating the scores after 3 months in the program (y) to the index score prior to starting the program ($x_4$).
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 3b -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+fit2 <- lm(y~x4+x1+x2+x1:x4+x2:x4,data=English)
+summary(fit2)
+```
+
+For Method 1: $\widehat{y}=39.26 + 0.122 x_4$
+
+For Method 2: $\widehat{y}=(39.26-20.30) + (0.122+1.780) x4 = 18.96 + 1.902 x_4$
+
+For Method 3: $\widehat{y}=(39.26-9.47) + (0.122+0.304) x4 =29.79 + 0.426 x_4$
