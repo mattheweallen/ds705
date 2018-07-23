@@ -27,9 +27,6 @@ Load the data and use summary(rowtime) to see a numerical summary of the values 
 # Load the data and do summary.
 require(DS705data)
 data("rowtime")
-#convert expvarsity and preexper to categorical
-rowtime$expvarsity <- factor(rowtime$expvarsity)
-rowtime$preexper <- factor(rowtime$preexper)
 summary(rowtime)
 ```
 
@@ -136,11 +133,12 @@ Find the VIF for each independent variable in the model produced by the forward 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Find the VIF for each independent variable in the model produced by the forward step wise procedure
+forw.step.model <- lm(formula = racetime ~ estffm + expvarsity + tall + preexper + biceps + meso + calfcir + bestvj, data = rowtime)
+vif(forw.step.model)
 ```
 
-Replace this text with your answer here.
+Since all the values for VIF are less that 10, there does not appear to be a serious problem with collinearity.
 
 ### Part 1g
 
@@ -165,7 +163,7 @@ pairs(rowtime[c(1,11,12,13,14)])
 pairs(rowtime[c(1,15,16,17,18)])
 ```
 
-Replace this text with your answer here.
+I do not notice any obvious curvature in the relationship between racetime and its predictors.
 
 ### Part 1h
 
@@ -186,11 +184,15 @@ and use step() to look for the best model containing up to any two-way interacti
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+# Examine all possible interactions with step function.
+forward.step.model <- lm(formula = racetime ~ estffm + expvarsity + tall + preexper + biceps + meso + calfcir + bestvj, data = rowtime)
+step(forward.step.model, scope = . ~ .^2, direction = 'forward')
 ```
 
-Replace this text with your answer here.
+The model with the lowest AIC is given by
+
+Step:  AIC=491.18
+racetime ~ estffm + expvarsity + tall + preexper + biceps + meso + calfcir + bestvj + tall:calfcir + estffm:bestvj
 
 ### Part 1i
 
@@ -201,11 +203,18 @@ If so, drop those predictors from the model if they are not involved in any inte
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1i -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# run summary on interaction model. 
+model.f <- lm(formula = racetime ~ estffm + expvarsity + tall + preexper + biceps + meso + calfcir + bestvj + tall:calfcir + estffm:bestvj, data = rowtime)
+#summary(model.f)
+# The p-value for estffm is 0.196266. It is not significant at 5% level. Remove it. Refit model
+#model.f <- lm(formula = racetime ~ expvarsity + tall + preexper + biceps + meso + calfcir + bestvj + tall:calfcir + #estffm:bestvj, data = rowtime)
+summary(model.f)$adj.r.squared
+extractAIC(model.f)
 
+#matt see model below. It has estffm in it. Also if removed need to remove interaction term.
 ```
 
-Replace this text with your answer here.
+The p-value for estffm is 0.196266. It is not significant at a 5% level, but its interaction with bestvj is significant at 5% level, so it can stay in the model. The $R^2_{adj}$ of the model is 0.6484292. The AIC is 491.1784.
 
 ### Part 1j 
 
@@ -291,7 +300,8 @@ Also fit the null model (intercept only) and use step() with forward selection t
 
 ```{r}
 # Insert your R code here.
-
+data("farmpond")
+summary(farmpond)
 ```
 
 ### Part 2b

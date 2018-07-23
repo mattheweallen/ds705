@@ -1,0 +1,11 @@
+```{r}
+plot(temp,hr,xlab="Temperature",ylab="Heart Rate",main="")
+abline(linear.model)
+dfTemp <- data.frame(temp=seq(96.25,100,length.out=100))
+fittedC <- predict(linear.model,dfTemp,interval="confidence")
+fittedP <- predict(linear.model,dfTemp,interval="prediction")
+#plot with conf. and pred. bands (fittedC and P)
+lines(dfTemp$temp, fittedC[, "lwr"], lty="dashed", col="darkgreen")
+lines(dfTemp$temp, fittedC[, "upr"], lty="dashed", col="darkgreen")
+lines(dfTemp$temp, fittedP[, "lwr"], lty="dotted", col="blue")
+lines(dfTemp$temp, fittedP[, "upr"], lty="dotted", col="blue")

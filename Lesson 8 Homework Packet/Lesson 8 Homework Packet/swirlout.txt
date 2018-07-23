@@ -1,0 +1,810 @@
+install.packages('shiny') #only needed the first time
+require(shiny)
+runGitHub('samplingShiny','DataScienceUWL')
+
+
+t.test(h,conf.level = 0.95)
+
+require(DS705data)
+
+data("HealthExam")
+hw <- HealthExam$Height[HealthExam$Sex == "F"]
+t.test(hw,conf.level = 0.90)
+require(DS705data)
+data("HealthExam")
+h <- HealthExam$Height[HealthExam$Sex=='M']
+?t.test
+t.test(h, alternative = "two.sided", mu = 71)
+power.t.test(n = 40, delta = 10, sd = 26, sig.level = .05, type="one.sample", alternative = "one.sided")
+length(h)
+power.t.test(power = .9, delta = 4, sd = 26,  type="one.sample", alternative = "one.sided")$n
+
+require(swirl)
+swirl()
+matt
+6
+1
+10
+head(flags)
+class(flags)
+cls_list <- lapply(flags, class)
+cls_list
+class(cls_list)
+as.character(cls_list)
+cls_vect <- sapply(flags, class)
+class(cls_vect)
+sum(flags$orange)
+flag_colors <- flags[, 11:17]
+head(flag_colors)
+lapply(flag_colors, sum)
+sapply(flag_colors, sum)
+sapply(flag_colors, mean)
+flag_shapes <- flags[, 19:23]
+lapply(flag_shapes, range)
+shape_mat <- sapply(flag_shapes, range)
+shape_mat
+class(shape_mat)
+unique(c(3,4,5,5,5,6,6))
+unique_vals <- lapply(flags, unique)
+unique_vals
+sapply(unique_vals, length)
+sapply(flags, unique)
+lapply(unique_vals, function(elem) elem[2])
+2
+5
+1
+swirl()
+require(swirl)
+swirl()
+matt
+5
+1
+11
+sapply(flags, unique)
+vapply(flags,unique,numeric(1))
+ok()
+sapply(flags, class)
+vapply(flags, class, character(1))
+?tapply
+table(flags$landmass)
+table(flags$animate)
+tapply(flags$animate, flags$landmass, mean)
+tapply(flags$population, flags$red, summary)
+tapply(flags$population, flags$landmass, summary)
+ls()
+class(plants)
+dim(plants)
+nrow(plants)
+ncol(plants)
+object.size(plants)
+names(plants)
+head(plants)
+head(plants, 10)
+tail(plants, 15)
+summary(plants)
+table(plants$Active_Growth_Period)
+str(plants)
+2
+5
+1
+13
+?sample
+sample(1:6, 4, replace = TRUE)
+sample(1:20,10)
+LETTERS
+sample(LETTERS)
+flips <- sample(x=c(0,1),size=100,replace = TRUE,prob = c(.3, .7))
+flips
+sum(flips)
+?rbinom
+rbinom(1, size = 100, prob = 0.7)
+flips2 <- rbinom(100, size = 1, prob = 0.7)
+flips2
+sum(flips2)
+?rnorm
+rnorm(10)
+rnorm(10, mean = 100, sd = 25)
+?rpois
+rpois(5,10)
+my_pois <- replicate(100, rpois(5, 10))
+my_pois
+cm <- colMeans(my_pois)
+hist(cm)
+2
+5
+2
+4
+hist(wh)
+t.test(wh, conf.level = .95)$conf.int
+t.test(wh, conf.level = .99)$conf.int
+tcrit <- qt(.975,39)
+63.2 + c(-1,1)*tcrit*2.74/sqrt(40)
+fakeData <- rnorm(40)
+fakeData <- (fakeData-mean(fakeData))/sd(fakeData)
+mean(fakeData)
+sd(fakeData)
+fakeData <- 2.74*fakeData + 63.2
+mean(fakeData)
+sd(fakeData)
+t.test(fakeData, conf.level = .95)$conf.int
+
+data("farmpond")
+rich.out <- glm(RICH~FISH + TOTNITR,data=farmpond,family="binomial")
+summary(rich.out)
+
+
+5
+2
+9
+fit <- lm(Weight~Height+Waist+SysBP,HealthExam)
+summary(fit)
+vif(fit)
+1
+plot(fit)
+shapiro.test(fit$resid)
+bptest(fit)
+#leaps
+#lmtest
+#hh
+dwtest(fit)
+1
+extractAIC(fit)
+full <- lm(Weight~.,data=HealthExam)
+step(full,direction = "backward")
+null <- lm(Weight~1,data=HealthExam)
+step(null,scope=list(lower=null,upper=full),direction = "forward")
+allmods <- regsubsets(Weight~.,nvmax=4,data=HealthExam)
+summary(allmods)
+summary(allmods)$adjr2
+plot(allmods, scale="adjr2")
+?regsubsets
+?step
+
+
+R version 3.4.3 (2017-11-30) -- "Kite-Eating Tree"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # Load the data and do summary.
+  > require(DS705data)
+Loading required package: DS705data
+> data("rowtime")
+> View(rowtime)
+> summary(rowtime)
+racetime          tall           weight          armspan         flexarm         thighci     
+Min.   :406.0   Min.   :155.6   Min.   : 57.00   Min.   :138.5   Min.   :27.50   Min.   :50.50  
+1st Qu.:442.4   1st Qu.:169.3   1st Qu.: 69.90   1st Qu.:167.6   1st Qu.:30.50   1st Qu.:55.50  
+Median :460.0   Median :173.6   Median : 73.35   Median :172.7   Median :31.90   Median :57.50  
+Mean   :458.5   Mean   :172.9   Mean   : 74.62   Mean   :172.8   Mean   :31.60   Mean   :57.89  
+3rd Qu.:475.3   3rd Qu.:176.3   3rd Qu.: 79.10   3rd Qu.:177.5   3rd Qu.:32.88   3rd Qu.:59.88  
+Max.   :518.7   Max.   :186.4   Max.   :100.10   Max.   :205.5   Max.   :39.00   Max.   :71.50  
+calfcir         tricep          biceps          thigh           estffm          estfm       
+Min.   :34.0   Min.   :12.00   Min.   : 4.00   Min.   :13.00   Min.   :44.86   Min.   : 9.918  
+1st Qu.:37.0   1st Qu.:18.00   1st Qu.: 9.00   1st Qu.:24.00   1st Qu.:54.52   1st Qu.:14.274  
+Median :38.0   Median :21.00   Median :12.00   Median :28.00   Median :56.97   Median :16.929  
+Mean   :38.4   Mean   :21.09   Mean   :12.46   Mean   :28.73   Mean   :57.83   Mean   :16.786  
+3rd Qu.:39.5   3rd Qu.:24.00   3rd Qu.:15.00   3rd Qu.:34.00   3rd Qu.:61.15   3rd Qu.:19.073  
+Max.   :44.0   Max.   :34.00   Max.   :28.00   Max.   :50.00   Max.   :78.15   Max.   :26.726  
+bestsnr          bestvj         legpower           endo            meso            ecto      
+Min.   :17.00   Min.   : 8.00   Min.   : 60.19   Min.   :3.219   Min.   :1.564   Min.   :0.100  
+1st Qu.:34.00   1st Qu.:13.00   1st Qu.: 92.19   1st Qu.:4.768   1st Qu.:3.257   1st Qu.:1.004  
+Median :40.00   Median :15.00   Median : 99.84   Median :5.789   Median :4.033   Median :1.596  
+Mean   :38.72   Mean   :14.82   Mean   :100.33   Mean   :5.696   Mean   :4.042   Mean   :1.655  
+3rd Qu.:44.00   3rd Qu.:16.00   3rd Qu.:108.92   3rd Qu.:6.499   3rd Qu.:4.738   3rd Qu.:2.218  
+Max.   :50.00   Max.   :21.00   Max.   :153.98   Max.   :8.260   Max.   :6.812   Max.   :3.887  
+expvarsity        preexper     
+Min.   :0.0000   Min.   :0.0000  
+1st Qu.:0.0000   1st Qu.:0.0000  
+Median :1.0000   Median :0.0000  
+Mean   :0.5667   Mean   :0.3333  
+3rd Qu.:1.0000   3rd Qu.:1.0000  
+Max.   :1.0000   Max.   :1.0000  
+> require(swirl)
+Loading required package: swirl
+
+| Hi! I see that you have some variables saved in your workspace. To keep things running smoothly, I recommend you clean
+| up before starting swirl.
+
+| Type ls() to see a list of the variables in your workspace. Then, type rm(list=ls()) to clear your workspace.
+
+| Type swirl() when you are ready to begin.
+
+Warning message:
+  package ‘swirl’ was built under R version 3.4.4 
+> swirl()
+
+| Welcome to swirl! Please sign in. If you've been here before, use the same name as you did then. If you are new, call
+| yourself something unique.
+
+What shall I call you? matt
+
+| Would you like to continue with one of these lessons?
+
+1: DS705 Descriptive Statistics
+2: DS705 Normal Distribution Probability Calculations
+3: R Programming Basic Building Blocks
+4: R Programming Functions
+5: No. Let me start something new.
+
+Selection: 5
+
+| Please choose a course, or type 0 to exit swirl.
+
+1: R Programming
+2: UW Stat Methods
+3: UW Stat Methods-master
+4: Take me to the swirl course repository!
+
+Selection: 2
+
+| Please choose a lesson, or type 0 to return to course menu.
+
+1: Descriptive Statistics
+2: Normal Distributions
+3: Assessing Normality
+4: T Confidence Intervals
+5: Two-Sample Inference for Means
+6: Wilcoxon Rank Sum
+7: Inference for Paired Data
+8: Multiple Regression
+9: Regression Model Selection
+10: Intro to ANOVA
+
+Selection: 9
+
+| Attempting to load lesson dependencies...
+
+| Package ‘leaps’ loaded correctly!
+
+| Package ‘lmtest’ loaded correctly!
+
+| Package ‘HH’ loaded correctly!
+
+|                                                                                                               |   0%
+
+| Let's look at some of the basic tools for model selection in regression.  The HealthExam data set has been loaded and
+| will be used to demonstrate a number of functions useful in multiple regression.  (Recall, you can type 'skip()' at
+                                                                                     | any time to bypass a task, enter play() to put swirl on hold and experiment in R for while, enter nxt() to get back to
+                                                                                     | the lesson).
+
+...
+
+|====                                                                                                           |   3%
+| Consider the first order linear model and store the output in an object, enter fit <-
+  | lm(Weight~Height+Waist+SysBP,HealthExam) at the command prompt.
+
+> 
+  > fit <- lm(Weight~Height+Waist+SysBP,HealthExam)
+
+| Excellent work!
+  
+  |========                                                                                                       |   7%
+| To see the output for this model, enter summary(fit) at the command prompt.  You may need to scroll up to check out
+| the p-values for each coefficient, the Multiple R-squared, and the Adjusted R-squared.  I love this part!
+  
+  > summary(fit)
+
+Call:
+  lm(formula = Weight ~ Height + Waist + SysBP, data = HealthExam)
+
+Residuals:
+  Min       1Q   Median       3Q      Max 
+-25.9826  -8.0196  -0.2224   5.8609  31.3849 
+
+Coefficients:
+  Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -186.02925   20.76167  -8.960 1.59e-13 ***
+  Height         2.37890    0.32414   7.339 2.00e-10 ***
+  Waist          2.17405    0.11991  18.131  < 2e-16 ***
+  SysBP         -0.03401    0.12461  -0.273    0.786    
+---
+  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 11.33 on 76 degrees of freedom
+Multiple R-squared:  0.8985,	Adjusted R-squared:  0.8945 
+F-statistic: 224.3 on 3 and 76 DF,  p-value: < 2.2e-16
+
+
+| Keep up the great work!
+  
+  |===========                                                                                                    |  10%
+| Enter vif(fit) to see the Variance Inflation Factors.  This function requires the package HH, which was installed with
+| this lesson (meaning that you would need to install it on your machine to use outside of this lesson).
+
+> vif(fit)
+Height    Waist    SysBP 
+1.148345 1.549081 1.555861 
+
+| Keep working like that and you'll get there!
+
+|===============                                                                                                |  14%
+| Are all of the VIFs under 10?
+
+1: yes
+2: no
+
+Selection: 1
+
+| You are really on a roll!
+
+|===================                                                                                            |  17%
+| Create some standard residual plots, which are good for assessing model assumptions.  Enter plot(fit) at the command
+| prompt.  You'll be asked to hit <Return> to display each plot in turn.
+
+> plot(fit)
+Hit <Return> to see next plot: 
+  Hit <Return> to see next plot: 
+  Hit <Return> to see next plot: 
+  Hit <Return> to see next plot: 
+  Hit <Return> to see next plot: 
+  Hit <Return> to see next plot: 
+  Hit <Return> to see next plot: 
+  Hit <Return> to see next plot: 
+  
+  | That's a job well done!
+
+|=======================                                                                                        |  21%
+| Hypothesis test can be used on residuals to assess model assumptions.  For example, to test the residuals for
+| normality enter shapiro.test(fit$resid) at the command prompt.
+
+> 
+> 
+> 
+> shapiro.test(fit$resid)
+
+Shapiro-Wilk normality test
+
+data:  fit$resid
+W = 0.98814, p-value = 0.6742
+
+
+| That's a job well done!
+  
+  |===========================                                                                                    |  24%
+| Enter bptest(fit) to conduct the Bruesch-Pagan test for homogeneity of variance among the residuals.  This function
+| requires the package lmtest, which was also installed with this lesson.
+
+> bptest(fit)
+
+studentized Breusch-Pagan test
+
+data:  fit
+BP = 4.0105, df = 3, p-value = 0.2603
+
+
+| You are doing so well!
+  
+  |===============================                                                                                |  28%
+| At a 5% level of significance, does this test indicate that the error variances are not constant, as the model
+| assumptions dictate?
+  
+  1: no
+2: yes
+
+Selection: 1
+
+| Nice work!
+  
+  |==================================                                                                             |  31%
+| Enter dwtest(fit) to conduct the Durbin-Watson test for serial correlation among the residuals.  This function also
+| requires the package lmtest, which, as you know, was installed with this lesson.
+
+> #leaps
+  > #lmtest
+  > #hh
+  > dwtest(fit)
+
+Durbin-Watson test
+
+data:  fit
+DW = 2.1463, p-value = 0.7368
+alternative hypothesis: true autocorrelation is greater than 0
+
+
+| You are quite good my friend!
+  
+  |======================================                                                                         |  34%
+| At a 5% level of significance, does this test indicate that the residuals are serially correlated (i.e. did the order
+                                                                                                     | of observations have some effect on the response)?
+  
+  1: no
+2: yes
+
+Selection: 1
+
+| Excellent work!
+  
+  |==========================================                                                                     |  38%
+| There are several tests and statistics to examine residuals, they are beyond the scope of this lesson.  There is
+| really no substitute for an examination of the residual plots; looking for patterns, outliers, and influential
+| observations.
+
+...
+
+|==============================================                                                                 |  41%
+| The AIC for the model that has been estimated can be produced by entering extractAIC(fit), at least in this case
+| because we assigned the output to the object called "fit".  Do this for the linear model that we fit previously in
+| this lesson.
+
+> 
+  > extractAIC(fit)
+[1]   4.0000 392.2654
+
+| Great job!
+  
+  |==================================================                                                             |  45%
+| The second number is the AIC, which is particularly useful when comparing two models.  Lower is better.
+
+...
+
+|======================================================                                                         |  48%
+| In fact, AIC is one of the criteria that is used in the automated stepwise model selection procedures in R.  Suppose
+| we wanted to use the stepwise approach to find the best model to predict Weight from the variables in the data set.
+
+...
+
+|=========================================================                                                      |  52%
+| We first must specify a "full" model - one that contains all of the potential independent variables under
+| consideration.  This can be done by typing them individually in the model specification, or, if there are no
+| extraneous variables in the data set and you are only interested in first order models, it can be specified easily as
+| follows.  full <- lm(Weight~.,data=HealthExam) Enter this at the command prompt.
+
+> full <- lm(Weight~.,data=HealthExam)
+
+| You got it right!
+  
+  |=============================================================                                                  |  55%
+| Enter step(full,direction="backward") at the command prompt to conduct a backward stepwise search for the model with
+| the lowest AIC.
+
+> step(full,direction = "backward")
+Start:  AIC=202.55
+Weight ~ Sex + AgeGroup + Height + Waist + Pulse + SysBP + DiasBP + 
+  BodyMass + Cholesterol + Leg + Region
+
+Df Sum of Sq    RSS    AIC
+- Region       3      26.6  718.1 199.57
+- SysBP        1       1.1  692.6 200.68
+- DiasBP       1       1.1  692.6 200.68
+- Cholesterol  1       9.9  701.4 201.69
+- Leg          1      13.9  705.4 202.14
+- Pulse        1      15.3  706.9 202.31
+<none>                      691.6 202.55
+- AgeGroup     2      50.5  742.1 204.20
+- Waist        1      47.5  739.1 205.87
+- Sex          1     233.2  924.8 223.80
+- Height       1    5616.1 6307.7 377.40
+- BodyMass     1    6234.2 6925.8 384.88
+
+Step:  AIC=199.57
+Weight ~ Sex + AgeGroup + Height + Waist + Pulse + SysBP + DiasBP + 
+  BodyMass + Cholesterol + Leg
+
+Df Sum of Sq    RSS    AIC
+- DiasBP       1       0.0  718.1 197.57
+- SysBP        1       3.5  721.6 197.95
+- Cholesterol  1       8.8  726.9 198.54
+- Leg          1      11.6  729.7 198.85
+<none>                      718.1 199.57
+- Pulse        1      18.4  736.5 199.59
+- AgeGroup     2      49.5  767.6 200.90
+- Waist        1      51.5  769.6 203.11
+- Sex          1     226.9  945.0 219.53
+- Height       1    5825.9 6544.0 374.34
+- BodyMass     1    7857.8 8575.9 395.98
+
+Step:  AIC=197.57
+Weight ~ Sex + AgeGroup + Height + Waist + Pulse + SysBP + BodyMass + 
+  Cholesterol + Leg
+
+Df Sum of Sq    RSS    AIC
+- SysBP        1       3.7  721.8 195.98
+- Cholesterol  1       8.8  726.9 196.55
+- Leg          1      11.6  729.7 196.85
+<none>                      718.1 197.57
+- Pulse        1      18.5  736.6 197.60
+- AgeGroup     2      50.8  768.9 199.03
+- Waist        1      52.1  770.2 201.17
+- Sex          1     241.3  959.5 218.75
+- Height       1    5855.6 6573.7 372.70
+- BodyMass     1    7911.1 8629.2 394.47
+
+Step:  AIC=195.98
+Weight ~ Sex + AgeGroup + Height + Waist + Pulse + BodyMass + 
+  Cholesterol + Leg
+
+Df Sum of Sq    RSS    AIC
+- Cholesterol  1       9.1  730.9 194.98
+- Leg          1      10.3  732.1 195.12
+- Pulse        1      17.4  739.2 195.88
+<none>                      721.8 195.98
+- AgeGroup     2      48.6  770.4 197.19
+- Waist        1      57.9  779.7 200.15
+- Sex          1     241.4  963.2 217.06
+- Height       1    5871.9 6593.7 370.95
+- BodyMass     1    7935.7 8657.5 392.73
+
+Step:  AIC=194.98
+Weight ~ Sex + AgeGroup + Height + Waist + Pulse + BodyMass + 
+  Leg
+
+Df Sum of Sq    RSS    AIC
+- Leg       1       8.9  739.8 193.95
+<none>                   730.9 194.98
+- Pulse     1      22.6  753.5 195.42
+- AgeGroup  2      49.2  780.1 196.19
+- Waist     1      58.1  789.0 199.10
+- Sex       1     296.8 1027.7 220.24
+- Height    1    5976.9 6707.8 370.32
+- BodyMass  1    7960.4 8691.3 391.04
+
+Step:  AIC=193.95
+Weight ~ Sex + AgeGroup + Height + Waist + Pulse + BodyMass
+
+Df Sum of Sq     RSS    AIC
+<none>                    739.8 193.95
+- Pulse     1      27.8   767.6 194.90
+- AgeGroup  2      62.3   802.1 196.42
+- Waist     1      52.1   791.9 197.39
+- Sex       1     319.1  1058.9 220.64
+- BodyMass  1    8235.7  8975.5 391.62
+- Height    1   10810.0 11549.8 411.79
+
+Call:
+  lm(formula = Weight ~ Sex + AgeGroup + Height + Waist + Pulse + 
+       BodyMass, data = HealthExam)
+
+Coefficients:
+  (Intercept)              SexM  AgeGroup36 to 64       AgeGroup65+            Height             Waist  
+-311.93051          -6.07213          -1.25898          -2.79782           4.83584           0.18449  
+Pulse          BodyMass  
+-0.05972           5.53390  
+
+
+| That's a job well done!
+
+|=================================================================                                              |  59%
+| Whoa!  That's a lot of output!!  You'll definitely need to scroll back to see it all.  The last model printed is the
+| stopping point and the one selected by this procedure.
+
+...
+
+|=====================================================================                                          |  62%
+| The stepwise search for the model with the lowest AIC can be done "backward", "forward", or "both".  The default is
+| "both".
+
+...
+
+|=========================================================================                                      |  66%
+| When stepping in the forward direction, a minimal null model must also be specified in addition to the upper limit of
+| the models under consideration. The model with no predictors is easily specified as follows.  null <-
+| lm(Weight~1,data=HealthExam) Enter this at the command prompt.
+
+> null <-(Weight~1,data=HealthExam)
+Error: unexpected ',' in "null <-(Weight~1,"
+> null <- lm(Weight~1,data=HealthExam)
+
+| You nailed it! Good job!
+
+|=============================================================================                                  |  69%
+| Enter step(null,scope=list(lower=null,upper=full),direction="forward") at the command prompt to conduct a forward
+| stepwise search for the model with the lowest AIC.
+
+> step(null,scope=list(lower=null,upper=full),direction = "forward")
+Start:  AIC=569.29
+Weight ~ 1
+
+Df Sum of Sq   RSS    AIC
++ Waist        1     79284 16811 431.82
++ BodyMass     1     67126 28969 475.36
++ SysBP        1     29926 66169 541.44
++ Height       1     28460 67635 543.19
++ AgeGroup     2     18695 77401 555.98
++ Sex          1     13865 82230 558.82
++ Leg          1      8872 87224 563.54
++ Cholesterol  1      8396 87699 563.97
++ DiasBP       1      3377 92718 568.42
+<none>                     96095 569.29
++ Region       3      6017 90079 570.11
++ Pulse        1         7 96089 571.28
+
+Step:  AIC=431.82
+Weight ~ Waist
+
+Df Sum of Sq     RSS    AIC
++ Height       1    7048.5  9762.7 390.34
++ Leg          1    6081.4 10729.7 397.90
++ Sex          1    2734.4 14076.8 419.62
++ Pulse        1     584.6 16226.6 430.99
++ Region       3    1366.0 15445.2 431.04
++ BodyMass     1     568.5 16242.7 431.07
+<none>                     16811.2 431.82
++ SysBP        1     145.6 16665.5 433.13
++ Cholesterol  1     122.4 16688.7 433.24
++ DiasBP       1      19.9 16791.3 433.73
++ AgeGroup     2     278.0 16533.2 434.49
+
+Step:  AIC=390.34
+Weight ~ Waist + Height
+
+Df Sum of Sq    RSS    AIC
++ BodyMass     1    8668.0 1094.7 217.29
++ Region       3    1650.6 8112.1 381.53
++ Leg          1     582.2 9180.5 387.42
++ AgeGroup     2     503.1 9259.6 390.11
+<none>                     9762.7 390.34
++ Sex          1     119.6 9643.1 391.36
++ Pulse        1      19.4 9743.3 392.18
++ SysBP        1       9.6 9753.1 392.27
++ DiasBP       1       9.1 9753.6 392.27
++ Cholesterol  1       7.8 9754.9 392.28
+
+Step:  AIC=217.29
+Weight ~ Waist + Height + BodyMass
+
+Df Sum of Sq     RSS    AIC
++ Sex          1   270.326  824.34 196.60
++ Cholesterol  1    57.077 1037.58 215.01
++ Leg          1    44.974 1049.69 215.94
++ DiasBP       1    28.583 1066.08 217.18
+<none>                     1094.66 217.29
++ SysBP        1    13.152 1081.51 218.33
++ AgeGroup     2    33.055 1061.61 218.84
++ Pulse        1     2.302 1092.36 219.13
++ Region       3    17.187 1077.47 222.03
+
+Step:  AIC=196.6
+Weight ~ Waist + Height + BodyMass + Sex
+
+Df Sum of Sq    RSS    AIC
++ AgeGroup     2    56.704 767.63 194.90
++ Leg          1    27.683 796.65 195.87
++ Pulse        1    22.228 802.11 196.42
+<none>                     824.34 196.60
++ Cholesterol  1    11.796 812.54 197.45
++ DiasBP       1     1.941 822.39 198.41
++ SysBP        1     0.078 824.26 198.60
++ Region       3    25.585 798.75 200.08
+
+Step:  AIC=194.9
+Weight ~ Waist + Height + BodyMass + Sex + AgeGroup
+
+Df Sum of Sq    RSS    AIC
++ Pulse        1   27.8190 739.81 193.95
+<none>                     767.63 194.90
++ Leg          1   14.1395 753.49 195.41
++ Cholesterol  1   12.7916 754.84 195.56
++ SysBP        1    1.4172 766.21 196.75
++ DiasBP       1    0.0068 767.62 196.90
++ Region       3   25.9582 741.67 198.15
+
+Step:  AIC=193.95
+Weight ~ Waist + Height + BodyMass + Sex + AgeGroup + Pulse
+
+Df Sum of Sq    RSS    AIC
+<none>                     739.81 193.95
++ Leg          1    8.9161 730.90 194.98
++ Cholesterol  1    7.6744 732.14 195.12
++ SysBP        1    2.7051 737.11 195.66
++ DiasBP       1    0.2011 739.61 195.93
++ Region       3   23.5747 716.24 197.36
+
+Call:
+lm(formula = Weight ~ Waist + Height + BodyMass + Sex + AgeGroup + 
+Pulse, data = HealthExam)
+
+Coefficients:
+(Intercept)             Waist            Height          BodyMass              SexM  AgeGroup36 to 64  
+-311.93051           0.18449           4.83584           5.53390          -6.07213          -1.25898  
+AgeGroup65+             Pulse  
+-2.79782          -0.05972  
+
+
+| You nailed it! Good job!
+
+|================================================================================                               |  72%
+| There are two main functions that compute AIC in R. AIC(model) and extractAIC(model) will return different values;
+| they are offset by a constant.  When using AIC for comparing models, you can use either function, so long as you don't
+| mix them together (e.g. don't use AIC(model1) and extractAIC(model2) and try to make a comparison).  However,
+                     | AIC(model1)-AIC(model2) = extractAIC(model1)-extractAIC(model2).  The AIC computation given in step() is the same as
+                     | extractAIC().
+                     
+                     ...
+                     
+                     |====================================================================================                           |  76%
+                     | Another automated model selection procedure in R is one that checks all models with a given number of predictors and
+                     | ranks them within each subset.  For this example, begin the procedure by entering allmods <-
+                     | regsubsets(Weight~.,nvmax=4,data=HealthExam) at the command prompt.
+                     
+                     > 
+                     > allmods <- regsubsets(Weight~.,nvmax=4,data=HealthExam)
+                     
+                     | You're the best!
+                       
+                       |========================================================================================                       |  79%
+                     | To see some results enter summary(allmods) at the command prompt.
+                     
+                     > summary(allmods)
+                     Subset selection object
+                     Call: regsubsets.formula(Weight ~ ., nvmax = 4, data = HealthExam)
+                     14 Variables  (and intercept)
+                     Forced in Forced out
+                     SexM                 FALSE      FALSE
+                     AgeGroup36 to 64     FALSE      FALSE
+                     AgeGroup65+          FALSE      FALSE
+                     Height               FALSE      FALSE
+                     Waist                FALSE      FALSE
+                     Pulse                FALSE      FALSE
+                     SysBP                FALSE      FALSE
+                     DiasBP               FALSE      FALSE
+                     BodyMass             FALSE      FALSE
+                     Cholesterol          FALSE      FALSE
+                     Leg                  FALSE      FALSE
+                     RegionNortheast      FALSE      FALSE
+                     RegionSouth          FALSE      FALSE
+                     RegionWest           FALSE      FALSE
+                     1 subsets of each size up to 4
+                     Selection Algorithm: exhaustive
+                     SexM AgeGroup36 to 64 AgeGroup65+ Height Waist Pulse SysBP DiasBP BodyMass Cholesterol Leg RegionNortheast
+                     1  ( 1 ) " "  " "              " "         " "    "*"   " "   " "   " "    " "      " "         " " " "            
+                     2  ( 1 ) " "  " "              " "         "*"    " "   " "   " "   " "    "*"      " "         " " " "            
+                     3  ( 1 ) "*"  " "              " "         "*"    " "   " "   " "   " "    "*"      " "         " " " "            
+                     4  ( 1 ) "*"  " "              "*"         "*"    " "   " "   " "   " "    "*"      " "         " " " "            
+                     RegionSouth RegionWest
+                     1  ( 1 ) " "         " "       
+                     2  ( 1 ) " "         " "       
+                     3  ( 1 ) " "         " "       
+                     4  ( 1 ) " "         " "       
+                     
+                     | Keep up the great work!
+                       
+                       |============================================================================================                   |  83%
+                     | In each row, the variables with the asterisks are the ones that produces the "best" model with the number of
+                     | independent variables corresponding to the row number.
+                     
+                     ...
+                     
+                     |================================================================================================               |  86%
+                     | To see results based on the Adjusted R-square enter summary(allmods)$adjr2 at the command prompt.
+                     
+                     > 
+                       > summary(allmods)$adjr2
+                     [1] 0.8228148 0.9880283 0.9908815 0.9910563
+                     
+                     | You got it right!
+                       
+                       |====================================================================================================           |  90%
+                     | No frills output here.  The numbers are the Adjusted R-square values for each of the 4 models, in order.
+                     
+                     ...
+                     
+                     |=======================================================================================================        |  93%
+                     | To see a cool summary plot that identifies models based on the Adjusted R-square enter plot(allmods, scale="adjr2") at
+                     | the command prompt.
+                     
+                     > 
+                       > plot(allmods, scale="adjr2")
+                     
+                     | Perseverance, that's the answer.
+                     
+                     |===========================================================================================================    |  97%
+                     | The variable darkened in each row are the ones entered into the top model for that number of predictors. Mallow's Cp
+                     | and Schwart's Information Criterion (BIC) is produced in the regsubsets function as well.  When this lesson is over,
+                     | type ?regsubsets and also ?step to read more about these automated procedures.
+                     
+                     ...?step
+                     
+                     |===============================================================================================================| 100%
+                     | And we have come to the end of yet another magnificent lesson.  Later!
