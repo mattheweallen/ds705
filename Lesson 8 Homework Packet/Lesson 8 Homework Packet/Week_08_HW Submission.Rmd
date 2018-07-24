@@ -23,7 +23,7 @@ Load the data and use summary(rowtime) to see a numerical summary of the values 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r include=FALSE}
 # Load the data and do summary.
 require(DS705data)
 data("rowtime")
@@ -54,14 +54,17 @@ require("lmtest")
 require("HH")
 ```
 
-```{r}
+```{r include=FALSE}
 # Use regsubsets to find the "best" first-order model with up 8 predictors
 allmods <- regsubsets(racetime~.,nvmax=8,data=rowtime)
 summary(allmods)
 summary(allmods)$adjr2
 plot(allmods, scale="adjr2")
 ```
-
+```{r}
+summary(allmods)$adjr2
+plot(allmods, scale="adjr2")
+```
 Which independent variables are in the best first-order model with 8 predictors when the $R^2_{adj}$ is the criterion for selection?
 
 The variables in the best first-order model with 8 predictors are calfcir, biceps, bestvj, legpower, meso, ecto, expvarsity, and preexper.
@@ -77,7 +80,7 @@ Use the **step** function with backward selection to find the "best" first-order
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r include=FALSE}
 # Use step with backward selection to find the "best" first-order model.
 full <- lm(racetime~.,data=rowtime)
 step(full,direction = "backward")
@@ -94,7 +97,7 @@ Use the **step** function with forward selection to find the "best" model for pr
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r include=FALSE}
 # Use step with forward selection to find the "best" first-order model.
 null <- lm(racetime~1,data=rowtime)
 step(null,scope=list(lower=null,upper=full),direction = "forward")
@@ -183,7 +186,7 @@ and use step() to look for the best model containing up to any two-way interacti
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1h -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r include=FALSE}
 # Examine all possible interactions with step function.
 forward.step.model <- lm(formula = racetime ~ estffm + expvarsity + tall + preexper + biceps + meso + calfcir + bestvj, data = rowtime)
 step(forward.step.model, scope = . ~ .^2, direction = 'forward')
@@ -205,13 +208,8 @@ If so, drop those predictors from the model if they are not involved in any inte
 ```{r}
 # run summary on interaction model. 
 model.f <- lm(formula = racetime ~ estffm + expvarsity + tall + preexper + biceps + meso + calfcir + bestvj + tall:calfcir + estffm:bestvj, data = rowtime)
-#summary(model.f)
-# The p-value for estffm is 0.196266. It is not significant at 5% level. Remove it. Refit model
-#model.f <- lm(formula = racetime ~ expvarsity + tall + preexper + biceps + meso + calfcir + bestvj + tall:calfcir + #estffm:bestvj, data = rowtime)
 summary(model.f)$adj.r.squared
 extractAIC(model.f)
-
-#matt see model below. It has estffm in it. Also if removed need to remove interaction term.
 ```
 
 The p-value for estffm is 0.196266. It is not significant at a 5% level, but its interaction with bestvj is significant at 5% level, so it can stay in the model. The $R^2_{adj}$ of the model is 0.6484292. The AIC is 491.1784.
@@ -228,13 +226,46 @@ Are the residuals of **Model F** normal?  Construct a histogram, normal probabil
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1j -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
+```{r include=FALSE}
+# Add plotting libraries
+require(ggplot2)
+require(qqplotr)
+require(grid)
+require(gridExtra)
+```
 
+```{r echo=FALSE}
+# Plot resids~pred, resids~temp, resids hist, resids normal prob, and box plot. Perform a Shapiro-Wilk test.
+resids <- model.f$resid # extract residuals from model
+fit <- model.f$fitted.values #fitted values
+resids_df <- data.frame(residuals = resids, pred = fit)
+```
+
+```{r echo=FALSE, fig.width=4, fig.height=4}
+#https://cran.r-project.org/web/packages/qqplotr/vignettes/introduction.html
+resid_normal_qq <- ggplot(data = resids_df, mapping = aes(sample = residuals)) +
+    stat_qq_band() +
+    stat_qq_line() +
+    stat_qq_point() +
+    labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
+    ggtitle("Normal Q-Q Plot")
+resid_normal_qq
+```
+
+```{r echo=FALSE}
+resids_boxplot <- ggplot(aes(y = residuals), data = resids_df) + geom_boxplot() +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank())
+resids_hist <- ggplot(data=resids_df, aes(residuals)) + geom_histogram(breaks=seq(-40, 34, by=2))
+grid.arrange(resids_boxplot, resids_hist,nrow=1, ncol=2, top="Boxplot and Histogram of Residuals")
 ```
 
 
-Replace this text with your answer here.
+```{r echo=FALSE}
+#shapiro-wilk test for normality
+shapiro.test(resids)
+```
+
+From the box plot of the residuals, the residuals appear appear to be centered at 0, but there is an outlier close to -40, which may indicate left skewness. The histogram as well looks normal, but may be left skewed. However based on the sharpiro-wilk test, we fail to reject that the residuals are normally distributed.
 
 
 ### Part 1k
@@ -243,13 +274,14 @@ Construct a residual plot for **Model F**. Do you see any patterns indicating po
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1k -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
-
+```{r echo=FALSE}
+resids_pred <- ggplot(resids_df,aes(x=pred, y=residuals)) + geom_point() + geom_hline(yintercept = 0) +
+    ggtitle("Residuals against Predicted Values")
+resids_pred
 ```
 
 
-Replace this text with your answer here.
+The residuals appear to be scattered evenly. However, there appear to be a few outliers. It is possible that the errors do not have the same variance throughout, which would be a violation of a model assumption.
 
 
 ### Part 1l
@@ -259,11 +291,14 @@ Perform the Bruesch-Pagan test for equal variances of the residuals at a 5% leve
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1l -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
+# Perform the Bruesch-Pagan test
+require(lmtest)
+bptest(model.f)
 
 ```
 
-Replace this text with your answer here.
+$$ H_0: \mbox{equal variances}, \quad H_1: \mbox{unequal variances}$$
+The BP statistic is 11.468 and the p-value is 0.3222. At a 5% level of significance, we fail to reject the null hypothesis that the model has equal variances.
 
 ### Part 1m
 
@@ -271,7 +306,7 @@ How do you feel about this last model being the "best"?
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1m -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+It appears the model both satisfies all the assumptions and has the best AIC statistic. The model is the "best" in the sense that it does not use every variable, which makes it more interpretable, but has enough variables to make predictions meaningful. 
 
 
 ## Exercise 2
@@ -298,11 +333,29 @@ Also fit the null model (intercept only) and use step() with forward selection t
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
+```{r include=FALSE}
+# Load the data.
 data("farmpond")
 summary(farmpond)
 ```
+
+```{r include=FALSE}
+# Create full model.
+full <- glm(RICH~.,data=farmpond, family="binomial")
+#summary(full)
+```
+```{r include=FALSE}
+# Use step with forward selection to find the "best" first-order model.
+null <- glm(RICH~1,data=farmpond, family="binomial")
+step(null,scope=list(lower=null,upper=full),direction = "forward")
+```
+
+```{r include=FALSE}
+  forward.model <- glm(formula = RICH ~ COND + TOTNITR + FISH, family = "binomial", data = farmpond)
+```
+The "best" model resulting from forward selection is given by
+
+RICH ~ COND + TOTNITR + FISH
 
 ### Part 2b
 
@@ -310,9 +363,18 @@ Construct a classification table (also known as a confusion matrix) for the mode
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
+```{r echo=FALSE}
+predprob <- fitted(forward.model) # get predicted probabilities
 
+threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
+predRICH <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                labels=c("Sp Rich<4", "Sp Rich>=4"))  # Y=1 is "Sp Rich>=4" here
+
+cTab <- table(farmpond$RICH, predRICH) 
+addmargins(cTab)
+
+p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+print(paste('Proportion correctly predicted = ', p)) 
 ```
 
 
@@ -321,10 +383,14 @@ Construct a classification table (also known as a confusion matrix) for the mode
 Compute McFadden's pseudo $R^2$ for the model identified in part 2a.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
+```{r include=FALSE}
+  #install.packages("pscl")
+  require(pscl)
+```
 
 ```{r}
-# Insert your R code here.
-
+  r2 <- pR2(forward.model)  # use McFadden R-square, package = "pscl"
+  r2[4] # McFadden's R-square is in the 4th column of the output
 ```
 
 
@@ -333,14 +399,13 @@ Compute McFadden's pseudo $R^2$ for the model identified in part 2a.
 Conduct a Hosmer-Lemeshow test of goodness-of-fit for the model from part 2a.  Use 5 groups and use a 5% level of significance.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d -|-|-|-|-|-|-|-|-|-|-|-
-
-```{r}
-# Insert your R code here.
-
+```{r include=FALSE}
+#install.packages("ResourceSelection")
+require("ResourceSelection")
 ```
 
-Replace this text with your answer here.
+```{r}
+hoslem.test(farmpond$RICH, fitted(forward.model), g=5) 
+```
 
-
-
-
+When g=5, the p-value is .8252. At a 5% level of significance, there is insufficient evidence to say that this model does not fit.
