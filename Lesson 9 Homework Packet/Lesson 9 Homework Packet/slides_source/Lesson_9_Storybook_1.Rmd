@@ -1,0 +1,467 @@
+---
+title: 'Bootstrap Hypothesis Testing'
+header-includes: \usepackage{amssymb}
+output:
+  beamer_presentation:
+    colortheme: seahorse
+    fonttheme: default
+    keep_tex: yes
+    template: ../../beamer169.tex
+  ioslides_presentation: default
+fontsize: 12pt
+---
+
+```{r global_options, include=FALSE, echo=FALSE}
+.pardefault <- par()
+# use for beamer
+knitr::opts_chunk$set(fig.width=4, fig.height=3, fig.align='center',warning=FALSE, message=FALSE)
+# use for word
+# knitr::opts_chunk$set(fig.width=4, fig.height=3,warning=FALSE, message=FALSE)
+#source('../scripts/shadeMe.R')
+```
+
+## Goals
+
+- Brief presenation to give you basics, but won't make you an expert.
+- Some of the R functions coming up have bootstrap options.
+- The homework will have a couple of problems related to this presentation.
+
+<div class='notes'>
+- audio01.mp3
+- We just want you to get some idea about how bootstrap hypothesis testing works.
+- Some of the R functions for hypothesis testing we'll use this week and next have bootstrap options available.  
+- You'll also see a bit more about bootstrap hypothesis testing in this weeks other presenation.
+</div>
+
+## Cholesterol Levels Sample
+
+```{r}
+chol <- c(136,180,218,226,232,243,244,281,294,335,
+          355,370,377,393,408,444,521,718,867,1357) 
+hist( chol, main = "")
+```
+
+<div class='notes'>
+- audio02.mp3
+- this is the same sample of cholesterol levels we used to introduce bootstrap confidence intervals in Lesson 2.
+- in this case we want to test a hypothesis about the population mean cholesterol level, but the sample clearly isn't from a normally distributed population and has at least one pretty large outlier.
+</div>
+
+## The t.test() in R
+
+$$H_0: \mu = 310, H_a: \mu > 310$$
+
+```{r echo=FALSE}
+P <- round(t.test( chol, mu=310, alternative = 'greater')$p.value,3)
+```
+
+```{r}
+t.test( chol, mu = 310, alternative = 'greater')$p.value
+```
+
+Do not reject $H_0$ ($P$ = `r P`).  There is not evidence that the population mean cholesterol level is larger than 310.  \vspace{.25in}
+
+**Is this right?**  Data doesn't appear to satisfy requirements for t-test.
+
+<div class='notes'>
+- audio03.mp3
+- what if we go ahead with the t-test anyway even though the sample data appears quite skewed with possibly a large outlier.  
+- We don't expect the t-test to work well for the small sample of size 20 we have here.
+- the underlying theory that repeated samples from this population yield a t-distribution requires a normally distributed population,
+- but we can try using bootstrapping to approximate the sampling distribution by a boot distribution
+- one way to do this is by bootstrapping a confidence interval and using it to draw conclusions about a hypothesis
+- we'll review that equivalence over the next few slides
+</div>
+
+## Hypothesis Testing using Confidence Intervals
+
+\Large
+
+\centering
+\begin{tabular}{c}
+Confidence interval \\
+$\Updownarrow$ \\
+Plausible values for population parameter \\
+$\Updownarrow$ \\
+Retain $H_0$ for plausible parameter values
+\end{tabular}
+
+<div class='notes'>
+- no audio
+</div>
+
+
+## Equivalence between Tests and Intervals
+
+\large
+
+\centering Significance level $\alpha$.  
+\centering $H_0: \theta = \theta_0$. \vspace{.2in}
+
+\centering
+\begin{tabular}{c|c|c}
+Alternative      & Confidence & Reject \\
+Hypothesis $H_a$ & Level      & $H_0$ if  \\ \hline
+$\theta \neq \theta_0$ & 
+$100(1-\alpha)\%$ &
+if $\theta_0$ not in CI \\ & & \\
+$\theta > \theta_0$ & 
+$100(1-2\alpha)\%$ &
+if $\theta_0$ is below CI \\ & & \\
+$\theta < \theta_0$ &
+$100(1-2\alpha)\%$ &
+if $\theta_0$ is above CI
+\end{tabular}
+
+<div class='notes'>
+- audio04.mp3
+- we've written this slide using a generic parameter which we call theta, but this could be a populatoin mean or proportion, or any other paramter.
+- a confidence interval is equivalent to a two-sided test.  A 95% confidence interval for a mean gives you all the values of the mean for which we'd retain the null hypothesis.
+- for one-sided tests we have to adjust the confidence level if we want to use a regular two-sided interval to test the hypothesis
+- some hypothesis test in R give you one-sided confidence bounds when you do one-tailed hypothesis tests, in those cases there is no need to adjust the confidence level.  We will see an example of this below.
+</div>
+
+## Example 1
+
+Test $H_0: \mu = 100$ vs $H_a: \mu \neq 100$ at $\alpha = 0.05.$
+
+```{r echo=FALSE}
+set.seed(123)
+```
+
+```{r}
+x = rnorm( 20, mean = 100, sd = 3)
+t.test( x, conf.level=.95, alternative='two.sided')$conf.int
+```
+
+With 95\% confidence $\mu$ is between 99.1 and 101.8 so ...
+
+Do not reject $H_0$.  There is not evidence to show the population mean differs from 100.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Example 2
+
+Test $H_0: \mu = 95$ vs $H_a: \mu > 95$ at $\alpha = 0.05.$
+
+```{r}
+t.test( x, conf.level = .9, alternative='two.sided')$conf.int
+```
+
+90\% confident that $\mu$ is between 99.3 and 101.6 also means that we are 95% confident that $\mu > 99.3$ so ...
+
+Reject $H_0$.  There is evidence to show that the population mean is greater than 95.
+
+<div class='notes'>
+- audio05.mp3
+- our 90% confidence interval tells us the mean is between 99.3 and 101.6 so we can be 5% confident that the mean is below 99.3 and also 5% confident the mean is above 101.6.  Combininng the interval and the piece above 101.6 we can be 95% confident the mean is above 99.3.
+- if we're 95% confident the mean is bigger than 99.3 then we can certainly accept our alternative hypothesis, at the 5% significance level, that the mean is larger than 95.
+</div>
+
+## Example 2 again
+
+Test $H_0: \mu = 95$ vs $H_a: \mu > 95$ at $\alpha = 0.05.$
+
+```{r}
+t.test( x, conf.level = .95, alternative='greater')$conf.int
+```
+
+- R also makes one-sided confidence bounds that can be used with one-sided tests.  
+- Notice that the confidence level is $1-\alpha$.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Hypothesis Test using Boostrap Interval
+
+\large
+
+
+$$H_0: \mu = 310, H_a: \mu > 310, \alpha = 0.05$$
+
+```{r}
+hist( chol, main = "")
+```
+
+<div class='notes'>
+- audio06.mp3
+- returning to the original hypothesis test with cholesterol levels
+- we didn't expect the t-test to be accurate because we have a small sample from a clearly non-normal population, so we'll bootstrap a confidence interval and use it to make a decision in our hypothesis test.
+</div>
+
+## The BCa interval
+
+```{r}
+bootMean <- function( x, i, trim = 0){ mean(x[i]) }
+require(boot)
+boot.object <- boot( chol, bootMean, R=5000)
+CI <- boot.ci( boot.object, type='bca', conf=0.90)
+CI
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+
+## BCa interval conclusion
+
+\large
+
+- We are 90\% confidence that the population mean cholesterol level is between 332.7 and 556.9.
+
+- We are also 95\% confident that the population mean cholesterol level is greater than 332.7.
+
+- At the 5\% significance level we reject $H_0$.  There is significant evidence to show the population mean cholesterol level is greater than 310.
+
+- Different result than the analytic $t$-interval!
+
+<div class='notes'>
+- no audio
+</div>
+
+## Testing by Inverting Confidence Intervals
+
+- Pros:
+    - Bootstrapping confidence intervals is easy.
+    - Can test any population parameter.
+- Cons:
+    - No p-value.
+    - May not be as powerful as a good bootstrap hypothesis test.
+
+<div class='notes'>
+- audio07.mp3
+- for many applications a confidence interval is better than a hypothesis test.  Using a CI we can make hypothesis test decisions, but even better we get parameter estimates
+</div>
+
+
+## Bootstrap Hypothesis Testing
+
+- Complicated.
+
+- IDEA  
+    1. Create null population from sample data.
+    2. Collect resamples.
+    3. Compute test statistic for each resample $\rightarrow$ null boot distribution.
+    4. Approximate p-value from boot distribution.
+
+<div class='notes'>
+- audio08.mp3
+- all hypothesis tests work from the idea that the null is assumed to be true and that the sampling distribution represents all the possible values of the test statistic that can occur when the null is true.
+- so while bootstrap hypothesis testing and confidence intervals are similar, a bootstrap hypothesis tests starts by shifting the original sample to create a pseudo population in which the null hypothesis is true.
+- the next several slides take you through these steps for our cholesterol hypothesis test.
+</div>
+
+## Cholesterol Revisited
+
+\large
+
+
+$$H_0: \mu = 310, H_a: \mu > 310, \alpha = 0.05$$
+
+```{r}
+hist( chol, main = "")
+```
+
+<div class='notes'>
+-no audio
+</div>
+
+## Step 1 - Create null pseudo-population
+
+Shift the orginal sample so that the mean is exactly 310.
+
+```{r}
+newchol = chol - mean(chol) + 310
+mean(newchol)
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Step 2 - Collect resamples
+
+- This could be done with a `for` loop, but using `replicate` is faster.
+- Each column is a resample.
+
+```{r}
+resamples <- replicate( 5000, sample( newchol, replace = T) )
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Step 3 - Compute test statistics
+
+Use `replicate()` or a `for` loop to compute the the test statistic for each resample.  Each resample is a column in the matrix called resamples.
+
+```{r}
+bootdist <- apply(resamples, 2, 
+                  function(c) t.test(c,mu=310)$statistic )
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Step 4 - Approximate p-value
+
+```{r}
+toriginal <- t.test(chol,mu=310)$statistic
+P <- sum( bootdist > toriginal )/5000
+P
+```
+
+Since $P = `r round(P,3)`$ is less than $\alpha = 0.05,$ we reject $H_0$.  The evidence suggest the population mean cholesterol level is greater than 310.
+
+<div class='notes'>
+- audio09.mp3
+- Using a bootstrap distribution or a mathematical sampling distribution the p-value is still the probability of observing a test statistic at least as extreme as the original test statistic computed from the observed data.
+</div>
+
+## Why did the bootstrap do better?
+
+```{r}
+hist( bootdist, probability = TRUE, breaks = 40, main = "", 
+      xlab="",xlim=c(-8,3), ylim = c(0,.4))
+curve( dt( x, df = 19), add = TRUE)
+abline( v = toriginal, col = 'blue')
+```
+
+<div class='notes'>
+- audio10.mp3
+- the histogram shows our bootstrap distribution of t test statistics
+- the curve shows the mathematical t distribution which assumes the population was normally distributed
+- the blue vertical line shows the location of t computed from the original sample so the P-value is the area to the right.  
+- we can see that mathematical t distibrution over estimates the p-value
+</div>
+
+## A Two Means Example
+```{r echo = FALSE}
+set.seed(321)
+```
+
+```{r}
+set.seed(321)
+x <- c( rexp(20), rexp(20)+.25)
+g <- factor( rep(c('A','B'),each=20) )
+boxplot(x~g)
+```
+
+<div class='notes'>
+- audio11.mp3
+- we've created an artificial example  here to demonstrate how bootstrapping works for a two sample test.
+- the B population is shifted upward from the A populatoin so the means definitely aren't the same.
+- in this case the Wilcoxon Rank Sum test would also be suitable
+</div>
+
+## The usual t-test
+
+```{r}
+t.test(x~g)$p.value
+```
+
+At the 5% significance level we wouldn't reject the null, but we **know** the means are different so
+- is this a Type II error due to small sample sizes and low power?
+- or is the t-test inaccurate because the conditions aren't met?
+
+<div class='notes'>
+- no audio
+</div>
+
+## Step 1 - make pseudo null population
+
+```{r} 
+xnull = c( x[1:20]-mean(x[1:20]), x[21:40]-mean(x[21:40]))
+```
+
+We've shifted each sample to have mean 0 so that the two "populations" have the same mean and $H_0: \mu_1  = \mu_2$ is true.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Step 2 - collect resamples
+
+```{r}
+rs <- rbind(replicate( 5000, sample( xnull[1:20], replace = T) ),
+  replicate( 5000, sample( xnull[21:40], replace = T) ) )
+```
+
+- We want to resample within each "population" independently.  
+- Each column of `rs` has two resamples, one from each "population."
+
+<div class='notes'>
+- no audio
+</div>
+
+## Step 3 - compute test statistics
+
+```{r}
+bootdist <- apply(rs, 2, 
+                  function(c) t.test(c~g)$statistic )
+```
+
+- Alternate:
+    - Do Step 1 as above
+    - Use `boot` package to build a boot object for two-sample t-test as in Lesson 3.
+    - The vector of test statistics is in `boot.object$t`
+
+<div class='notes'>
+- no audio
+</div>
+
+## Step 4 - approximate p-value
+
+```{r}
+# compute observed test stat
+toriginal = t.test( x~g )$statistic
+# for asymmetric distributions the two-tailed P-value is 
+# ambiguous.  A common solution is to find smaller of the 
+# left and right tails and then double it.  
+P <- 2*min( sum( bootdist < toriginal), sum( bootdist > toriginal ) )/5000
+P
+```
+
+Reject $H_0$ ($\alpha = 0.05, P = `r round(P,4)`$).  There is significant evidence to show the population means are different.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Which test to trust?
+
+```{r}
+hist(bootdist,breaks=20,probability = TRUE, main="", xlab="")
+curve( dt(x,df=31.006),add=TRUE )
+abline( v = toriginal, col = 'blue')
+```
+
+<div class='notes'>
+- audio12.mp3
+- We can see that the mathematical t-distribution doesn't quite agree with the boostrap distribution of Welch t test statistics.
+- With these small samples from skewed populations we don't expect t to be accurate, but the boot distribution accounts for the skewness so we'd go with that one.
+- Try doing the wilcoxon rank sum test on this artifical data and see what happens.
+</div>
+
+## Our 2 Cents
+
+- Bootstrap hypothesis testing is harder than boostrap confidence intervals:
+    - have to enforce the null hypothesis.
+    - best to use a "pivotal" test-statistic like t.
+    - bootstrap t works well for means, but procedures for other statistics have to be done carefully.
+    - you're not expected to be an expert after this brief introduction.
+- Haven't covered resampling *permutation tests*:
+    - Tests that the samples are exchangeable.  
+    - Shuffle the data randomly between the samples without replacement.
+    - Wilcoxon Rank Sum and Kruskal Wallis are special permuation tests.
+- Best to invert bootstrap confidence interals for hypothesis testing when possible unless p-values are really needed.
+
+<div class='notes'>
+- no audio
+</div>
