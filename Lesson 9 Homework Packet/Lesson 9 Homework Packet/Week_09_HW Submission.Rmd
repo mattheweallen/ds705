@@ -67,7 +67,25 @@ Follow along with with Two Means example in the Bootstrap Hypothesis Testing pre
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# your code goes here
+# two means bootstrap
+xnull <- c(mac.repair.time-mean(mac.repair.time), pc.repair.time-mean(pc.repair.time))
+g <- repair$type
+rs <- rbind(replicate( 5000, sample( xnull[1:61], replace = T) ),
+  replicate( 5000, sample( xnull[62:122], replace = T) ) )
+bootdist <- apply(rs, 2, function(c) t.test(c~g)$statistic )
+
+# compute observed test stat
+toriginal <- t.test( repair$time~g )$statistic
+# for asymmetric distributions the two-tailed P-value is 
+# ambiguous.  A common solution is to find smaller of the 
+# left and right tails and then double it.  
+P <- 2*min( sum( bootdist < toriginal), sum( bootdist > toriginal ) )/5000
+P
+
+hist( bootdist, probability = TRUE, breaks = 40, main = "", 
+      xlab="",xlim=c(-8,3), ylim = c(0,.4))
+#curve( dt( x, df = 19), add = TRUE)
+#abline( v = toriginal, col = 'blue')
 ```
 
 Replace with your conclusion.
