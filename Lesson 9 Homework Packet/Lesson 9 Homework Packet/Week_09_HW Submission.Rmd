@@ -1,8 +1,8 @@
 
 ---
 title: 'ANOVA etc.'
-author: "Your name here"
-date: "mm/dd/yyyy"
+author: "Matthew Allen"
+date: "07/26/2018"
 output: word_document
 fontsize: 12pt
 ---
@@ -21,12 +21,20 @@ $$H_a:  \mu_{\mbox{PC}} \neq \mu_{\mbox{Mac}} $$
 Even though repair times for both computer types are skewed right go ahead and use `t.test` to test if the population mean times are significantly different.  Include your R code below and write a conclusion to the test for practice.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
-
-```{r}
-# your code goes here
+```{r include=FALSE}
+# load dataset repair 
+require(DS705data)
+data("repair")
 ```
 
-Replace with your conclusion.
+```{r}
+# perform t-test to check whether mean repair time for mac and pc are significantly different.
+mac.repair.time <- repair$time[which(repair$type=="Mac")]
+pc.repair.time <- repair$time[which(repair$type=="PC")]
+t.test(mac.repair.time, pc.repair.time, alternative = 'two.sided')$p.value
+```
+
+At a 5% level of significance, we fail to reject the hypotheis that the mean repair times for Macs and PCs are different.
 
 ---
 
@@ -37,10 +45,18 @@ Now use the `boot` package to construct a 95% BCa confidence interval for the di
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# your code goes here
+# Construct a 95% BCa confidence interval for the difference in population mean repair times.
+library(boot)
+bootMeanDiff <- function(d,i){
+  means <- tapply(d[i,1],d[,2],mean)
+  means[1]-means[2]
+  }
+boot.object <- boot(repair, bootMeanDiff, R = 5000, 
+                    strata = repair$type)
+boot.ci(boot.object,conf=.95,type='bca')$bca[4:5]
 ```
 
-Replace with your conclusion.
+The 95% interval constructed by bootstrapping is [-3.4218950, -0.1100385]. The interval does not include zero. Thus at a 5% level of significance, we have evidence that the difference in mean repair times is different from 0.
 
 ---
 
