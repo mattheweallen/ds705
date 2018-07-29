@@ -1,0 +1,171 @@
+---
+title: 'Predicting Loan Defaults with Logistic Regression'
+author: "Matt Allen"
+date: "07/29/2018"
+output: word_document
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+require(ggplot2)
+require(grid)
+require(gridExtra)
+```
+
+## 1. Executive Summary
+## 2. Introduction
+
+The purpose of this project is to build a model to predict whether or not a borrower will pay back a loan. The desciption of the data set is [here](https://datascienceuwl.github.io/Project2018/loans50k.csv). The model will give a simple "Good" or "Bad" indicating the quality of the loan.
+
+## 3. Preparing and Cleaning the Data
+
+The first step in preparing the data is to create a new column named repsonse that will have the values "Good" and "Bad". It is based on the variable status. Only the rows with status of "Fully Paid", "Charged off", and "Default" will be kept."Fully Paid" maps to "Good", and "Charged off" and "Default" are mapped to "Bad".
+
+```{r create_response_column, include=FALSE}
+
+filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
+#filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
+loans <- read.csv2(filePath, header = TRUE, sep = ",")
+loans$response <- loans$status
+
+#Good loans are those that have a status of "Fully Paid". Bad loans are those that have a status of "Charged Off" or "Default".
+levels(loans$response)[levels(loans$response)==c("Charged Off")] <- "Bad"
+levels(loans$response)[levels(loans$response)==c("Default")] <- "Bad"
+levels(loans$response)[levels(loans$response)==c("Fully Paid")] <- "Good"
+loans <- loans[which(loans$response=="Bad" | loans$response=="Good"), ]
+
+#remove unuused levels
+loans$response <- factor(loans$response)
+```
+
+
+The initial dataset consisted of 50,000 records. After reducing "Good" and "Bad", the total number of records left were 34,655 records. The number of records with the variable response equal to "Good" is 27,074, and "Bad" is 7,581.
+
+There are columns that can be removed, because they are not useful. For example, the status variable may be removed, because it has been transformed into the response variable. The totalPaid variable can be removed, because it is not knowable at the time of issue of a loan. 
+
+The variable employment, which indicates job title, can be removed because there is so much variation. It would be possible to create a new variable with job title that puts titles in more general categories, but it probably is still not useful. A better indicator may be income from job. The variable loanID can be removed. It is not necessary in the loan analysis, and may have ethical implications as it has the potential to trace a loan back to an individual. The variable verified indicates verification of annual income completed. This can be removed, because the current study is not meant to test the loan applicaitons truthfulness. 
+
+Some of the categories like medical and debt_consolidation if used in the model could introduce bias against particular vulnerable groups that despite some setbacks may still be able to pay off a loan. Although the variable state is broader than zip code, it can still be discriminatory by geography. Also since  state is a somewhat general geography, it may not have much predictive power, and can be removed. 
+The variable length indicates the length of employment. This could be a good indicator, but there are more than 1300 missing values. It should be removed, because removing the rows with missing income would significantly reduce the data set, and imputation methods may be challenging for this much missing data where there is not necessarily a good proxy.
+
+The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. totalBal and totalLim can be used as proxies for totalRevLim, totalRevBal, totalBcLim,bcOpen, and totalIlLim. Further debtIncRatio, avgBal can be removed because they can be derived from other variables like income, totalBal, and openAcc. Remove totalAcc, because we are interested in accounts that are currently open and this is already captured in openAcc. Remove the variable term, because payment captures this information. The loan term and payment amount are dependent on each other. The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth. 
+
+The variable grade indicates the risk of the loan. I would consider it to be another response variable like status or the response variable derived from status, but with more levels. For this reason, it should be eliminated. The variable rate can be removed for similar reasons as grade. The loan rate is an indication of the borrower's risk. The greater the risk the higher the rate. The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
+
+After elimination of variables, the predictors that are left are amount, payment, home, income, delinq2yr, inq6mth, openAcc, totalBal, and totalLim. I converted income and payment to numeric, because they were showing up as factors. With the remaining vairables, there is no imputation or record removal needed.
+
+```{r reduce_variables, include=FALSE}
+#eliminate length, many missing values what is another a proxy? show count of n/a.
+table(loans$length)
+class(loans$length)
+#1823 as n/a
+length(which(loans$length == "n/a"))
+
+columns_to_keep <- c("response","amount","payment","home","income","openAcc","totalBal","totalLim","delinq2yr","inq6mth")
+
+loans <- loans[columns_to_keep]
+
+#convert income and payment to numeric
+loans$income <- as.numeric(as.character(loans$income))
+loans$payment <- as.numeric(as.character(loans$payment))
+```
+
+
+
+
+
+## 4. Exploring and Transforming the Data
+
+The variables amount, payment, income, openAcc, totalBal, and totalLim showed varying degrees of right skewness. From inspection of histograms, the variables amount, payment, and income showed the most right skewness and were transfored by the log function. The variables totalBal and totalLim were transformed by taking the cubed root. The variable openAcc was transformed by the sqrt function. Historgrams of the transformed variables are displayed in figure 1.
+
+
+```{r transform_variables, echo=FALSE}
+#"response","amount","payment","home","income", "openAcc","totalBal","totalLim"
+#transform variables
+loans$log_amount <- log(loans$amount)
+
+loans$log_payment <- log(loans$payment)
+loans$log_income <- log(loans$income)
+loans$sqrt_openAcc <- sqrt(loans$openAcc)
+loans$cube_rt_totalBal <- (loans$totalBal)^(1/3)
+loans$cube_rt_totalLim <- (loans$totalLim)^(1/3)
+
+#https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
+
+log_amount_plot <- ggplot(loans, aes(x=log_amount)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+log_payment_plot <- ggplot(loans, aes(x=log_payment)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+log_income_plot <- ggplot(loans, aes(x=log_income)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+sqrt_openAcc_plot <- ggplot(loans, aes(x=sqrt_openAcc)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+cube_rt_totalBal_plot <- ggplot(loans, aes(x=cube_rt_totalBal)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+cube_rt_totalLim_plot <- ggplot(loans, aes(x=cube_rt_totalLim)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+
+
+#https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
+
+grid.arrange(log_amount_plot, log_payment_plot, log_income_plot, sqrt_openAcc_plot, cube_rt_totalBal_plot, cube_rt_totalLim_plot, nrow=2, ncol=3, top="Predictors", bottom = "Figure 1 Historgrams of Transformed Variables")
+
+```
+
+
+To start to develop a picture of the relationships between the predictor variables, and the response, two boxplots were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for a predictor variable. The plots can be seen in figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Similarly with the variable log_payment, a loan that has a smaller payment makes it easier to make the payment each month. Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
+
+```{r explore_relationships, echo=FALSE}
+log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
+log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
+log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
+sqrt_openAcc_boxplot <- ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
+cube_rt_totalBal_boxplot <- ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
+sqrt_totalLim_boxplot <- ggplot(aes(y = cube_rt_totalLim, x = response), data = loans) + geom_boxplot()
+
+grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, sqrt_openAcc_boxplot, cube_rt_totalBal_boxplot, sqrt_totalLim_boxplot, nrow=2, ncol=3, top="Predictors by Response", bottom = "Figure 2 Boxplots of Predictors by Response")
+```
+
+## 5. The Logistic Model
+
+```{r create_training_test_datasets, include=FALSE}
+#https://stackoverflow.com/questions/17200114/how-to-split-data-into-training-testing-sets-using-sample-function
+## 80% of the sample size
+smp_size <- floor(0.8 * nrow(loans))
+
+## set the seed to make your partition reproducible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(loans)), size = smp_size)
+
+train <- loans[train_ind, ]
+test <- loans[-train_ind, ]
+```
+
+```{r create_model, include=FALSE}
+loan.model <- glm(formula = response ~ log_amount + log_payment + log_income + sqrt_openAcc + cube_rt_totalBal + cube_rt_totalLim, family = "binomial", data = train)
+```
+
+```{r contigency_table, echo=FALSE}
+predprob <- fitted(loan.model) # get predicted probabilities
+
+threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
+predRICH <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                labels=c("Sp Rich<4", "Sp Rich>=4"))  # Y=1 is "Sp Rich>=4" here
+
+cTab <- table(train$response, predRICH) 
+addmargins(cTab)
+
+p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+print(paste('Proportion correctly predicted = ', p)) 
+```
+
+## 6. Optimizing the Threshold for Accuracy
+## 7. Optimizing the Threshold for Profit
+## 8. Results Summary
