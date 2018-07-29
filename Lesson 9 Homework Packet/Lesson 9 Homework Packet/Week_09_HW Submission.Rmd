@@ -117,36 +117,17 @@ Construct side-by-side boxplots for the inside diameters of the insulation shiel
 ```{r include=FALSE}
 require(DS705data)
 data(shields)
-require(ggplot2)
-require(grid)
-require(gridExtra)
+library(ggplot2)
 ```
 
 ```{r}
-#https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
-
-Machine.A <- data.frame(Diameter=shields$Diameter[which(shields$Machine=="A")])
-Machine.B <- data.frame(Diameter=shields$Diameter[which(shields$Machine=="B")])
-Machine.C <- data.frame(Diameter=shields$Diameter[which(shields$Machine=="C")])
-
-#hist(shields$Diameter[which(shields$Machine=="A")])
-
-machineA_plot <- ggplot(Machine.A, aes(x=Diameter)) + 
-  geom_histogram(binwidth=1, colour="black", fill="white")
-
-machineB_plot <- ggplot(Machine.B, aes(x=Diameter)) + 
-  geom_histogram(binwidth=1, colour="black", fill="white")
-
-machineC_plot <- ggplot(Machine.C, aes(x=Diameter)) + 
-  geom_histogram(binwidth=1, colour="black", fill="white")
-
-
-#https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
-
-grid.arrange(machineA_plot, machineB_plot, machineC_plot, nrow=1, ncol=3, top="Diameters by Machine", bottom = "Figure 1 Historgrams of Transformed Variables")
-
+ggplot(aes(x = Machine, y = Diameter), data = shields) + geom_boxplot()
 ```
 ----
+
+```{r echo=TRUE,fig.height=3.5, include=FALSE}
+boxplot(Diameter~Machine,data=shields,horizontal=TRUE)
+```
 
 ### Part 2b
 
@@ -154,7 +135,7 @@ Comment on what you see in the boxplots.  How do the medians compare visually?  
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+Machines A and B have rougly the same medians, but Machine A definitely has a different median. The machines do not look like they have the same variability for diameter. Machine C appears to be right skewed.
 
 ----
 
@@ -164,7 +145,11 @@ Which data conditions for ANOVA appear not to be met, if any?  Provide reasoning
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+The response variable Diameter is not normally distributed for each population. Machine B and C are definitely skewed.
+
+The response variable Diameter does not have have equal variance for each population. The variance of Machine C is greater than Machine A and B.
+
+It is unclear whether samples have been selected randomly, and independently.
 
 ----
 
@@ -175,16 +160,16 @@ Conduct an analysis of variance test (the standard one that assumes normality an
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d -|-|-|-|-|-|-|-|-|-|-|-
 
 (i)
-Replace this text with your answer here.
-
+$$H_0: \mu_\mbox{Diameter.Machine.A} = \mu_\mbox{Diameter.Machine.B} = \mu_\mbox{Diameter.Machine.C}$$
+$$ H_a: \mbox{ not all the means are the same}$$
 (ii)
 ```{r}
-# Insert your R code here.
-
+# Compute F statistic and P-Value.
+anova( lm( Diameter ~ Machine, shields ) )
 ```
 
 (iii)
-Replace this text with your answer here.
+At a 5% level of significace, we fail to reject that all Machines produce the same inside diameter dimension for shields.
 
 ----
 
@@ -195,17 +180,17 @@ Conduct an analysis of variance test with the Welch correction.  (i) State the n
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e -|-|-|-|-|-|-|-|-|-|-|-
 
 (i)
-Replace this text with your answer here.
+$$H_0: \mu_\mbox{Diameter.Machine.A} = \mu_\mbox{Diameter.Machine.B} = \mu_\mbox{Diameter.Machine.C}$$
+$$ H_a: \mbox{ not all the means are the same}$$
 
 (ii)
 ```{r}
-# Insert your R code here.
-
+# conduct anova with welch
+oneway.test(Diameter~Machine,data=shields,var.equal=F)
 ```
 
 (iii)
-Replace this text with your answer here.
-
+At a 5% level of significace, we fail to reject that all Machines produce the same inside diameter dimension for shields.
 ----
 
 ### Part 2f
@@ -214,7 +199,9 @@ Which data conditions for Welch ANOVA are not met, if any?  Provide reasoning fo
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2f -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+The response variable Diameter is not normally distributed for each population. Machine B and C are definitely skewed.
+
+It is unclear whether samples have been selected randomly, and independently.
 
 ----
 
@@ -225,16 +212,18 @@ Conduct a Kruskal-Wallis test.  (i) State the null and alternative hypotheses, (
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2g -|-|-|-|-|-|-|-|-|-|-|-
 
 (i)
-Replace this text with your answer here.
+$H_0:$ the population distributions are the same
+$H_1:$ the population distributions are not the same
 
 (ii)
 ```{r}
-# Insert your R code here.
+# Conduct a Kruskal-Wallis test.
+kruskal.test( Diameter ~ Machine, data = shields )
 
 ```
 
 (iii)
-Replace this text with your answer here.
+At a 5% level of significance, there is evidence that the distribution of diameters are different between the machines, or that the distribution of diameters are shifted from each other. That is they have different medians.
 
 ----
 
@@ -244,7 +233,7 @@ Which data conditions for the Kruskal-Wallis test are not met, if any?  Provide 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2h -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+The different machines' diameter distributions may not have equal variances.
 
 ----
 
@@ -258,9 +247,26 @@ Conduct a bootstrapped ANOVA test using pooled residuals and unequal variances a
 Replace this text with your answer here.
 
 (ii)
-```{r}
-# Insert your R code here.
+```{r echo=TRUE}
+resA <- shields$Diameter[shields$Machine=='A'] - mean(shields$Diameter[shields$Machine=='A'])
+resB <- shields$Diameter[shields$Machine=='B'] - mean(shields$Diameter[shields$Machine=='B'])
+resC <- shields$Diameter[shields$Machine=='C'] - mean(shields$Diameter[shields$Machine=='C'])
+pop.null <- data.frame(res=c(resA,resB,resC),shields$Machine)
+with(pop.null, tapply( res, shields$Machine, mean) )
+```
 
+```{r echo = TRUE, cache = TRUE}
+B <- 10000; Fstar1 <- numeric(B)
+for (i in 1:B){
+  pop.null <- data.frame( 
+    res = sample( c(resA, resB, resC), replace = T), shields$Machine )
+  Fstar1[i] <- oneway.test( res~shields$Machine, data=pop.null, 
+                            var.equal=FALSE)$statistic
+}
+F.obs <- oneway.test( Diameter ~ Machine, data = shields)$statistic
+
+Fstar1[is.na(Fstar1)] <- 100*F.obs
+p.approx1 <- sum( Fstar1 > F.obs )/B; p.approx1
 ```
 
 (iii)
@@ -278,9 +284,27 @@ Repeat the bootstrapped ANOVA test using unpooled residuals and unequal variance
 Replace this text with your answer here.
 
 (ii)
-```{r}
-# Insert your R code here.
 
+```{r echo = TRUE, cache = TRUE}
+B <- 10000; Fstar2 <- numeric(B)
+for (i in 1:B){
+  pop.null <- data.frame( 
+    res = c( sample( resA, replace = T ), 
+             sample( resB, replace = T ), 
+             sample( resC, replace = T ) ), shields$Machine )
+  Fstar2[i] <- oneway.test( res~shields$Machine, data=pop.null, 
+                            var.equal=FALSE)$statistic
+}
+Fstar2[is.na(Fstar2)] <- 100*F.obs
+p.approx2 <- sum( Fstar2 > F.obs )/B; p.approx2
+```
+
+
+```{r echo = TRUE, cache = TRUE}
+install.packages("WRS2")
+require('WRS2')  # install this package if needed
+# use 10% trimmed means 
+t1waybt(Diameter~Machine,data=shields,tr=0.1,nboot=10000)
 ```
 
 (iii)
@@ -324,7 +348,7 @@ What impact do you think samples of sizes 5, 5, and 10 play here?
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2n -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+The sample sizes are somewhat small. An increase in the sample size especially for the bootstrap method, would increase the power of the tests. 
 
 ----
 
@@ -344,10 +368,10 @@ but this is not what KW tests as this example shows.  Take 3 random samples of s
 set.seed(321)
 x <- c( rnorm(100,0,1), rnorm(100,0,10), rnorm(100,0,50))
 groups <- factor( (rep( c('A','B','C'), each=100 ) ) )
-# complete the code here ...
-
+# Conduct a Kruskal-Wallis test.
+kruskal.test(x ~ groups)
 ```
 
-Replace this text with your explanation.
+The condition that the populations have equal variances for the Kruskall Wallis test is violated. The three normal distributions have standard deviations of 1, 10 and 50. 
 
 ----
