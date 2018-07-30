@@ -63,9 +63,9 @@ The variable grade indicates the risk of the loan. I would consider it to be ano
 
 The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
 
-After inspection of the histograms of the variables totalBal and totalLim, it was discovered that their distributions are bimodal, which violates condition of normality, so debtIncRatio was used as a proxy. The variable payment was found to be strongly correlated with amount, and was removed. The variable openAcc was found not to be significant and was removed.
+After inspection of the histograms of the variables totalBal and totalLim, it was discovered that their distributions are bimodal, which violates condition of normality, so debtIncRatio was used as a proxy. The variable openAcc was found not to be significant and was removed.
 
-After elimination of variables, the predictors that are left are amount, verified, income, debtIncRat, delinq2yr and inq6mth. The variable verified is categorical, the rest are quantitative. 
+After elimination of variables, the predictors that are left are payment, amount, verified, income, debtIncRat, delinq2yr and inq6mth. The variable verified is categorical, the rest are quantitative. 
 
 With the remaining variables, there is no imputation or record removal needed. 
 
@@ -76,14 +76,16 @@ With the remaining variables, there is no imputation or record removal needed.
   #1823 as n/a
   length(which(loans$length == "n/a"))
 
-  columns_to_keep <- c("response","totalPaid", "amount", "debtIncRat","verified","income", "delinq2yr","inq6mth")
+  columns_to_keep <- c("response","totalPaid", "amount", "debtIncRat","verified","income", "delinq2yr","inq6mth","payment")
   loans <- loans[columns_to_keep]
 
   #convert income, amount, debtIncRat and totalPaid to numeric
   loans$income <- as.numeric(as.character(loans$income))
   loans$amount <- as.numeric(as.character(loans$amount))
+  loans$payment <- as.numeric(as.character(loans$payment))
   loans$totalPaid <- as.numeric(as.character(loans$totalPaid))
   loans$debtIncRat <- as.numeric(as.character(loans$debtIncRat))
+  
 ```
 
 
@@ -95,12 +97,16 @@ The variables amount, income, delinq2yr, inq6mth showed varying degrees of right
 ```{r transform_and_plot_variables, echo=FALSE}
 #transform variables
 loans$log_amount <- log(loans$amount)
+loans$log_payment <- log(loans$payment)
 loans$log_income <- log(loans$income)
 loans$cube_rt_delinq2yr <- (loans$delinq2yr)^(1/3)
 loans$cube_rt_inq6mth <- (loans$inq6mth)^(1/3)
 #https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
 
 log_amount_plot <- ggplot(loans, aes(x=log_amount)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+log_payment_plot <- ggplot(loans, aes(x=log_payment)) + 
   geom_histogram(binwidth=.1, colour="black", fill="white")
 
 log_income_plot <- ggplot(loans, aes(x=log_income)) + 
@@ -118,7 +124,7 @@ debtIncRat_plot <- ggplot(loans, aes(x=debtIncRat)) +
 
 #https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
 
-grid.arrange(log_amount_plot, log_income_plot, cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, debtIncRat_plot, nrow=3, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
+grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot,  debtIncRat_plot, nrow=3, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
 ```
 
 
@@ -132,8 +138,9 @@ cube_rt_delinq2yr_boxplot <- ggplot(aes(y = cube_rt_delinq2yr, x = response), da
 cube_rt_inq6mth_boxplot <- ggplot(aes(y = cube_rt_inq6mth, x = response), data = loans) + geom_boxplot()
 
 debtIncRat_boxplot <- ggplot(aes(y = debtIncRat, x = response), data = loans) + geom_boxplot()
+log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
 
-grid.arrange(log_amount_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_inq6mth_boxplot, debtIncRat_boxplot, nrow=3, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
+grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_inq6mth_boxplot,  debtIncRat_boxplot, nrow=3, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
 ```
 
 After inspection of the boxplot cube_rt_delinq2yr, the variable delinq2yr was removed from the model, because even after transformation it is extremely right skewed. Taking it out of the model did not effect the accuracy or profit predictions significantly.
@@ -156,7 +163,7 @@ test <- loans[-train_ind, ]
 
 ```{r create_model, include=FALSE}
 #cube_rt_delinq2yr +
-loan.model <- glm(formula = response ~ log_amount + log_income + verified + debtIncRat + cube_rt_inq6mth, family = "binomial", data = train)
+loan.model <- glm(formula = response ~ log_amount + log_income + log_payment + verified + debtIncRat + cube_rt_inq6mth, family = "binomial", data = train)
 extractAIC(loan.model)
 summary(loan.model)
 summary(test)
@@ -164,7 +171,7 @@ summary(test)
 
 ```{r vif, include=FALSE}
 require(HH)
-vif(response ~ log_amount + log_income + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth,  data = train)
+vif(response ~ log_amount + log_income + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth + payment,  data = train)
 ```
 
 
