@@ -122,7 +122,7 @@ grid.arrange(log_amount_plot, log_income_plot, cube_rt_delinq2yr_plot, cube_rt_i
 ```
 
 
-To start to develop a picture of the relationships between the predictor variables, and the response, two boxplots were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for a predictor variable. The plots can be seen in figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Similarly with the variable log_payment, a loan that has a smaller payment makes it easier to make the payment each month. Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
+To start to develop a picture of the relationships between the predictor variables, and the response, two boxplots were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for a predictor variable. The plots can be seen in figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
 
 ```{r explore_relationships, echo=FALSE}
 log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
@@ -135,6 +135,9 @@ debtIncRat_boxplot <- ggplot(aes(y = debtIncRat, x = response), data = loans) + 
 
 grid.arrange(log_amount_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_inq6mth_boxplot, debtIncRat_boxplot, nrow=3, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
 ```
+
+After inspection of the boxplot cube_rt_delinq2yr, the variable delinq2yr was removed from the model, because even after transformation it is extremely right skewed. Taking it out of the model did not effect the accuracy or profit predictions significantly.
+
 
 ## 5. The Logistic Model
 
@@ -152,7 +155,8 @@ test <- loans[-train_ind, ]
 ```
 
 ```{r create_model, include=FALSE}
-loan.model <- glm(formula = response ~ log_amount + log_income + verified + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth, family = "binomial", data = train)
+#cube_rt_delinq2yr +
+loan.model <- glm(formula = response ~ log_amount + log_income + verified + debtIncRat + cube_rt_inq6mth, family = "binomial", data = train)
 extractAIC(loan.model)
 summary(loan.model)
 summary(test)
