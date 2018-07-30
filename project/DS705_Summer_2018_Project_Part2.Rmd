@@ -63,7 +63,7 @@ The variable grade indicates the risk of the loan. I would consider it to be ano
 
 The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
 
-After inspection of the histograms of the variables totalBal and totalLim, it was discovered that their distributions are bimodal, which violates condition of normality, so debtIncRatio was used as a proxy. The variable openAcc was found not to be significant and was removed.
+After inspection of the histograms of the variables totalBal and totalLim, it was discovered that their distributions are bimodal, which violates condition of normality, so debtIncRatio was used as a proxy. The variable openAcc was found not to be significant and was also removed.
 
 After elimination of variables, the predictors that are left are payment, amount, verified, income, debtIncRat, delinq2yr and inq6mth. The variable verified is categorical, the rest are quantitative. 
 
@@ -90,8 +90,7 @@ With the remaining variables, there is no imputation or record removal needed.
 
 
 ## 4. Exploring and Transforming the Data
-#log_amount + log_income + home + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth
-The variables amount, income, delinq2yr, inq6mth showed varying degrees of right skewness. From inspection of histograms, the variable amount and income showed the most right skewness and were transformed by the log function. The variables delinq2yr and inq6mth were transformed by taking the cubed root. Histograms of the transformed variables are displayed in Figure 1.
+The variables amount, income, delinq2yr, inq6mth showed varying degrees of right skewness. From inspection of histograms, the variable amount, payment and income showed the most right skewness and were transformed by the log function. The variables delinq2yr and inq6mth were transformed by taking the cubed root. Histograms of the transformed variables are displayed in Figure 1.
 
 
 ```{r transform_and_plot_variables, echo=FALSE}
@@ -128,7 +127,7 @@ grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq
 ```
 
 
-To start to develop a picture of the relationships between the predictor variables, and the response, two boxplots were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for a predictor variable. The plots can be seen in figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
+To develop a picture of the relationships between the predictor variables, and the response, two boxplots for each response "Good" and "Bad" were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for each predictor variable. The plots can be seen in Figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Similarly with the variable log_payment, a loan that has a smaller payment makes it easier to make the payment each month.  Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
 
 ```{r explore_relationships, echo=FALSE}
 log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
