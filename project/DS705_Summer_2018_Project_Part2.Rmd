@@ -20,7 +20,7 @@ The purpose of this project is to build a model to predict whether or not a borr
 
 ## 3. Preparing and Cleaning the Data
 
-The first step in preparing the data is to create a new column named response that will have the values "Good" and "Bad". It is based on the variable status. Only the rows with status of "Fully Paid", "Charged off", and "Default" will be kept. "Fully Paid" maps to "Good", and "Charged off" and "Default" are mapped to "Bad".
+The first step in preparing the data was to create a new column named response that has the values "Good" and "Bad". It was based on the variable status. Only the rows with status of "Fully Paid", "Charged off", and "Default" were kept. "Fully Paid" maps to "Good", and "Charged off" and "Default" were mapped to "Bad".
 
 ```{r create_response_column, include=FALSE}
 
@@ -28,6 +28,7 @@ filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
 #filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
 loans <- read.csv2(filePath, header = TRUE, sep = ",")
 loans$response <- loans$status
+#summary(loans$verified)
 
 #Good loans are those that have a status of "Fully Paid". Bad loans are those that have a status of "Charged Off" or "Default".
 levels(loans$response)[levels(loans$response)==c("Charged Off")] <- "Bad"
@@ -37,80 +38,64 @@ loans <- loans[which(loans$response=="Bad" | loans$response=="Good"), ]
 
 #remove unuused levels
 loans$response <- factor(loans$response)
+
+
+
+#transform Source Verified to Verified
+levels(loans$verified)[levels(loans$verified)==c("Source Verified")] <- "Verified"
+#remove unuused levels
+loans$verified <- factor(loans$verified)
+
 ```
 
 
-The initial dataset consisted of 50,000 records. After reducing "Good" and "Bad", the total number of records left were 34,655 records. The number of records with the variable response equal to "Good" is 27,074, and "Bad" is 7,581.
+The initial dataset consisted of 50,000 records. After reducing "Good" and "Bad", the total number of records left were 34,655 records. The number of records with the variable response equal to "Good" was 27,074, and "Bad" was 7,581.
 
-There are variables that can be removed, because they are not useful. For example, the status variable may be removed, because it has been transformed into the response variable. The totalPaid variable can be removed, because it is not knowable at the time of issue of a loan. 
+There were variables that could be removed, because they were not useful. For example, the status variable may be removed, because it has been transformed into the response variable. The totalPaid variable can be removed, because it is not knowable at the time of issue of a loan. The variable loanid was removed because it is just an identifier and has no predictive power. 
 
 The variable employment, which indicates job title, can be removed because there is so much variation. It would be possible to create a new variable with job title that puts titles in more general categories, but it probably is still not useful. A better indicator may be income from job. 
 
 The variable length indicates the length of employment. This could be a good indicator, but there are more than 1300 missing values. It should be removed, because removing the rows with missing income would significantly reduce the data set, and imputation methods may be challenging for this much missing data where there is not necessarily a good proxy.
 
-The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. totalBal and totalLim can be used as proxies for totalRevLim, totalRevBal, totalBcLim,bcOpen, and totalIlLim. Further debtIncRatio, avgBal can be removed because they can be derived from other variables like income, totalBal, and openAcc. Remove totalAcc, because we are interested in accounts that are currently open and this is already captured in openAcc. Remove the variable term, because payment captures this information. The loan term and payment amount are dependent on each other. The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth. Also, amount can be removed, because it is related to payment.
+The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth.
 
+The variable grade indicates the risk of the loan. I would consider it to be another response variable like status or the response variable derived from status, but with more levels. For this reason, it should be eliminated. The variable rate can be removed for similar reasons as grade. The loan rate is an indication of the borrower's risk. The greater the risk the higher the rate. 
 
+The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
 
-The variable grade indicates the risk of the loan. I would consider it to be another response variable like status or the response variable derived from status, but with more levels. For this reason, it should be eliminated. The variable rate can be removed for similar reasons as grade. The loan rate is an indication of the borrower's risk. The greater the risk the higher the rate. The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
+After inspection of the histograms of the variables totalBal and totalLim, it was discovered that their distributions are bimodal, which violates condition of normality, so debtIncRatio was used as a proxy. The variable payment was found to be strongly correlated with amount, and was removed. The variable openAcc was found not to be significant and was removed.
 
-After inspection of the histograms of the variables totalBal and totalLim, it was discovered that there distributions are bimodal, which violates condition of normality, so debtIncRatio was used as a proxy. The variable payment was found to be strongly correlated with amount, and was removed. The variable openAcc was found not to be significant and was removed. The variable loanid was removed because it is just an identifier and has no predictive power.
+After elimination of variables, the predictors that are left are amount, verified, income, debtIncRat, delinq2yr and inq6mth. The variable verified is categorical, the rest are quantitative. 
 
-delinq2yr and inq6mth are highly right skewed
-
-After elimination of variables, the predictors that are left are amount, home, income, debtIncRat, delinq2yr and inq6mth. I converted income and amount to numeric, because they were showing up as factors. With the remaining variables, there is no imputation or record removal needed. The variable home is categorical, the rest are quantitative.
+With the remaining variables, there is no imputation or record removal needed. 
 
 ```{r reduce_variables, include=FALSE}
-#eliminate length, many missing values what is another a proxy? show count of n/a.
-table(loans$length)
-class(loans$length)
-#1823 as n/a
-length(which(loans$length == "n/a"))
+  #eliminate length, many missing values what is another a proxy? show count of n/a.
+  table(loans$length)
+  class(loans$length)
+  #1823 as n/a
+  length(which(loans$length == "n/a"))
 
-columns_to_keep <- c("response","totalPaid", "amount", "debtIncRat","home","income","openAcc", "delinq2yr","inq6mth","reason")
-#removed "payment", "verified", "state"
-#
-loans <- loans[columns_to_keep]
-#summary(loans$rate)
-#convert income, payment and totalPaid to numeric
-loans$income <- as.numeric(as.character(loans$income))
-loans$amount <- as.numeric(as.character(loans$amount))
-loans$totalPaid <- as.numeric(as.character(loans$totalPaid))
-#loans$rate <- as.numeric(as.character(loans$rate))
-```
+  columns_to_keep <- c("response","totalPaid", "amount", "debtIncRat","verified","income", "delinq2yr","inq6mth")
+  loans <- loans[columns_to_keep]
 
-
-```{r explore dataset, include=FALSE}
-  loans$debtIncRat <- as.numeric(as.character(loans$debtIncRat))  
-  summary(loans$debtIncRat)
-  hist(loans$debtIncRat)
-  hist(log(loans$pubRec))  
-  #delinq2yr and inq6mth
-  #hist(log(loans$delinq2yr - mean()))
-  #hist(log(loans$inq6mth))
-  
-  #"response","totalPaid","debtIncRat","payment","home","income","openAcc", "delinq2yr","inq6mth"
-  #hist(loans$payment)
-  
+  #convert income, amount, debtIncRat and totalPaid to numeric
+  loans$income <- as.numeric(as.character(loans$income))
+  loans$amount <- as.numeric(as.character(loans$amount))
+  loans$totalPaid <- as.numeric(as.character(loans$totalPaid))
+  loans$debtIncRat <- as.numeric(as.character(loans$debtIncRat))
 ```
 
 
 ## 4. Exploring and Transforming the Data
+#log_amount + log_income + home + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth
+The variables amount, income, delinq2yr, inq6mth showed varying degrees of right skewness. From inspection of histograms, the variable amount and income showed the most right skewness and were transformed by the log function. The variables delinq2yr and inq6mth were transformed by taking the cubed root. Histograms of the transformed variables are displayed in Figure 1.
 
-The variables amount, payment, income, openAcc, totalBal, and totalLim showed varying degrees of right skewness. From inspection of histograms, the variables amount, payment, and income showed the most right skewness and were transformed by the log function. The variables totalBal and totalLim were transformed by taking the cubed root. The variable openAcc was transformed by the sqrt function. Historgrams of the transformed variables are displayed in figure 1.
 
-
-```{r transform_variables, echo=FALSE}
-#"response","amount","payment","home","income", "openAcc","totalBal","totalLim"
+```{r transform_and_plot_variables, echo=FALSE}
 #transform variables
 loans$log_amount <- log(loans$amount)
-
-#loans$log_payment <- log(loans$payment)
 loans$log_income <- log(loans$income)
-loans$sqrt_openAcc <- sqrt(loans$openAcc)
-#loans$cube_rt_totalBal <- (loans$totalBal)^(1/3)
-#loans$cube_rt_totalLim <- (loans$totalLim)^(1/3)
-#cube_rt_delinq2yr + cube_rt_inq6mth
 loans$cube_rt_delinq2yr <- (loans$delinq2yr)^(1/3)
 loans$cube_rt_inq6mth <- (loans$inq6mth)^(1/3)
 #https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
@@ -118,27 +103,22 @@ loans$cube_rt_inq6mth <- (loans$inq6mth)^(1/3)
 log_amount_plot <- ggplot(loans, aes(x=log_amount)) + 
   geom_histogram(binwidth=.1, colour="black", fill="white")
 
-log_payment_plot <- ggplot(loans, aes(x=log_payment)) + 
-  geom_histogram(binwidth=.1, colour="black", fill="white")
-
 log_income_plot <- ggplot(loans, aes(x=log_income)) + 
   geom_histogram(binwidth=.1, colour="black", fill="white")
 
-sqrt_openAcc_plot <- ggplot(loans, aes(x=sqrt_openAcc)) + 
-  geom_histogram(binwidth=.1, colour="black", fill="white")
+cube_rt_delinq2yr_plot <- ggplot(loans, aes(x=cube_rt_delinq2yr)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
 
-cube_rt_totalBal_plot <- ggplot(loans, aes(x=cube_rt_totalBal)) + 
-  geom_histogram(binwidth=.1, colour="black", fill="white")
+cube_rt_inq6mth_plot <- ggplot(loans, aes(x=cube_rt_inq6mth)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
 
-cube_rt_totalLim_plot <- ggplot(loans, aes(x=cube_rt_totalLim)) + 
-  geom_histogram(binwidth=.1, colour="black", fill="white")
-
+debtIncRat_plot <- ggplot(loans, aes(x=debtIncRat)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
 
 
 #https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
 
-grid.arrange(log_amount_plot, log_payment_plot, log_income_plot, sqrt_openAcc_plot, cube_rt_totalBal_plot, cube_rt_totalLim_plot, nrow=2, ncol=3, top="Predictors", bottom = "Figure 1 Historgrams of Transformed Variables")
-
+grid.arrange(log_amount_plot, log_income_plot, cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, debtIncRat_plot, nrow=3, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
 ```
 
 
@@ -146,13 +126,14 @@ To start to develop a picture of the relationships between the predictor variabl
 
 ```{r explore_relationships, echo=FALSE}
 log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
-log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
 log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
-sqrt_openAcc_boxplot <- ggplot(aes(y = sqrt_openAcc, x = response), data = loans) + geom_boxplot()
-cube_rt_totalBal_boxplot <- ggplot(aes(y = cube_rt_totalBal, x = response), data = loans) + geom_boxplot()
-sqrt_totalLim_boxplot <- ggplot(aes(y = cube_rt_totalLim, x = response), data = loans) + geom_boxplot()
 
-grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, sqrt_openAcc_boxplot, cube_rt_totalBal_boxplot, sqrt_totalLim_boxplot, nrow=2, ncol=3, top="Predictors by Response", bottom = "Figure 2 Boxplots of Predictors by Response")
+cube_rt_delinq2yr_boxplot <- ggplot(aes(y = cube_rt_delinq2yr, x = response), data = loans) + geom_boxplot()
+cube_rt_inq6mth_boxplot <- ggplot(aes(y = cube_rt_inq6mth, x = response), data = loans) + geom_boxplot()
+
+debtIncRat_boxplot <- ggplot(aes(y = debtIncRat, x = response), data = loans) + geom_boxplot()
+
+grid.arrange(log_amount_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_inq6mth_boxplot, debtIncRat_boxplot, nrow=3, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
 ```
 
 ## 5. The Logistic Model
@@ -171,23 +152,15 @@ test <- loans[-train_ind, ]
 ```
 
 ```{r create_model, include=FALSE}
-#loan.model <- glm(formula = response ~ log_amount + log_payment + log_income + sqrt_openAcc + cube_rt_totalBal + #cube_rt_totalLim + verified + reason + state + home, family = "binomial", data = train)
-#"response","totalPaid","debtIncRat","payment","home","income","openAcc", "delinq2yr","inq6mth"
-
-#remove openAcc  + sqrt_openAcc because not significant
-#+ reason take out
-
-loan.model <- glm(formula = response ~ log_amount + log_income + home + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth, family = "binomial", data = train)
+loan.model <- glm(formula = response ~ log_amount + log_income + verified + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth, family = "binomial", data = train)
 extractAIC(loan.model)
-
-
 summary(loan.model)
 summary(test)
 ```
 
 ```{r vif, include=FALSE}
 require(HH)
-vif(response ~ log_amount + log_income + home + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth,  data = train)
+vif(response ~ log_amount + log_income + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth,  data = train)
 ```
 
 
@@ -196,7 +169,7 @@ vif(response ~ log_amount + log_income + home + debtIncRat + cube_rt_delinq2yr +
 predprob <- predict(loan.model, test, type="response")
 threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
 predLoan <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
-                labels=c("Bad", "Good"))  # Y=1 is Loan is good
+                labels=c("Bad", "Good"))  
 
 cTab <- table(test$response, predLoan) 
 addmargins(cTab)
@@ -206,54 +179,36 @@ print(paste('Proportion correctly predicted = ', p))
 ```
 
 ## 6. Optimizing the Threshold for Accuracy
-```{r contigency_table, echo=FALSE}
-#predprob <- fitted(loan.model) # get predicted probabilities
+```{r accuracy, echo=FALSE}
 model.accuracy <- function(threshhold) {
   predprob <- predict(loan.model, test, type="response")
-  #threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
-  predRICH <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
-                  labels=c("Sp Rich<4", "Sp Rich>=4"))  # Y=1 is "Sp Rich>=4" here
+  predLoan <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                  labels=c("Bad", "Good"))  
 
-  cTab <- table(test$response, predRICH) 
+  cTab <- table(test$response, predLoan) 
   addmargins(cTab)
 
   p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
 }
-#print(paste('Proportion correctly predicted = ', p)) 
 
 threshholds <- seq(from = 0, to = 1, length.out = 30)
 accuracy <- sapply(threshholds,model.accuracy)
-accuracy
+accuracy.df <- data.frame(threshhold=threshholds, accuracy=accuracy)
+#model is same accuracy from 0 to .5.
 plot(accuracy~threshholds)
 ```
 ## 7. Optimizing the Threshold for Profit
 
-```{r contigency_table, echo=FALSE}
-#predprob <- fitted(loan.model) # get predicted probabilities
-#summary(test$amount)
-#summary(test$totalPaid)
+```{r profit, echo=FALSE}
 model.profit <- function(threshhold) {
   predprob <- predict(loan.model, test, type="response")
-  #print(predprob)
-  
-  #print(which(predprob > threshhold))
-  #threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
-  #predRICH <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
-  #                labels=c("Sp Rich<4", "Sp Rich>=4"))  # Y=1 is "Sp Rich>=4" here
-
-  #cTab <- table(test$response, predRICH) 
-  #addmargins(cTab)
-
-  #p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
   profit.df <- test[which(predprob > threshhold),]
   profit <- sum(profit.df$totalPaid - profit.df$amount)
-  #print(profit)
 }
-#print(paste('Proportion correctly predicted = ', p)) 
-
 threshholds <- seq(from = 0, to = 1, length.out = 30)
 profit <- sapply(threshholds,model.profit)
-profit
+
+threshholds[which.max(profit)] #threshold of max profit
 plot(profit~threshholds)
 ```
 
