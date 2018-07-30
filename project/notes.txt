@@ -1,0 +1,5 @@
+verified
+reason
+state
+
+loanid can be removed because it is just an identifier no predictive power

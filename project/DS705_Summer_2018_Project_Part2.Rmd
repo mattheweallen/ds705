@@ -16,11 +16,11 @@ require(gridExtra)
 ## 1. Executive Summary
 ## 2. Introduction
 
-The purpose of this project is to build a model to predict whether or not a borrower will pay back a loan. The desciption of the data set is [here](https://datascienceuwl.github.io/Project2018/loans50k.csv). The model will give a simple "Good" or "Bad" indicating the quality of the loan.
+The purpose of this project is to build a model to predict whether or not a borrower will pay back a loan. The description of the data set is [here](https://datascienceuwl.github.io/Project2018/loans50k.csv). The model will give a simple "Good" or "Bad" indicating the quality of the loan. The project will begin by preparing and cleaning the data. Variables will be selected by domain knowledge versus an automated method. Through exploration of the selected variables, the variables may be transformed to satisfy conditions of model fitting like being normally distributed for example. The data will be fitted to a logistic model with a training data set. Part of the data set will be held out as test data set to validate the model. The model is binomial and the mean also called the classification threshold can be adjusted to optimize for accuracy or profit.  
 
 ## 3. Preparing and Cleaning the Data
 
-The first step in preparing the data is to create a new column named repsonse that will have the values "Good" and "Bad". It is based on the variable status. Only the rows with status of "Fully Paid", "Charged off", and "Default" will be kept."Fully Paid" maps to "Good", and "Charged off" and "Default" are mapped to "Bad".
+The first step in preparing the data is to create a new column named response that will have the values "Good" and "Bad". It is based on the variable status. Only the rows with status of "Fully Paid", "Charged off", and "Default" will be kept. "Fully Paid" maps to "Good", and "Charged off" and "Default" are mapped to "Bad".
 
 ```{r create_response_column, include=FALSE}
 
@@ -42,11 +42,10 @@ loans$response <- factor(loans$response)
 
 The initial dataset consisted of 50,000 records. After reducing "Good" and "Bad", the total number of records left were 34,655 records. The number of records with the variable response equal to "Good" is 27,074, and "Bad" is 7,581.
 
-There are columns that can be removed, because they are not useful. For example, the status variable may be removed, because it has been transformed into the response variable. The totalPaid variable can be removed, because it is not knowable at the time of issue of a loan. 
+There are variables that can be removed, because they are not useful. For example, the status variable may be removed, because it has been transformed into the response variable. The totalPaid variable can be removed, because it is not knowable at the time of issue of a loan. 
 
-The variable employment, which indicates job title, can be removed because there is so much variation. It would be possible to create a new variable with job title that puts titles in more general categories, but it probably is still not useful. A better indicator may be income from job. The variable loanID can be removed. It is not necessary in the loan analysis, and may have ethical implications as it has the potential to trace a loan back to an individual. The variable verified indicates verification of annual income completed. This can be removed, because the current study is not meant to test the loan applicaitons truthfulness. 
+The variable employment, which indicates job title, can be removed because there is so much variation. It would be possible to create a new variable with job title that puts titles in more general categories, but it probably is still not useful. A better indicator may be income from job. 
 
-Some of the categories like medical and debt_consolidation if used in the model could introduce bias against particular vulnerable groups that despite some setbacks may still be able to pay off a loan. Although the variable state is broader than zip code, it can still be discriminatory by geography. Also since  state is a somewhat general geography, it may not have much predictive power, and can be removed. 
 The variable length indicates the length of employment. This could be a good indicator, but there are more than 1300 missing values. It should be removed, because removing the rows with missing income would significantly reduce the data set, and imputation methods may be challenging for this much missing data where there is not necessarily a good proxy.
 
 The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. totalBal and totalLim can be used as proxies for totalRevLim, totalRevBal, totalBcLim,bcOpen, and totalIlLim. Further debtIncRatio, avgBal can be removed because they can be derived from other variables like income, totalBal, and openAcc. Remove totalAcc, because we are interested in accounts that are currently open and this is already captured in openAcc. Remove the variable term, because payment captures this information. The loan term and payment amount are dependent on each other. The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth. 
@@ -62,13 +61,14 @@ class(loans$length)
 #1823 as n/a
 length(which(loans$length == "n/a"))
 
-columns_to_keep <- c("response","amount","payment","home","income","openAcc","totalBal","totalLim","delinq2yr","inq6mth")
+columns_to_keep <- c("response","totalPaid","amount","payment","home","income","openAcc","totalBal","totalLim","delinq2yr","inq6mth", "verified", "reason", "state")
 
 loans <- loans[columns_to_keep]
 
-#convert income and payment to numeric
+#convert income, payment and totalPaid to numeric
 loans$income <- as.numeric(as.character(loans$income))
 loans$payment <- as.numeric(as.character(loans$payment))
+loans$totalPaid <- as.numeric(as.character(loans$totalPaid))
 ```
 
 
@@ -77,7 +77,7 @@ loans$payment <- as.numeric(as.character(loans$payment))
 
 ## 4. Exploring and Transforming the Data
 
-The variables amount, payment, income, openAcc, totalBal, and totalLim showed varying degrees of right skewness. From inspection of histograms, the variables amount, payment, and income showed the most right skewness and were transfored by the log function. The variables totalBal and totalLim were transformed by taking the cubed root. The variable openAcc was transformed by the sqrt function. Historgrams of the transformed variables are displayed in figure 1.
+The variables amount, payment, income, openAcc, totalBal, and totalLim showed varying degrees of right skewness. From inspection of histograms, the variables amount, payment, and income showed the most right skewness and were transformed by the log function. The variables totalBal and totalLim were transformed by taking the cubed root. The variable openAcc was transformed by the sqrt function. Historgrams of the transformed variables are displayed in figure 1.
 
 
 ```{r transform_variables, echo=FALSE}
@@ -149,17 +149,17 @@ test <- loans[-train_ind, ]
 ```
 
 ```{r create_model, include=FALSE}
-loan.model <- glm(formula = response ~ log_amount + log_payment + log_income + sqrt_openAcc + cube_rt_totalBal + cube_rt_totalLim, family = "binomial", data = train)
+loan.model <- glm(formula = response ~ log_amount + log_payment + log_income + sqrt_openAcc + cube_rt_totalBal + cube_rt_totalLim + verified + reason + state, family = "binomial", data = train)
 ```
 
 ```{r contigency_table, echo=FALSE}
-predprob <- fitted(loan.model) # get predicted probabilities
-
+#predprob <- fitted(loan.model) # get predicted probabilities
+predprob <- predict(loan.model, test, type="response")
 threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
 predRICH <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
                 labels=c("Sp Rich<4", "Sp Rich>=4"))  # Y=1 is "Sp Rich>=4" here
 
-cTab <- table(train$response, predRICH) 
+cTab <- table(test$response, predRICH) 
 addmargins(cTab)
 
 p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
@@ -167,5 +167,55 @@ print(paste('Proportion correctly predicted = ', p))
 ```
 
 ## 6. Optimizing the Threshold for Accuracy
+```{r contigency_table, echo=FALSE}
+#predprob <- fitted(loan.model) # get predicted probabilities
+model.accuracy <- function(threshhold) {
+  predprob <- predict(loan.model, test, type="response")
+  #threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
+  predRICH <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                  labels=c("Sp Rich<4", "Sp Rich>=4"))  # Y=1 is "Sp Rich>=4" here
+
+  cTab <- table(test$response, predRICH) 
+  addmargins(cTab)
+
+  p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+}
+#print(paste('Proportion correctly predicted = ', p)) 
+
+threshholds <- seq(from = 0, to = 1, length.out = 30)
+accuracy <- sapply(threshholds,model.accuracy)
+accuracy
+plot(accuracy~threshholds)
+```
 ## 7. Optimizing the Threshold for Profit
+
+```{r contigency_table, echo=FALSE}
+#predprob <- fitted(loan.model) # get predicted probabilities
+#summary(test$amount)
+#summary(test$totalPaid)
+model.profit <- function(threshhold) {
+  predprob <- predict(loan.model, test, type="response")
+  #print(predprob)
+  
+  #print(which(predprob > threshhold))
+  #threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
+  #predRICH <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+  #                labels=c("Sp Rich<4", "Sp Rich>=4"))  # Y=1 is "Sp Rich>=4" here
+
+  #cTab <- table(test$response, predRICH) 
+  #addmargins(cTab)
+
+  #p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+  profit.df <- test[which(predprob > threshhold),]
+  profit <- sum(profit.df$totalPaid - profit.df$amount)
+  #print(profit)
+}
+#print(paste('Proportion correctly predicted = ', p)) 
+
+threshholds <- seq(from = 0, to = 1, length.out = 30)
+profit <- sapply(threshholds,model.profit)
+profit
+plot(profit~threshholds)
+```
+
 ## 8. Results Summary
