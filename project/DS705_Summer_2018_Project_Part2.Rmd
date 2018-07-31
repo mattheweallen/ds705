@@ -160,12 +160,17 @@ debtIncRat_plot <- ggplot(loans, aes(x=debtIncRat)) +
 
 #https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
 
-grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, cube_rt_bcOpen_plot, cube_rt_totalBcLim_plot, debtIncRat_plot, nrow=4, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
+#grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, #cube_rt_bcOpen_plot, cube_rt_totalBcLim_plot, debtIncRat_plot, nrow=4, ncol=2, top="Predictors", bottom = "Figure 1 #Histograms of Numeric Predictors")
 
 
 #make bar graph of categorical predictors.
 ```
 
+```{r plot_variable_hists, echo=FALSE}
+grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, cube_rt_bcOpen_plot, cube_rt_totalBcLim_plot, debtIncRat_plot, nrow=4, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
+
+#make bar graph of categorical predictors.
+```
 
 To develop a picture of the relationships between the predictor variables, and the response, two boxplots for each response "Good" and "Bad" were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for each predictor variable. The plots can be seen in Figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Similarly with the variable log_payment, a loan that has a smaller payment makes it easier to make the payment each month.  Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
 
@@ -246,6 +251,9 @@ print(paste('Proportion correctly predicted = ', p))
 ```
 
 ## 6. Optimizing the Threshold for Accuracy
+
+The maxmimum accuracy occurs near the threshold of .55. As you can see from the plot above of accuracy vs threshold, the accuracy is mostly flat from 0 to 0.6, but from inspection of the data peaks at .55. It then declines between 0.6 and 1.0.
+
 ```{r accuracy, echo=FALSE}
 model.accuracy <- function(threshhold) {
   predprob <- predict(loan.model, test, type="response")
@@ -265,7 +273,7 @@ accuracy.df <- data.frame(threshhold=threshholds, accuracy=accuracy)
 plot(accuracy~threshholds)
 ```
 
-The maxmimum accuracy occurs near the threshold of .55. As you can see from the plot above of accuracy vs threshold, the accuracy is mostly flat from 0 to 0.6, but from inspection of the data peaks at .55. It then declines between 0.6 and 1.0.
+
 
 ## 7. Optimizing the Threshold for Profit
 
@@ -303,6 +311,32 @@ If no loans were denied the total profit would be $758,390. The increase from us
 
 If the model had predicted all the good loans perfectly, the total profit would be $12,020,435, which represents an increase of 1485%. Perfect prediction is at least 6 times better, so may be the model could be improved.
 
+```{r profit_plot, echo=FALSE}
+  plot(profit~threshholds)
+```
+
 ## 8. Results Summary
 
 The classification threshold that produces the maximum profit is .76, which gives an accuracy of 65%.
+
+Given a bad loan, the model will correctly predict it 54% of the time.
+
+Given a good loan, the model will correctly predict it 68% of the time.
+
+```{r contigency_table_max_profit, include=FALSE}
+#predprob <- fitted(loan.model) # get predicted probabilities
+predprob <- predict(loan.model, test, type="response")
+threshhold <- 0.76  # Set Y=1 when predicted probability exceeds this
+predLoan <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                labels=c("Bad", "Good"))  
+
+cTab <- table(test$response, predLoan) 
+addmargins(cTab)
+
+p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+print(paste('Proportion correctly predicted = ', p)) 
+print(paste('Proportion correctly predicted given bad loan = ', 819/1521))
+print(paste('Proportion correctly predicted given good loan = ', 3626/5338))
+```
+
+
