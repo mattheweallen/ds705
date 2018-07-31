@@ -46,6 +46,13 @@ levels(loans$verified)[levels(loans$verified)==c("Source Verified")] <- "Verifie
 #remove unuused levels
 loans$verified <- factor(loans$verified)
 
+#experiment
+summary(loans$bcOpen)
+hist((loans$bcOpen)^(1/3))
+
+summary(loans$totalBcLim)
+hist((loans$totalBcLim)^(1/3))
+
 ```
 
 
@@ -76,7 +83,7 @@ With the remaining variables, there is no imputation or record removal needed.
   #1823 as n/a
   length(which(loans$length == "n/a"))
 
-  columns_to_keep <- c("response","totalPaid", "amount", "debtIncRat","verified","income", "delinq2yr","inq6mth","payment")
+  columns_to_keep <- c("response","totalPaid", "amount", "debtIncRat","verified","income", "delinq2yr","inq6mth","payment", "bcOpen", "totalBcLim")
   loans <- loans[columns_to_keep]
 
   #convert income, amount, debtIncRat and totalPaid to numeric
@@ -85,6 +92,7 @@ With the remaining variables, there is no imputation or record removal needed.
   loans$payment <- as.numeric(as.character(loans$payment))
   loans$totalPaid <- as.numeric(as.character(loans$totalPaid))
   loans$debtIncRat <- as.numeric(as.character(loans$debtIncRat))
+  
   
 ```
 
@@ -98,6 +106,25 @@ The variables amount, income, delinq2yr, inq6mth showed varying degrees of right
 loans$log_amount <- log(loans$amount)
 loans$log_payment <- log(loans$payment)
 loans$log_income <- log(loans$income)
+
+#remove NAs from bcOpen, there are 360.
+loans <- loans[which(!is.na(loans$bcOpen)),]
+
+#replaced totalLim and totalBal etc with
+loans$cube_rt_bcOpen <- (loans$bcOpen)^(1/3)
+summary(loans$cube_rt_bcOpen)
+summary(loans$bcOpen)
+
+
+loans$cube_rt_totalBcLim <- (loans$totalBcLim)^(1/3)
+
+summary(loans$cube_rt_totalBcLim)
+summary(loans$totalBcLim)
+
+#cube_rt_bcOpen+cube_rt_totalBcLim
+#sum(is.na(loans$bcOpen))
+#sum(is.na(loans$totalBcLim))
+  
 loans$cube_rt_delinq2yr <- (loans$delinq2yr)^(1/3)
 loans$cube_rt_inq6mth <- (loans$inq6mth)^(1/3)
 #https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
@@ -117,13 +144,19 @@ cube_rt_delinq2yr_plot <- ggplot(loans, aes(x=cube_rt_delinq2yr)) +
 cube_rt_inq6mth_plot <- ggplot(loans, aes(x=cube_rt_inq6mth)) + 
   geom_histogram(binwidth=1, colour="black", fill="white")
 
+cube_rt_bcOpen_plot <- ggplot(loans, aes(x=cube_rt_bcOpen)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
+
+cube_rt_totalBcLim_plot <- ggplot(loans, aes(x=cube_rt_totalBcLim)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
+
 debtIncRat_plot <- ggplot(loans, aes(x=debtIncRat)) + 
   geom_histogram(binwidth=1, colour="black", fill="white")
 
 
 #https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
 
-grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot,  debtIncRat_plot, nrow=3, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
+grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, cube_rt_bcOpen_plot, cube_rt_totalBcLim_plot, debtIncRat_plot, nrow=4, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
 ```
 
 
@@ -139,11 +172,16 @@ cube_rt_inq6mth_boxplot <- ggplot(aes(y = cube_rt_inq6mth, x = response), data =
 debtIncRat_boxplot <- ggplot(aes(y = debtIncRat, x = response), data = loans) + geom_boxplot()
 log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
 
-grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_inq6mth_boxplot,  debtIncRat_boxplot, nrow=3, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
+cube_rt_bcOpen_boxplot <- ggplot(aes(y = cube_rt_bcOpen, x = response), data = loans) + geom_boxplot()
+cube_rt_totalBcLim_boxplot <- ggplot(aes(y = cube_rt_totalBcLim, x = response), data = loans) + geom_boxplot()
+
+
+grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_bcOpen_boxplot, cube_rt_totalBcLim_boxplot, cube_rt_inq6mth_boxplot,  debtIncRat_boxplot, nrow=4, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
 ```
 
 After inspection of the boxplot cube_rt_delinq2yr, the variable delinq2yr was removed from the model, because even after transformation it is extremely right skewed. Taking it out of the model did not effect the accuracy or profit predictions significantly.
 
+After plotting and exploring of several other predictors, the shapes of bcOpen and totalBcLim after cube root transformation were found to be close to normal. Adding them to the model decreased AIC, and increased predictive power. The terms are significant. The variables bcOpen and totalBcLim which indicate credit card utilization may be proxies for totalBal and totalLim, which were removed because of their bimodal distributions.
 
 ## 5. The Logistic Model
 
@@ -162,7 +200,7 @@ test <- loans[-train_ind, ]
 
 ```{r create_model, include=FALSE}
 #cube_rt_delinq2yr +
-loan.model <- glm(formula = response ~ log_amount + log_income + log_payment + verified + debtIncRat + cube_rt_inq6mth, family = "binomial", data = train)
+loan.model <- glm(formula = response ~ log_amount + log_income + log_payment + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim, family = "binomial", data = train)
 extractAIC(loan.model)
 summary(loan.model)
 summary(test)
@@ -170,7 +208,7 @@ summary(test)
 
 ```{r vif, include=FALSE}
 require(HH)
-vif(response ~ log_amount + log_income + debtIncRat + cube_rt_delinq2yr + cube_rt_inq6mth + payment,  data = train)
+vif(response ~ log_amount + log_income + log_payment + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim,  data = train)
 ```
 
 
@@ -204,7 +242,7 @@ model.accuracy <- function(threshhold) {
 threshholds <- seq(from = 0, to = 1, length.out = 30)
 accuracy <- sapply(threshholds,model.accuracy)
 accuracy.df <- data.frame(threshhold=threshholds, accuracy=accuracy)
-#model is same accuracy from 0 to .5.
+#model is most accurate at around .5
 plot(accuracy~threshholds)
 ```
 ## 7. Optimizing the Threshold for Profit

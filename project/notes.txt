@@ -1,5 +1,10 @@
-verified
-reason
-state
+verified #why out
+state #why out
+
+put in interest rate?
 
 loanid can be removed because it is just an identifier no predictive power
+
+payment removed because strong correlation with amount
+
+remove openAcc  + sqrt_openAcc because not significant
