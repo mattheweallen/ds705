@@ -30,7 +30,9 @@ data("repair")
 ```{r}
 # perform t-test to check whether mean repair time for mac and pc are significantly different.
 mac.repair.time <- repair$time[which(repair$type=="Mac")]
+#hist(mac.repair.time)
 pc.repair.time <- repair$time[which(repair$type=="PC")]
+#hist(pc.repair.time)
 t.test(mac.repair.time, pc.repair.time, alternative = 'two.sided')$p.value
 ```
 
@@ -88,7 +90,8 @@ hist( bootdist, probability = TRUE, breaks = 40, main = "",
 #abline( v = toriginal, col = 'blue')
 ```
 
-Replace with your conclusion.
+The p-value is 0.0304. Thus at a 5% level of significance, we have evidence that the difference in mean repair times is different from 0.
+
 
 ---
 
@@ -98,7 +101,7 @@ The bootstrap and theoretical t-distributions give different results here.  Whic
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace with your answer.
+Both bootstrap methods lead to the same conclusion. The distributions of repair time for macs and pcs are not normal, which is a condition for the t-test. Since the condition of normality is not present, I trust the bootstrap method more.
 
 ---
 
@@ -121,7 +124,8 @@ library(ggplot2)
 ```
 
 ```{r}
-ggplot(aes(x = Machine, y = Diameter), data = shields) + geom_boxplot()
+shields_box_plot <- ggplot(aes(x = Machine, y = Diameter), data = shields) + geom_boxplot()
+shields_box_plot
 ```
 ----
 
@@ -190,6 +194,7 @@ oneway.test(Diameter~Machine,data=shields,var.equal=F)
 ```
 
 (iii)
+
 At a 5% level of significace, we fail to reject that all Machines produce the same inside diameter dimension for shields.
 ----
 
@@ -244,7 +249,8 @@ Conduct a bootstrapped ANOVA test using pooled residuals and unequal variances a
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2i -|-|-|-|-|-|-|-|-|-|-|-
 
 (i)
-Replace this text with your answer here.
+$H_0:$ the population distributions are the same
+$H_1:$ the population distributions are not the same
 
 (ii)
 ```{r echo=TRUE}
@@ -270,7 +276,7 @@ p.approx1 <- sum( Fstar1 > F.obs )/B; p.approx1
 ```
 
 (iii)
-Replace this text with your answer here.
+At a 5% level of significance, we fail to reject that the distributions are the same.
 
 ----
 
@@ -281,7 +287,8 @@ Repeat the bootstrapped ANOVA test using unpooled residuals and unequal variance
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2j -|-|-|-|-|-|-|-|-|-|-|-
 
 (i)
-Replace this text with your answer here.
+$H_0:$ the population distributions are the same
+$H_1:$ the population distributions are not the same
 
 (ii)
 
@@ -301,14 +308,14 @@ p.approx2 <- sum( Fstar2 > F.obs )/B; p.approx2
 
 
 ```{r echo = TRUE, cache = TRUE}
-install.packages("WRS2")
+#install.packages("WRS2")
 require('WRS2')  # install this package if needed
 # use 10% trimmed means 
 t1waybt(Diameter~Machine,data=shields,tr=0.1,nboot=10000)
 ```
 
 (iii)
-Replace this text with your answer here.
+At a 5% level of significance, we fail to reject that the distributions are the same.
 
 ----
 
@@ -318,7 +325,7 @@ Which seems better and why, the bootstrap procedure with the pooled or unpooled 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2k -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer.
+The bootstrap procedure with pooled residuals seems better. It is visually apparent from the boxplot that the means are different. The bootstrap procedure with pooled residuals agrees with this. 
 
 ----
 
@@ -328,7 +335,7 @@ Do any of the four statistical inference procedures used here provide a clear an
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2l -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+There is no clear answer.
 
 ----
 
@@ -338,7 +345,7 @@ If you were responsible for conducting the statistical analysis here, what would
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2m -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace this text with your answer here.
+I would say the results are inconclusive.
 
 ----
 
