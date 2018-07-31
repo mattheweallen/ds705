@@ -24,8 +24,8 @@ The first step in preparing the data was to create a new column named response t
 
 ```{r create_response_column, include=FALSE}
 
-filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
-#filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
+#filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
+filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
 loans <- read.csv2(filePath, header = TRUE, sep = ",")
 loans$response <- loans$status
 #summary(loans$verified)
@@ -39,7 +39,9 @@ loans <- loans[which(loans$response=="Bad" | loans$response=="Good"), ]
 #remove unuused levels
 loans$response <- factor(loans$response)
 
-
+#make ratio of amount to payment
+#loans$amount_payment_ratio <- loans$amount / loans$payment
+#hist(loans$amount_payment_ratio)
 
 #transform Source Verified to Verified
 levels(loans$verified)[levels(loans$verified)==c("Source Verified")] <- "Verified"
@@ -104,7 +106,9 @@ The variables amount, income, delinq2yr, inq6mth showed varying degrees of right
 ```{r transform_and_plot_variables, echo=FALSE}
 #transform variables
 loans$log_amount <- log(loans$amount)
+
 loans$log_payment <- log(loans$payment)
+
 loans$log_income <- log(loans$income)
 
 #remove NAs from bcOpen, there are 360.
@@ -184,9 +188,11 @@ grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, cube_r
 
 After inspection of the boxplot cube_rt_delinq2yr, the variable delinq2yr was removed from the model, because even after transformation it is extremely right skewed. Taking it out of the model did not effect the accuracy or profit predictions significantly.
 
-After plotting and exploring of several other predictors, the shapes of bcOpen and totalBcLim after cube root transformation were found to be close to normal. Adding them to the model decreased AIC, and increased predictive power. The terms are significant. The variables bcOpen and totalBcLim which indicate credit card utilization may be proxies for totalBal and totalLim, which were removed because of their bimodal distributions.
+After plotting and exploring of several other predictors, the shapes of bcOpen and totalBcLim after cube root transformation were found to be close to normal. Adding them to the model decreased AIC, and increased predictive power. The terms are significant. The variables bcOpen and totalBcLim which indicate credit card utilization may be proxies for totalBal and totalLim, which were removed because of their bimodal distributions. The variable bcOpen had 360 values with NA. These were removed from the data set.
 
 ## 5. The Logistic Model
+
+From the summary of the model all the variables are very significant as indicated by small p-values. Based on the VIF, the variables log_payment and log_amount are colinear. However, they are still very sigficant in the model, and will be kept.
 
 ```{r create_training_test_datasets, include=FALSE}
 #https://stackoverflow.com/questions/17200114/how-to-split-data-into-training-testing-sets-using-sample-function
@@ -203,7 +209,7 @@ test <- loans[-train_ind, ]
 
 ```{r create_model, include=FALSE}
 #cube_rt_delinq2yr +
-loan.model <- glm(formula = response ~ log_amount + log_income + log_payment + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim, family = "binomial", data = train)
+loan.model <- glm(formula = response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim, family = "binomial", data = train)
 extractAIC(loan.model)
 summary(loan.model)
 summary(test)
@@ -211,7 +217,7 @@ summary(test)
 
 ```{r vif, include=FALSE}
 require(HH)
-vif(response ~ log_amount + log_income + log_payment + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim,  data = train)
+vif(response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim,  data = train)
 ```
 
 
