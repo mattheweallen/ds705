@@ -157,6 +157,9 @@ debtIncRat_plot <- ggplot(loans, aes(x=debtIncRat)) +
 #https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
 
 grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, cube_rt_bcOpen_plot, cube_rt_totalBcLim_plot, debtIncRat_plot, nrow=4, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
+
+
+#make bar graph of categorical predictors.
 ```
 
 
