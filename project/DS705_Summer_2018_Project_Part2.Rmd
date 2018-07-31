@@ -24,8 +24,8 @@ The first step in preparing the data was to create a new column named response t
 
 ```{r create_response_column, include=FALSE}
 
-#filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
-filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
+filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
+#filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
 loans <- read.csv2(filePath, header = TRUE, sep = ",")
 loans$response <- loans$status
 #summary(loans$verified)
@@ -229,7 +229,7 @@ require(HH)
 vif(response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim,  data = train)
 ```
 
-The contingency table along with the overall accuracy is below. The accuracy is at 79%. That is 79% of the time truly good or bad loans are classified correctly. Based on the accuracy and that the terms are all significant, this is a good model.
+The contingency table along with the overall accuracy is below. The accuracy is at 79%. That is 79% of the time truly good or bad loans are classified correctly. Based on the accuracy and that the terms are all significant, this is a decent model. From the contingency table, there are relatively few loans predicted as bad compared to good loans. The model may be good at predicting good loans, and bad at predicting bad ones.
 
 ```{r contigency_table, echo=FALSE}
 #predprob <- fitted(loan.model) # get predicted probabilities
@@ -269,7 +269,7 @@ The maxmimum accuracy occurs near the threshold of .55. As you can see from the 
 
 ## 7. Optimizing the Threshold for Profit
 
-```{r profit, echo=FALSE}
+```{r profit, include=FALSE}
 model.profit <- function(threshhold) {
   predprob <- predict(loan.model, test, type="response")
   profit.df <- test[which(predprob > threshhold),]
@@ -278,8 +278,31 @@ model.profit <- function(threshhold) {
 threshholds <- seq(from = 0, to = 1, length.out = 30)
 profit <- sapply(threshholds,model.profit)
 
+max(profit)
 threshholds[which.max(profit)] #threshold of max profit
+threshhold.df <- data.frame(threshhold=threshholds, profit=profit)
 plot(profit~threshholds)
+
+#no loans denied
+noloandenied.profit <- sum(test$totalPaid - test$amount)
+noloandenied.profit
+#model increase
+(max(profit) - noloandenied.profit)/noloandenied.profit
+
+#perfect prediction
+good.test.df <- test[which(test$response == "Good"),]
+perfect.profit <- sum(good.test.df$totalPaid - good.test.df$amount)
+#perfect increase
+(perfect.profit - noloandenied.profit)/noloandenied.profit
+1485/244
 ```
 
+The maximum profit of $2,609,607 occurs at a threshold of .76. The best profit threshold corresponds to an accuracy of 65%. The profit where the model is the most accurate at a threshold of 55% is $1,247,186. The maximum accuracy and profit thresholds do not coincide.   
+
+If no loans were denied the total profit would be $758,390. The increase from using the model is 244%.
+
+If the model had predicted all the good loans perfectly, the total profit would be $12,020,435, which represents an increase of 1485%. Perfect prediction is at least 6 times better, so may be the model could be improved.
+
 ## 8. Results Summary
+
+The classification threshold that produces the maximum profit is .76, which gives an accuracy of 65%.
