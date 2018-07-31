@@ -103,7 +103,7 @@ With the remaining variables, there is no imputation or record removal needed.
 The variables amount, income, delinq2yr, inq6mth showed varying degrees of right skewness. From inspection of histograms, the variable amount, payment and income showed the most right skewness and were transformed by the log function. The variables delinq2yr and inq6mth were transformed by taking the cubed root. Histograms of the transformed variables are displayed in Figure 1.
 
 
-```{r transform_and_plot_variables, echo=FALSE}
+```{r transform_and_plot_variables, include=FALSE}
 #transform variables
 loans$log_amount <- log(loans$amount)
 
@@ -170,29 +170,31 @@ grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq
 To develop a picture of the relationships between the predictor variables, and the response, two boxplots for each response "Good" and "Bad" were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for each predictor variable. The plots can be seen in Figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Similarly with the variable log_payment, a loan that has a smaller payment makes it easier to make the payment each month.  Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
 
 ```{r explore_relationships, echo=FALSE}
-log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot()
-log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot()
+log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
 
-cube_rt_delinq2yr_boxplot <- ggplot(aes(y = cube_rt_delinq2yr, x = response), data = loans) + geom_boxplot()
-cube_rt_inq6mth_boxplot <- ggplot(aes(y = cube_rt_inq6mth, x = response), data = loans) + geom_boxplot()
+log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
 
-debtIncRat_boxplot <- ggplot(aes(y = debtIncRat, x = response), data = loans) + geom_boxplot()
-log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot()
+cube_rt_delinq2yr_boxplot <- ggplot(aes(y = cube_rt_delinq2yr, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+cube_rt_inq6mth_boxplot <- ggplot(aes(y = cube_rt_inq6mth, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
 
-cube_rt_bcOpen_boxplot <- ggplot(aes(y = cube_rt_bcOpen, x = response), data = loans) + geom_boxplot()
-cube_rt_totalBcLim_boxplot <- ggplot(aes(y = cube_rt_totalBcLim, x = response), data = loans) + geom_boxplot()
+debtIncRat_boxplot <- ggplot(aes(y = debtIncRat, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+
+
+cube_rt_bcOpen_boxplot <- ggplot(aes(y = cube_rt_bcOpen, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+cube_rt_totalBcLim_boxplot <- ggplot(aes(y = cube_rt_totalBcLim, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
 
 
 grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_bcOpen_boxplot, cube_rt_totalBcLim_boxplot, cube_rt_inq6mth_boxplot,  debtIncRat_boxplot, nrow=4, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
 ```
 
-After inspection of the boxplot cube_rt_delinq2yr, the variable delinq2yr was removed from the model, because even after transformation it is extremely right skewed. Taking it out of the model did not effect the accuracy or profit predictions significantly.
+After inspection of the boxplot for cube_rt_delinq2yr, the variable delinq2yr was removed from the model, because even after transformation it is extremely right skewed. Taking it out of the model did not effect the accuracy or profit predictions significantly.
 
 After plotting and exploring of several other predictors, the shapes of bcOpen and totalBcLim after cube root transformation were found to be close to normal. Adding them to the model decreased AIC, and increased predictive power. The terms are significant. The variables bcOpen and totalBcLim which indicate credit card utilization may be proxies for totalBal and totalLim, which were removed because of their bimodal distributions. The variable bcOpen had 360 values with NA. These were removed from the data set.
 
 ## 5. The Logistic Model
 
-From the summary of the model all the variables are very significant as indicated by small p-values. Based on the VIF, the variables log_payment and log_amount are colinear. However, they are still very sigficant in the model, and will be kept.
+From the summary of the model all the variables are very significant as indicated by p-values that are close to zero. Based on the VIF, the variables log_payment and log_amount show correlation. However, they are still very significant in the model, and will be kept.
 
 ```{r create_training_test_datasets, include=FALSE}
 #https://stackoverflow.com/questions/17200114/how-to-split-data-into-training-testing-sets-using-sample-function
@@ -212,14 +214,22 @@ test <- loans[-train_ind, ]
 loan.model <- glm(formula = response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim, family = "binomial", data = train)
 extractAIC(loan.model)
 summary(loan.model)
-summary(test)
+#summary(test)
 ```
+The model with the coefficients is below.
+
+$$\widehat{\text{ln} \left( \frac{P(Good)}{1-P(Good)} \right)} = 5.181 - 1.875 \cdot \text{log_amount} 
++ 1.468 \cdot \text{log_payment} + 0.467 \cdot \text{log_income} - 0.357 \cdot \text{verified} - 0.028 \cdot \text{debtIncRat} 
+- 0.037 \cdot \text{cube_rt_inq6mth} + 0.018 \cdot \text{cube_rt_bcOpen} + 0.024 \cdot \text{cube_rt_totalBcLim}$$
+
+
 
 ```{r vif, include=FALSE}
 require(HH)
 vif(response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim,  data = train)
 ```
 
+The contingency table along with the overall accuracy is below. The accuracy is at 79%. That is 79% of the time truly good or bad loans are classified correctly. Based on the accuracy and that the terms are all significant, this is a good model.
 
 ```{r contigency_table, echo=FALSE}
 #predprob <- fitted(loan.model) # get predicted probabilities
@@ -254,6 +264,9 @@ accuracy.df <- data.frame(threshhold=threshholds, accuracy=accuracy)
 #model is most accurate at around .5
 plot(accuracy~threshholds)
 ```
+
+The maxmimum accuracy occurs near the threshold of .55. As you can see from the plot above of accuracy vs threshold, the accuracy is mostly flat from 0 to 0.6, but from inspection of the data peaks at .55. It then declines between 0.6 and 1.0.
+
 ## 7. Optimizing the Threshold for Profit
 
 ```{r profit, echo=FALSE}
