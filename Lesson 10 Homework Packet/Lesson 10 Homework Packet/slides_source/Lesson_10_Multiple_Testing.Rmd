@@ -1,0 +1,1109 @@
+---
+title: "Multiple Testing"
+output:
+  beamer_presentation:
+    colortheme: default
+    fonttheme: default
+    keep_tex: yes
+    template: ../../beamer169.tex
+fontsize: '12pt,notes'
+---
+
+## A Long Presentation
+
+\Large
+
+- Multiple Testing is a big topic and a subject of active research.
+- Blend of classical and current approaches - the material on the False Discovery Rate isn't in your textbook, but is definitely applicable to big data.
+- The right approach depends on your application.
+- Many of the slides show the same examples with different approaches so you can flip through many of these quickly.
+
+<div class='notes'>
+- audio01.mp3
+- The presentation this week is one of our longer ones.  There are two reasons for that
+- first multiple testing is a big topic for which there are entire books and some of the procedures we cover aren't addressed in the textbook.  
+- Most notably we present material on the False Discovery Rate which has only been around since 1995 and grew out of the field of genomics where it's standard to have thousands of simultaneous comparisons.
+- The second reason is that we probably went a little over the top with  many examples in R to show you how to implement various procedures.
+- Many of the R slides are similar in nature so we think you'll be able to flip through many of those quite quickly.
+</div>
+
+
+## Multiple Tests Example
+
+\Large
+
+- Garcia-Arenzana et al (2014) tested associations of 25 dietary variables with mammographic density, an important risk factor for breast cancer (P-values on next slide).
+- $\alpha = 0.05$ means that if $H_0$ is true there is still a 5% chance of a significant result.
+- Among 25 tests we should expect one or two significant results by chance alone.
+
+<div class='notes'>
+- no audio
+- add reference below slide: García-Arenzana, N., E.M. Navarrete-Muñoz, V. Lope, P. Moreo, S. Laso-Pablos, N. Ascunce, F. Casanova-Gómez, C. Sánchez-Contador, C. Santamariña, N. Aragonés, B.P. Gómez, J. Vioque, and M. Pollán. 2014. Calorie intake, olive oil consumption and mammographic density among Spanish women. International journal of cancer 134: 1916-1925.
+</div>
+
+## Multiple P-values
+
+\setlength{\tabcolsep}{.1in}
+\begin{tabular}{lrlr}
+Dietary Variable & $P$ & Dietary Variable & $P$ \\ \hline
+Total Calories & \textcolor{blue}{<0.001} & Eggs 0.275 \\
+Olive oil & \textcolor{blue}{0.008} & Blue fish & 0.34 \\
+Whole milk & \textcolor{blue}{0.039} & Legumes & 0.341 \\
+White meat & \textcolor{blue}{0.041} & Carbohydrates & 0.384 \\
+Proteins & \textcolor{blue}{0.042} & Potatoes & 0.569 \\
+Nuts & 0.06 & Bread & 0.594 \\
+Cereals and pasta & 0.074 & Fats & 0.696 \\
+White Fish & 0.205 & Sweets & 0.762 \\
+Butter & 0.212 & Dairy products & 0.94 \\
+Vegetables & 0.216 & Semi-skimmed milk & 0.942 \\
+Skimmed Milk & 0.222 & Total meat & 0.975 \\
+Red Meat & 0.251 & Processed meat & 0.986 \\
+Fruit & 0.269 & & \\
+\end{tabular}
+
+<div class='notes'>
+- audio02.mp3
+- If we're testing at the 5% level, then there are 5 significant results here.  If there weren't truly any significant results we'd expect to find 1 or 2 false positives by chance alone.
+- add below this slide:  The idea to use this example cam from http://www.biostathandbook.com/multiplecomparisons.html which is really good and quick read on this subject.
+
+</div> 
+
+## Multiple Statistical Tests
+
+\Large
+
+- **Possible Problem:**  As the number of tests increases so does the fraction of the tests that may be wrong due to random chance alone.
+
+- Depending on application we might have to apply a *multiple tests correction* to reduce the chance of Type I errors and/or Type II errors.
+
+<div class='notes'>
+- no audio
+</div>
+
+
+## The Multiple Testing Problem
+
+- perform $m$ simultaneous hypothesis tests with a common procedure
+
+\centering
+\begin{tabular}{c|cc|c}
+           & $H_0$ retained & $H_0$ rejected & Total \\
+           & (test non-significant) & (test significant) \\ \hline
+$H_0$ true & $TN$            & $FD$            & $T_0$ \\
+$H_a$ true & $FN$            & $TD$            & $T_1$ \\ \hline
+Total      & $N$             & $D$             & $m$
+\end{tabular}
+
+- T/F = True/False, D/N = Discovery/Nondiscovery
+- can only observe $N$, $D$ and $m$
+- $FD$ = False Discovery = Type I error
+- $FN$ = False Nondiscovery = Type II error
+
+<div class='notes'>
+- audio03.mp3
+- we'll say that significant tests in which the null hypothesis is rejected represent discoveries
+- a Type I error is a false discovery, represented by FD in the table
+- a Type II error is a false nondiscovery, that is there truly is a significant effect but the test failed to reveal it, we call this FN in the table.
+- the more simultaneous tests we do, the more opportunities for these errors occur due to chance, but in the end after we've done $m$ tests all we know if how many nulls we've retained and how many we've rejected.
+- Statisticians have developed many, many procedures to allow the user to try to control the chances of these errors occuring.  We'll see a few of these procedures in what follows.
+</div>
+
+## Do we need multiple tests correction?
+
+\Large
+
+- If false discoveries are really bad, then yes.  What if you're comparing multiple new medical treatments to an existing treatment?
+
+- If false nondiscoveries are really bad, then no.  What if you're just looking for possible dietary factors that might be linked to breast cancer?
+
+- Compromise - find more true discoveries by allowing for some false discoveries.
+
+<div class='notes'> 
+- audio04.mp3
+- Whenever we try to reduce one kind of error, we'll make more of the other and we'll explore this in what follows.
+- In the next few slides we'll define three types of error control.
+</div>
+
+
+## Per-Comparison Error Control
+
+\Large
+
+- PCER = Per Comparison type I Error Rate
+- uncorrected testing
+- each individual test uses a significance level of $\alpha$
+- probability of Type I error for each test is $\leq \alpha$
+- many Type I errors = many false discoveries
+
+<div class='notes'>
+- no audio
+</div>
+
+
+## Familywise Error Control
+
+\Large
+    
+- FWER = FamilyWise Error Rate
+- control overall rate of Type I error.
+- e.g. Bonferonni correction - use a per-comparison significance level of $\alpha / m$
+- guarantees the probability of one or more Type I errors is $\leq \alpha$
+- many Type II errors = many false nondiscoveries
+
+<div class='notes'>
+- audio05.mp3
+- Procedures to control the familywise error rate have been around since the 1950's.  
+- These procedures tend to be very conservative.  Since the focus is on avoiding false discoveries we can end up missing significant effects.
+</div>
+
+## Control False Discovery Rate
+
+\Large
+
+- False Discovery Rate = control, on average, $FD/D$ which is the proportion of false discoveries out all discoveries
+- in other words, out of all the significant tests we control the fraction that are truly not significant
+
+<div class='notes'>
+- audio06.mp3
+- work on the false discovery rate began in 1995 with a paper due to Benjamin and Hochberg.
+- Procedures that control the false discovery rate don't tell you the maximum probability of a Type I or a Type II error.
+- Instead they say that if we repeated the experiment many times then this is the average proportion of false discoveries out of all discoveries. 
+- This is exactly the sort of tool we need in big data where we might be sifting through thousands of results to try to find some that are worthy of further exploration.
+</div>
+
+## An Exploratory Example - Setup 1
+
+\Large
+
+- We'll examine the three types of error control in R for a synthetic example.
+- We'll generate some random data and test each value: 
+    - \large $H_0:$ value is from a normal distribution with $\mu=0$
+    - \large $H_a:$ value is from a normal distribution with $\mu>0$
+
+<div class='notes'>
+- no audio
+</div>
+
+## An Exploratory Example - Setup 2
+
+```{r echo = FALSE}
+set.seed(133) #133 gives an example showing Bonferroni Holm is slightly more powerful than Bonferonni.
+```
+
+```{r}
+T0 = 900; T1 = 100;
+x = c( rnorm(T0), rnorm(100, mean = 3) )
+P = pnorm( x, lower.tail = FALSE )
+sum( P < 0.05 )
+```
+
+- \large Number of discoveries is $D = 142$.
+
+<div class='notes'>
+- below slide - the file ErrorExperiments.R in the download pack will let you explore this series of experiments yourself.
+- audio07.mp3
+- our data consists of random observations from two normal distributions.
+- 900 are from the standard normal with mean 0 and standard deviation 1.  For these 900 the null is true so we ideally we'd get 900 True Nondiscoveries.
+- 100 are from a right-shifted normal with mean 3 and standard deviation 1.  For these 100 the alternative is true so ideally we'd have 100 True Disoveries.
+- To get the P-value for each test, we assume the observation is from the standard normal and compute the right-tail probability.  At the 5% significance level we'll end up rejecting any value that is greater than about 1.65.
+- Using the 5% significance level for each individual test we discover 142 significant results, that is, we've made 142 discoveries.   Some of these have to be wrong since we only expected 100.
+</div>
+
+## An Exploratory Example - No Corrections 1
+
+```{r}
+# FALSE means reject null = discovery
+test <- P > 0.05
+test0 <- test[1:T0]
+test1 <- test[(T0+1):(T0+T1)]
+summary(test0) 
+summary(test1)
+```
+
+<div class='notes'>
+- audio08.mp3
+- here is what happens when we use a Per Comparison Error Rate of 5% and we've added no corrections to account for multiple comparisons.
+- We'll explain the results in detail on this slide, but for the other methods of error control on the upcoming slides we'll just give shorter summaries.
+- the test variable is FALSE for all significant tests
+- For the first 900 observations we'd like to see 900 TRUE values indicating that we retain the null hypothesis, but instead we see 49 FALSE values indicating we have 49 significant results that are in error.  These are Type I errors or False Discoveries.
+- For the last 100 observations we'd liek to see 100 FALSE values indicating that we reject the null hypothesis for all 100, but instead we have 93 TRUEs and 7 FALSEs.  The 7 FALSES are Type II errors where we wrongly decided not to reject the null.  These are False Nondiscoveries.
+- It's important to remember that these errors occur simply because of random chance.
+</div>
+
+## An Exploratory Example - No Corrections 2
+
+```{r}
+# the type I error rate is
+sum(test0==FALSE)/T0
+# the type II error rate is
+sum(test1==TRUE)/T1
+# the false discovery rate is
+sum(test0==FALSE) / (sum(test0==FALSE) + sum(test1==FALSE))
+```
+
+<div class='notes'>
+- audio09.mp3
+- the Type I error rate is the number of False Discoveries out of the 900 tests where we knew the null was true.  
+- Notice that the type I error rate is exactly what we'd expect since we set the significance level to be 5% meaning there is a 5% chance of rejecting a true null due to random variation of the data.
+- We have a lot of False Discoveries here with almost 35% of all our discoveries being false, but the Type II error rate is low showing that we've managed to find most of the truly significant results.
+</div> 
+
+## Bonferonni Correction for FWER
+
+\large
+
+- Controls FWER.
+- Reject $H_0$ if $P < \alpha/m$
+- In R use ```p.adjust( P, method = 'bonf')``` and compare the adjusted p-values to $\alpha$.
+    - \large Reject $H_0$ if $\tilde{p} = m p < \alpha$
+
+- Pros:  simple, any hypothesis tests (or CI's)
+- Cons: super conservative / low power so that many effects may be missed.
+
+<div class='notes'>
+- audio10.mp3
+- The Bonferonni correction is often explained by saying that we compare each individual P value to the corrected significance level alpha over m.
+- However, in practice and in software we multiply the original p-values by m and compare these to the family wise error rate alpha.  These new p-values are often called adjusted or corrected p-values. 
+- R uses adjusted P-values.
+- On the next couple of slides we'll apply the Bonferonni correction to our 1000 hypothesis tests.
+</div>
+
+## An Exploratory Example - Bonferonni Correction 1
+
+```{r}
+# same as btest <- P > 0.05/(T0+T1)
+btest <- p.adjust(P,method='bonf') > 0.05
+btest0 <- btest[1:T0]
+btest1 <- btest[(T0+1):(T0+T1)]
+summary(btest0) 
+summary(btest1)
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## An Exploratory Example - Bonferroni Correction 2
+
+```{r}
+# the type I error rate is
+sum(btest0==FALSE)/T0
+# the type II error rate is
+sum(btest1==TRUE)/T1
+# the false discovery rate is
+sum(btest0==FALSE) / (sum(btest0==FALSE) + sum(btest1==FALSE))
+```
+
+<div class='notes'>
+- audio11.mp3
+- Bonferonni was wildly successful at controlling the Type I error rate, which is now 0, because no false disoveries were made at all.  This also makes the false discovery rate 0 as well.
+- However, the Type II error rate has skyrocketed as we've now missed a whole bunch of significant results.
+- controlling errors is always a balancing act.
+</div>
+
+## Bonferroni-Holm Step-down Procedure for FWER
+
+- sequential correction
+- Compare smallest $p$-value to $\alpha/m$
+- Second smallest $p$-value to $\alpha/(m-1)$, etc.
+- Stop at first non-rejection and do not reject any remaining hypotheses.
+- Pros: fairly simple, controls FWER, slightly more power than Bonferroni 
+- Cons: still conservative, can't use for simultaneous confidence intervals
+
+\centering \large Always use instead of Bonferonni for multiple hypothesis tests, but stick to Bonferonni if CI's are needed.
+
+<div class='notes'>
+- audio11a.mp3
+- this is a sequential procedure that reduces the amount of correction to account for the number of tests remaining.
+- it's uniformly more powerful than Bonferroni though the difference isn't usually large. 
+- So always use this for simultaneous hypothesis tests instead of plain Bonferonni.  Sequential adjustments don't make sense for confidence intervals so for simultaneous confidence intervals use plain Bonferonni.
+</div>
+
+## An Exploratory Example - Bonferonni-Holm 1
+
+```{r}
+holmt <- p.adjust(P,method='holm') > 0.05
+holmt0 <- holmt[1:T0]
+holmt1 <- holmt[(T0+1):(T0+T1)]
+summary(holmt0) 
+summary(holmt1)
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## An Exploratory Example - Bonferonni-Holm 2
+
+```{r}
+# the type I error rate is
+sum(holmt0==FALSE)/T0
+# the type II error rate is
+sum(holmt1==TRUE)/T1
+# the false discovery rate is
+sum(holmt0==FALSE) / (sum(holmt0==FALSE) + sum(holmt1==FALSE))
+```
+
+<div class='notes'>
+- audio12.mp3
+- the only difference between the Bonferroni correction and the Bonferonni-Holm sequential correction is that the number of Type II errors has been reduced by one reflecting the slightly higher power of the sequential procedure.
+</div>
+
+## FDR Control - Benjamin and Hochberg Procedure
+
+\Large
+
+- $\alpha$ is now the target average false discovery rate 
+- use `p.adjust( p, method = 'BH' )` to compute adjusted p-values in R and compare to $\alpha$
+- the adjusted p-values are sometimes called q-values
+- details of sequential procedure on Wikipedia
+- widely used in genomics and medical imaging with thousands of simultaneous tests
+
+<div class='notes'>
+- audio13.mp3
+- We could show you how to sequentially adjust the P-values, but it wouldn't really give you any insight into why this procedure works.  
+- You can find the reference to the original 1995 paper on Wikipedia if you want to read more about it.
+- Notice that alpha doesn't have anything to do with the probability of Type I errors here, instead it's the desired average False Discovery Rate.
+</div>
+
+## An Exploratory Example - FDR Correction 1
+
+```{r}
+# No Corrections, FALSE means reject null = discovery
+fdrt <- p.adjust(P, method='BH') > 0.05
+fdrt0 <- fdrt[1:T0]
+fdrt1 <- fdrt[(T0+1):(T0+T1)]
+summary(fdrt0) 
+summary(fdrt1)
+```
+
+<div class='notes'>
+- audio14.mp3
+- now we've made 4 False Disoveries or Type I errors which is way less conservative than the Bonferroni correction
+- the tradeoff is we've made far fewer Type II errors
+</div>
+
+## An Exploratory Example - FDR Correction 2
+
+```{r}
+# the type I error rate is
+sum(fdrt0==FALSE)/T0
+# the type II error rate is
+sum(fdrt1==TRUE)/T1
+# the false discovery rate is
+sum(fdrt0==FALSE) / (sum(fdrt0==FALSE) + sum(fdrt1==FALSE))
+```
+
+<div class='notes'>
+- audio15.mp3
+- The Type I error rate is still quite small and we've made far fewer Type II errors.
+- Notice that the False Discovery Rate is about 6% meaning of all our significant tests or Discoveries only about 6% are wrong.  This is pretty close to the 5% target we set.
+</div>
+
+
+## An Exploratory Example - FDR Correction 3
+
+Increase target FDR to 0.10 = 10% False Discoveries.
+
+```{r}
+# No Corrections, FALSE means reject null = discovery
+fdrt <- p.adjust(P, method='BH') > 0.10
+fdrt0 <- fdrt[1:T0]
+fdrt1 <- fdrt[(T0+1):(T0+T1)]
+summary(fdrt0) 
+summary(fdrt1)
+```
+
+<div class='notes'>
+- 
+</div>
+
+## An Exploratory Example - FDR Correction 4
+
+```{r}
+# the type I error rate is
+sum(fdrt0==FALSE)/T0
+# the type II error rate is
+sum(fdrt1==TRUE)/T1
+# the false discovery rate is
+sum(fdrt0==FALSE) / (sum(fdrt0==FALSE) + sum(fdrt1==FALSE))
+```
+
+<div class='notes'>
+- audio15a.mp3
+- as the target False Discovery Rate increases notice that we make more discoveries, in this case there are 86 discoveries of which 13 are false
+- so our actual FDR is about 15% which is in the neighborhood of our 10% target
+- Note that we've decreased the Type II error rate while increasing the Type I error rate.  Changing the desired FDR allows us to change the balance between Type I and Type II errors.
+</div>
+
+## Revisiting the Dietary Example
+
+```{r, echo=FALSE}
+P = c(.001,.008,.039,.041,.042,.060,.074,.205,.212,.216,.222,.251,.269,
+      .275,.340,.341,.384,.569,.594,.696,.762,.940,.942,.975,.986)
+```
+
+```{r}
+# no corrections
+rej <- P<.05; rej[1:10]
+# FWER with Bonferonni-Holm
+rej <- p.adjust(P,method='holm') < .05; rej[1:10]
+# FDR with Benjamin-Hochberg, aim for up to 20% false discoveries
+rej <- p.adjust(P,method='BH') < .20; rej[1:10]
+```
+
+<div class='notes'>
+- audio16.mp3
+-lets revisit the dietary example from the beginning
+- if we do no multiple test correction there appear to be 5 significant results, but since we expect at least 1 or 2 false positives it's hard to tell what's really significant and what isn't
+- if we control the family wise error rate with Bonferonni-Holm then there is only 1 significant result.  That's great if false discoveries are a problem, but the researchers in this case were really just trying to find possible associations for further research
+- so they actually chose to control the false discovery rate with the Benjamin Hochberg procedure and found two significant associations. To be accurate here, I'm not actually sure what target false discovery rate they used.
+</div>
+
+## Bonferroni Correction for CI's
+
+\Large 
+
+- For 4 simultaneous CI's.
+- want familywise error rate $\alpha_E = 0.05$
+- familywise confidence level $1-\alpha_E = 0.95$
+- individual comparison error rate $\alpha_I = 0.05/4 = 0.0125$
+- individual comparison confidence level $1-\alpha_I = 0.9875$
+
+Generally:  familywise confidence level $1-\alpha$ use individual confidence level $1-\alpha/m$.
+
+
+<div class='notes'>
+- audio17.mp3
+- we'll see an example of using this later to estimate differences between population means, but this correction can be used for any family of simulataneous confidence intervals which is why we've introduced it here.
+- if we have overall 95% confidence level for a whole family of intervals we can say that we are 95% confident that the collection of intervals doesn't contain any intervals that fail to contain the estimated parameter
+</div>
+
+## Which kind of Error Control?
+
+\centering
+Type I Error = False Discovery, Type II Error = False Nondiscovery
+\vspace{.25in}
+
+\centering
+\begin{tabular}{c|c|c|p{2.5in}}
+Error         & Type I        & Type II        & \\
+Control       & Errors        & Errors         & When to use   \\ \hline
+PCER          & Many          & Few            & When it's important 
+not to miss any discoveries.  Exploratory Only. \\ \hline
+FWER          & Very few      & Many           & When false discoveries are bad and need to be controlled. \\ \hline
+FDR           & Few           & Controlled & Exploratory Analysis.  Don't want to miss discoveries while keeping false discoveries controlled. \\
+\end{tabular}
+
+<div class = 'notes'>
+- audio18.mp3
+- The kind of error control you choose for multiple tests really depends on the application
+- If you're comparing several new but expensive medical treatments to an existing one, it might make sense to control the family wise error rate to avoid making a potentially expensive Type I error.
+- If you're looking for associations between one variable and many others and you plan to do further research into the significant associations then using FDR or possibly no corrections at all makes sense.  
+- If you've got thousands or even tens of thousands of tests then you really have to do something like FDR control so that you have a reasonable chance of discovering many significant results while keeping a lid on false discoveries.
+</div>
+
+## Comparing Population Means
+
+\Large
+
+- The methods above apply to any family of hypothesis tests:
+    - \large Simultanous $t$-tests for some effect
+    - Testing multiple correlations
+    - Testing multiple regression coefficients
+    - many others
+
+- Below we study comparing multiple population means
+    - \large Multiple two-sample $t$-tests for each pair of means.
+    - Tukey-Kramer test for pairwise means comparison.
+    
+    
+<div class='notes'>
+-audio19.mp3
+- the error control procedures we've met so far apply to any family of hypothesis tests, or in the case of Bonferonni we can also correct the confidence levels for simultaneous confidence intervals
+- in what follows we'll focus on the problem of comparing multiple population means
+</div>
+
+## ANOVA and Kruskal-Wallis Tests
+
+\Large
+
+- Reject $H_0$ and conclude there is at least one significant difference between means, but which?
+
+- Find pairwise differences: multiple pairwise tests with error control or use a specialized procedure like Tukey-Kramer.
+
+- Good idea to do ANOVA first especially for controlling Type I errors, but not required.
+
+<div class='notes'>
+- audio20.mp3
+- It's conventional to start with an ANOVA to see if there are significant differences among the means, but all an ANOVA (or Kruskal-Wallis) can tell us is that there is at least one difference, but we won't know hwere it is.
+- So we usually follow up with multiple pairwise tests or pairwise confidence interval estimates of the differences in means which requires us to think about error control.
+- If you're not worried about Type I errors you really don't even need to do ANOVA to begin with and can jump straight to the pairwise comparisons.
+</div>
+
+## Comparing Multiple Population Means
+
+\large
+
+- How many pairs of means? 
+
+$k$ means | $m = \frac{k(k-1)}{2}$ pairs
+:---------:|:-----------------------------:
+3          | 3 
+4          | 6
+5          | 10
+6          | 15
+7          | 21
+$\vdots$   | $\vdots$
+
+The number grows quadratically with the number of means.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Testing for significant differences among means
+
+\Large
+
+- PCER control 
+    - \large pairwise $t$-tests with no correction
+- FWER control
+    - \large pairwise $t$-tests with Bonferonni-Holm
+    - "one-step" procedure like Tukey-Kramer which is more powerful than Bonferonni 
+- FDR control
+    - \large pairwise $t$-tests with Benjamin-Hochberg
+
+Any of these methods can be bootstrapped if the conditions aren't met. 
+
+<div class='notes'>
+- audio21.mp3
+- these are just a few of the many different procedures which have been developed for comparing population means, but these are some of the main ones that are used in practice.
+- the pairwise t-tests we're talking about here are essentially the same as the independent samples t-test for the difference of two means that you learned earlier in the course.
+- All of these are based on doing one t-test or t-interval for each pair of means except for the Tukey-Kramer procedure which uses a t-test statistic that is based on the maximum difference between groups so the requirements are similar to those of the t-test.
+</div>
+
+## Requirements for pairwise $t$-tests
+
+\large
+
+- Similar to independent samples $t$-test.
+- Requires normal distributions or each sample size $\geq 30$.
+- Generally use unequal variances tests without checking for equal variances.
+- If samples are small it can be helpful to use equal variances versions of tests as long as the samples have comparable variances.
+- If the distributions really non-normal and the samples aren't too small, then bootstrap the $t$-tests using onewayComp() from DS705data package.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance Example
+
+\large
+
+- Record pain sensitivity after rats developed morphine tolerance
+- 5 treatment groups:  MS, MM, SS, SM, McM 
+- example found in David Howell's book: *Statistical Methods for Psychology* - Chapter 12 (included with download)
+- original study: Siegel, Shepard. "Evidence from rats that morphine tolerance is a learned response." Journal of comparative and physiological psychology 89.5 (1975): 498.
+
+<div class='notes'>
+- audio22.mp3
+- The details of the experiment aren't important for the purpose of demonstrating our statistical procedures, but domain knowledge is always important for data scientist.
+- If you are are curious, the M's are for morphine and S's for Saline, so MS is morphine followed by Saline etc. 
+</div>
+
+## Morphine Tolerance Boxplots
+
+```{r echo=FALSE, fig.width=5, fig.height=2.5, fig.align='center'}
+pain <- c( 3, 5, 1, 8, 1, 1, 4, 9,
+        2,12,13, 6,10, 7,11,19,
+       14, 6,12, 4,19, 3, 9,21,
+       29,20,36,21,25,18,26,17,
+       24,26,40,32,20,33,27,30)
+treat <- factor( rep( c('MS','MM','SS','SM','McM'),
+                      each = 8), 
+                 levels = c('MS','MM','SS','SM','McM')  )
+morph <- data.frame(pain,treat)
+par(mar=c(3,2,0.5,0))
+boxplot(pain~treat,data=morph)
+```
+
+<div class='notes'>
+- audio23.mp3
+- based on the boxplot it seems reasonable to say that the samples come from normal distributions with similar variances.  
+- for our pairwise t-tests we'll go ahead an use the equal variances assumption since the slight boost in power might be helpful to compensate for the small sample size of 8 for each sample.
+- visually we can see that some of the samples are shifted from relative to the others so we'll likely see some different means
+</div>
+
+## Morphine Tolerance - PCER 1
+
+No corrections.
+
+```{r}
+pairwise.t.test( pain, treat, p.adjust.method='none',
+                 pool.sd = TRUE)$p.value
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - PCER 2
+
+No corrections - easier to read.
+
+```{r}
+pairwise.t.test( pain, treat, p.adjust.method='none',
+                 pool.sd = TRUE)$p.value < 0.05
+```
+- mean for SM is significantly different than for MS, MM, and SS, etc.
+- 7 significant differences out of 10 possible, but Type I errors may be present
+
+<div class='notes'>
+- audio24.mp3
+- it's easier to read the output if we use the 5\% threshold to return TRUE if we should reject the hypothesis that the pair of means is the same
+- these are two-tailed tests unless otherwise specified.
+- for reporting these results in homework you should should write a summary that describes which pairs of means are different
+</div>
+
+## Morphine Tolerance - PCER 3
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+require(DS705data)
+```
+
+```{r echo=TRUE, eval=TRUE}
+onewayComp(pain~treat,data=morph,var.equal=TRUE,
+           adjust='none')$comp[,c(2,3,5,6)]
+```
+
+<div class='notes'>
+- audio25.mp3
+- to get the onewayComp function you'll have to load the DS705data package
+- this function will do a lot and you can look at the help page for the function to learn more
+- we're displaying some of the columns of output to keep this readable.  You can see that we asked for columns 2,3,5 and 6 to be displayed.
+- in this case it includes a 95\% confidence interval for the difference of each pair of means, these confidence levels haven't been corrected to allow for multiple comparison
+</div>
+
+
+## Morphine Tolerance - Bonferonni 1
+
+Bonferonni FWER Correction - easier to read.
+
+```{r}
+pairwise.t.test( pain, treat, p.adjust.method='bonf',
+                 pool.sd = TRUE)$p.value < 0.05
+```
+- no longer significant difference between $\mu_{MS}$ and $\mu_{MM}$ or $\mu_{SS}$
+- probablility of any Type I error now less than .05, but may be missing signficant differences
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Bonferonni 2
+
+```{r echo=TRUE, eval=TRUE}
+onewayComp(pain~treat,data=morph,var.equal=TRUE,
+           adjust='bonferroni')$comp[,c(2,3,6,7)]
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Bonferonni 3
+
+\large
+
+**Simultaneous Hypothesis Test Conclusion:**  At the 5% significance level we can say the population mean pain sensitivities for SM and MCM are different than those of MS, MM, and SS.  There are no other significant differences.
+
+**Family of confidence interval interpretation:**  We are 95% confident that the population mean pain sensitivity is greater for SM than for MS, MM, and SS by 11.5 to 28.5, 5.5 to 22.5, and 4.5 to 21.5, respectively.  While the pain sensitity for McM is greater than for MS, MM, and SS by 16.5 to 33.5, 10.5 to 27.5, and 9.5 to 26.5, respectively.
+
+<div class='notes'>
+- audio26.mp3
+- since we are controlling the familywise error rate here we can assert a conclusion or interpretation about the whole family of comparison in much the same way as we would for a single test or confidence interval.
+- if we are not using corrections or are controlling the false discovery rate, then we need to explain that with our conlusions as well.
+</div>
+
+## Morphine Tolerance - Bonferonni-Holm 1
+
+Bonferonni-Holm FWER Correction - easier to read.
+
+```{r}
+pairwise.t.test( pain, treat, p.adjust.method='holm',
+                 pool.sd = TRUE)$p.value < 0.05
+```
+- agrees perfectly with Bonferonni corrected results
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Bonferonni-Holm 2
+
+```{r echo=TRUE, eval=TRUE}
+onewayComp(pain~treat,data=morph,var.equal=TRUE,
+           adjust='holm')$comp
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Benjamin-Hochberg 1
+
+Benjamin-Hochberg FDR Correction - easier to read.
+
+```{r}
+pairwise.t.test( pain, treat, p.adjust.method='BH',
+                 pool.sd = TRUE)$p.value < 0.05
+```
+- gives 7 significant differences out of 10
+- controls FDR so that we expect about 5% of significant differences to be actually be nonsignificant on average
+
+<div class='notes'>
+- audio27.mp3
+- When you explain these results you should no longer claim that these differences are significant at the 5% significance level
+- Rather you should say something like we've discovered 7 significant differences by a method which gets about 5% of significant differences wrong on average.
+</div>
+
+## Morphine Tolerance - Benjamin-Hochberg 2
+
+```{r echo=TRUE, eval=TRUE}
+onewayComp(pain~treat,data=morph,var.equal=TRUE,
+           adjust='BH')$comp
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Benjamin-Hochberg 3
+
+```{r echo=TRUE, eval=TRUE}
+onewayComp(pain~treat,data=morph,var.equal=TRUE,
+           adjust='BH')$pair[[3]]<.05
+```
+
+<div class='notes'>
+- audio28.mp3
+- we just threw in this slide so you can see how you can get the matrix of p-values from the onewayComp function.
+</div>
+
+## Less Conservative FWER Control for Comparing Means
+
+\large
+
+- Bonferroni correction usually overly conservative possibly producing many Type II errors
+- Less conservative for samples from normal distributions use Tukey-Kramer or Games-Howell.
+    - \large more details on next 3 slides (also page 460 in Ott)
+    - sometimes called one-step procedures since they compare all pairs at once
+    - preferred to Bonferonni for FWER control when applicable
+    - in R use TukeyHSD() or onewayComp()
+
+<div class='notes'>
+- audio29.mp3
+- Tukey-Kramer is a widely used procedure but needs the samples to be from normal distributions, to have approximately equal variances, and similar sample sizes.  Games-Howell is less well known, but uses a Welch-like correction to allow for unequal variances and unbalanced sample sizes.
+- Even when the variances and sample sizes are similar the Games-Howell procedure usually produces results that are very close to those from Tukey-Kramer, but since Games-Howell isn't as widely known it's probably best to use Tukey-Kramer when possible.
+- In the onewayComp function just set the var.equal argument to FALSE to use Games-Howell.
+</div>
+    
+## Tukey-Kramer
+
+\Large
+$$\overline{x}_i - \overline{x}_j \pm q_{\mbox{crit}} s_p \sqrt{ \frac{\frac{1}{n_i} + \frac{1}{n_j}}{2}}$$
+
+\large
+$q_{crit}$ is the upper-tail critical value of the Studentized range distribution (`qtukey()` in R).
+
+$s_p = \sqrt{MSE}, df = N - k$
+
+exact control of FWER if samples balanced and population variances equal.
+
+<div class='notes'>
+no audio
+</div>
+
+## Games-Howell
+
+\Large
+$$\overline{x}_i - \overline{x}_j \pm q_{\mbox{crit}} \sqrt{ \frac{\frac{s_i^2}{n_i} + \frac{s_j^2}{n_j}}{2} }$$
+
+\large
+$q_{crit}$ is the upper-tail critical value of the Studentized range distribution (`qtukey()` in R).
+
+"Welch" corrected degrees of freedom: $v_i = \frac{s_i^2}{n_i}, v_j = \frac{s_j^2}{n_j}, df = \frac{ (v_i + v_j)^2 }{\frac{v_i^2}{n_i-1} + \frac{v_j^2}{n_j-1}}$
+
+approximate control of FWER
+
+<div class='notes'>
+no audio
+</div>
+
+## Tukey-Kramer vs. Games-Howell Summary
+
+\Large
+
+- Tukey-Kramer
+    - \large approximately balanced (equal) sample sizes
+    - and approximately equal variances
+- Games-Howell
+    - \large unbalanced sample sizes
+    - and/or unequal variances 
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Tukey-Kramer 1
+
+Tukey-Kramer control of FWER using TukeyHSD().
+
+```{r}
+TukeyHSD(aov(pain~treat, data=morph))$treat[,2:4]
+```
+
+- in this case gives the same significant differences as the Bonferonni correction applied to the pairwise t-tests.
+- tighter confidence intervals than Bonferonni so these are preferred.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Tukey-Kramer 2
+
+Tukey-Kramer control of FWER using onewayComp()
+
+```{r echo=TRUE, eval=TRUE}
+onewayComp(pain~treat,data=morph,var.equal=TRUE,
+           adjust='one.step')$comp[,c(2,3,6,7)]
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Morphine Tolerance - Games-Howell
+
+Games-Howell control of FWER using onewayComp()
+
+```{r echo=TRUE, eval=TRUE}
+onewayComp(pain~treat,data=morph,var.equal=FALSE,
+           adjust='one.step')$comp[,c(2,3,6,7)]
+```
+
+<div class='notes'>
+- no audio
+</div>
+
+## Tukey-Kramer and Games-Howell Summary
+
+\large
+
+- both procedures identified same significant differences as Bonferonni correction applied to pairwise t-tests
+- Tukey-Kramer is a good choice because the populations appear to have similar variances and the confidence intervals are tighter than those from Bonferonni.
+- Games-Howell wasn't really needed here since the variances were the same, but use if variances are different or sample sizes quite different.
+- Interpret these results the same way we did with the pairwise Bonferroni corrected results above.
+
+<div class='notes'>
+- no audio
+</div>
+
+## Bootstrapping for pairwise means
+
+\Large
+
+- Any of the procedures in onewayComp() can be bootstrapped, by specifying nboot = 1000 say.
+- Good to do if populations clearly aren't normally distributed.
+
+<div class='notes'>
+- audio30.mp3
+- Some people like to use bootstrapping to validate results.
+- Say you've elected to use Tukey-Kramer becaue the samples appear to come from normal distributions, etc.  
+- Use onewayComp to compute the results and the use onewayComp again with nboot = 5000 say to get bootstrapped results.  If the results are similar then great, but if the results are quite different perhaps you should explore a bit further to see if the conditions are really met.
+- If it's clear that the samples aren't from normal distributions, then using bootstrapping is a good thing to try.
+- We haven't really covered them very much in this class but the bootstrap intervals and hypothesis tests produced by onewayComp() based on the t-test statistic.  Instead of using the critical values and p-values from an analytic t-distribution we use the bootstrap distribution of the t-statistic to get the critical values or p-values.  These kind of bootstrap confidence intervals are sometimes called Studentized intervals.
+</div>
+
+## Which Procedure for Comparing Means?
+
+- For FWER control when comparing all possible pairs of means:
+    - Normality OK $\rightarrow$ Tukey-Kramer (var.equal=TRUE) or Games-Howell (var.equal = FALSE). onewayComp() from DS705data package gives tests and CI's.
+    
+    - Normality not OK $\rightarrow$ try bootstrapping Tukey-Kramer or Games-Howell using onewayComp() with nboot > 0.
+    
+- For FWER control for just a few pairs of means:
+    - We haven't done this, but if the number of pairs is small then Bonferonni (or Bonferonni-Holm if you don't need CI's) may be better than Tukey-Kramer.  Do t-tests for just the pairs of interest and then make corrections.  Bootstrap if needed.
+    
+- For FDR control when comparing all possible pairs
+    - Use onewayComp( ..., adjust = 'BH') to do pairwise t-tests.  
+    - Normal OK use nboot = 0.
+    - Normality not OK use nboot > 0.
+    
+<div class='notes'>
+- no audio
+</div>
+
+
+
+## What if means aren't appropriate?
+
+\large 
+
+- For skewed data or data with many outliers it might be more appropriate to compare medians or trimmed means.
+- If populations have same shape distributions with possible shifts :
+    - \large Dunn test for pairwise comparison of shifts, often used as a followup to Kruskal-Wallis.
+    - Pairwise Rank Sum tests with Bonferonni correction.
+- Can also bootstrap intervals for differences of medians or trimmed means with boot package and apply Bonferonni correction to the confidence levels.  
+
+<div class='notes'>
+- audio31.mp3
+- Since there's already plenty of material to learn in this lesson we won't cover all of these alternative procedures here
+- but we will conclude with a bootstrapping example that shows you how to bootstrap a family of confidence intervals, in this case, for differences of medians.
+</div>
+
+## Contact Lenses Example 
+
+See Problem 8.27 in Ott (page 442).
+```{r echo=FALSE,fig.align='center',fig.width=5,fig.height=2.5}
+contacts <- read.csv('./ex8-27.TXT')
+contacts <- contacts[,c(4,2)]
+par(mar=c(4,4,.5,.5))
+boxplot(Response~Supplier,data=contacts,horizontal=TRUE,main="",
+        xlab='Power deviation',ylab='Supplier')
+require(boot)
+```
+
+<div class='notes'>
+- audio32.mp3
+- The response variable, recorded for each of the suppliers, is the deviation between the actual power
+of a lens and the reported or labeled power of a lens.
+- because of outliers and potential skewness, we elect to estimate the differences in the population medians instead of the means.
+</div> 
+
+## Contact Lenses Example (2)
+
+- Estimate differences in population medians: C-A, C-B, and A-B
+```{r echo=TRUE}
+bootMedDiff <- function(d,i){
+  # d is a dataframe with 
+  #    quantitative variable in column 1
+  #    factor variable in column 2
+  meds <- tapply(d[i,1],d[,2],median)
+  c( meds[3]-meds[1], meds[3]-meds[2], meds[1]-meds[2])
+  }
+```
+
+<div class='notes'>
+- audio33.mp3
+- Here is our helper function for computing the three differences of medians
+- we will pass this function to the boot() function and use the strata option so that the resampling occurs within each sample.
+</div>
+
+## Contact Lenses Example (3)
+
+```{r echo=FALSE}
+set.seed(1)
+```
+
+\small
+```{r echo=TRUE}
+boot.object <- boot(contacts, bootMedDiff, R = 5000, 
+                    strata = contacts$Supplier)
+# med_C - med_A 
+boot.ci(boot.object,conf = 1 - .05/3, type='bca', index=1)$bca[4:5]
+# med_C - med_B 
+boot.ci(boot.object,conf = 1 - .05/3, type='bca', index=2)$bca[4:5]
+# med_A - med_B (= 6)
+boot.ci(boot.object,conf = 1 - .05/3, type='bca', index=3)$bca[4:5]
+```
+
+<div class='notes'>
+- audio34.mp3
+- notice we're using the bca intervals that we've used throughout the course and
+- that we've also use a Bonferonni correction for the three intervals so that we can be 95% confident in the entire family of intervals.
+</div>
+
+
+## Fast Facts: Bonferonni Correction for Multiple Tests
+
+\begin{table}
+        \centering
+        \begin{tabular}{ll}
+        \bf{Why}: & To control probability, $\alpha$ of one or more Type I errors (FWER) \\
+                  &   \\                
+        \bf{When}:& Anytime there are $m$ simultaneous tests with a common procedure. \\
+                  & \\
+        \bf{How}: & Compare unadjusted p-values to $\alpha/m$ or use \bf{p.adjust(p,'bonf')}\\
+                  & to adjust p-values which are compared to $\alpha$. \\
+        \end{tabular}
+\end{table}
+
+<div class="notes">
+- No audio.
+</div>
+
+## Fast Facts: Bonferonni Correction for Multiple Confidence Intervals
+
+\begin{table}
+        \centering
+        \begin{tabular}{ll}
+        \bf{Why}: & To control overall confidence level, $1-\alpha,$ for a family of \\
+                  & simultaneous confidence intervals so we can say with $1-\alpha$ confidence \\
+                  & that \bf{all} of the intervals contain true parameters. \\
+                  &   \\                
+        \bf{When}:& Anytime there are $m$ simultaneous intervals with a common procedure. \\
+                  & \\
+        \bf{How}: & Compute each individual interval at confidence level $1-\alpha/m$.\\
+        \end{tabular}
+\end{table}
+
+<div class="notes">
+- No audio.
+</div>
+
+## Fast Facts: False Discovery Rate for Multiple Tests
+
+\begin{table}
+        \centering
+        \begin{tabular}{ll}
+        \bf{Why}: & To set a target average rate of false disoveries (FDR), $\alpha$, for \\
+                  & a family of $m$ simultaneous hypothesis tests. \\
+                  &   \\                
+        \bf{When}:& Anytime there are $m$ simultaneous tests with a common procedure. \\
+                  & \\
+        \bf{How}: & Use \bf{p.adjust(p,'BH')} to adjust p-values which are \\
+                  & compared to $\alpha$. \\
+        \end{tabular}
+\end{table}
+
+<div class="notes">
+- No audio.
+</div>
+
+## Our 2 Cents
+
+- Multiple comparisons is a huge topic so we've just given you a survey of the some the most widely used tools.
+- Use FWER when it's important to not make Type I errors.
+- Use FDR when it's more important to make discoveries for further research, but still want to keep a handle on False Discoveries.
+- Only use PCER (no corrections) when it's very important not to make Type II errors or when you're just exploring.
+- Bonferonni assumes the tests are perfectly independent so it's unnecessarily conservative in many circumstances.
+- Beware of data dredging. Don't do many comparisons without correction and report only the significant ones, that's bad science.
+
+<div class="notes">
+- No audio.
+</div>
+
+## Our 2 Cents (Continued)
+
+- For pairwise comparisons of means the Tukey-Kramer/Games-Howell procedures are preferable to Bonferonni for FWER control.
+- The Dunn test is a good followup for a significant result in Kruskal-Wallis and there is an R-package - `dunn.test`
+- onewayComp() is a versatile tool which you're welcome to use after the class ends.
+- onewayComp() also supports arbitrary linear contrasts which is something we haven't covered but is in the textbook.
+- Try doing onewayComp() with nboot = 0 and with nboot = 1000 or more and if the results are similar then assumptions about normality and such are probably fine.  
+
+<div class="notes">
+- No audio.
+</div>
+
