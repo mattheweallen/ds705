@@ -65,7 +65,7 @@ sum(test1==TRUE)/T1
 sum(test0==FALSE) / (sum(test0==FALSE) + sum(test1==FALSE))
 ```
 
-The Type I error rate is 4.4%, which is close to the 5% level of significance. There is a 5% chance of rejecting the null hypothesis by random chance. 
+The Type I error rate is 4.4%, which is close to the 5% level of significance that I would expect. There is a 5% chance of rejecting the null hypothesis by random chance. 
 
 ---
 
