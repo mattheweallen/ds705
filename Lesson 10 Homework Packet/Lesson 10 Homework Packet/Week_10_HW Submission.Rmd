@@ -65,7 +65,7 @@ sum(test1==TRUE)/T1
 sum(test0==FALSE) / (sum(test0==FALSE) + sum(test1==FALSE))
 ```
 
-The Type I error rate is 4.4%, which is close to the 5% level of significance that I would expect. There is a 5% chance of rejecting the null hypothesis by random chance. 
+The Type I error rate is 4.4%, which is close to the 5% level of significance that would be expected. There is a 5% chance of rejecting the null hypothesis by random chance. 
 
 ---
 
@@ -76,10 +76,24 @@ Now attempt to control the family-wise error rate (FWER) using Bonferroni correc
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+# same as btest <- P > 0.05/(T0+T1)
+btest <- p.adjust(P,method='bonf') > 0.05
+btest0 <- btest[1:T0]
+btest1 <- btest[(T0+1):(T0+T1)]
+summary(btest0) 
+summary(btest1)
 ```
 
-Replace text with your answer.
+```{r}
+# the type I error rate is
+sum(btest0==FALSE)/T0
+# the type II error rate is
+sum(btest1==TRUE)/T1
+# the false discovery rate is
+sum(btest0==FALSE) / (sum(btest0==FALSE) + sum(btest1==FALSE))
+```
+
+The type I error rate and false discovery rate have gone to zero. However, the the type II error rate has increased substantially from 11% to 83%.
 
 ---
 
