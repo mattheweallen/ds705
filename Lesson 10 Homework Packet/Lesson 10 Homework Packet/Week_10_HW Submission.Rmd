@@ -104,10 +104,23 @@ Repeat Part 1c using the Bonferroni-Holm Step-Down procedure to control FWER.  A
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+holmt <- p.adjust(P,method='holm') > 0.05
+holmt0 <- holmt[1:T0]
+holmt1 <- holmt[(T0+1):(T0+T1)]
+summary(holmt0) 
+summary(holmt1)
 ```
 
-Replace text with your answer.
+```{r}
+# the type I error rate is
+sum(holmt0==FALSE)/T0
+# the type II error rate is
+sum(holmt1==TRUE)/T1
+# the false discovery rate is
+sum(holmt0==FALSE) / (sum(holmt0==FALSE) + sum(holmt1==FALSE))
+```
+
+The results are no different. The type II error is still 83%, and the type I error and the false discovery rate are still both zero. 
 
 ---
 
@@ -117,7 +130,7 @@ Would either of the Bonferroni correction methods be recommended if you were try
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace text with your answer.
+It would not be recommended to use either of the Bonferroni correction methods, because the type II error is so high. Having such a high type II error would cause many significant results to appear to be null results. 
 
 ---
 
@@ -128,10 +141,23 @@ Now apply the Benjamin-Hochberg procedure to achieve a target average False Disc
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+# No Corrections, FALSE means reject null = discovery
+fdrt <- p.adjust(P, method='BH') > 0.05
+fdrt0 <- fdrt[1:T0]
+fdrt1 <- fdrt[(T0+1):(T0+T1)]
+summary(fdrt0) 
+summary(fdrt1)
+```
+```{r}
+# the type I error rate is
+sum(fdrt0==FALSE)/T0
+# the type II error rate is
+sum(fdrt1==TRUE)/T1
+# the false discovery rate is
+sum(fdrt0==FALSE) / (sum(fdrt0==FALSE) + sum(fdrt1==FALSE))
 ```
 
-Replace text with your answer.
+The type I error has increased a small amount from 0 to .3%, and the false discovery rate has increased from 0 to 4.9%. The tradeoff is that the type II error has decreased from 83% to 42%. 
 
 ---
 
