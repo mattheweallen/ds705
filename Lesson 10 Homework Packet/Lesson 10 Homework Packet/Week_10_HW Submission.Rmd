@@ -167,7 +167,7 @@ A pharmaceutical company is doing preliminary hypothesis testing of hundreds of 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2 -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace text with your answer.
+The company should use FDR. The false discovery rate is not as big a problem when in the preliminary phase, because the company is looking for candidate compounds for further research.
 
 ---
 
