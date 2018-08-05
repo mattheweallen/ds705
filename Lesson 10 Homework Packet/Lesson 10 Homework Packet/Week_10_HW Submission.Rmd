@@ -204,10 +204,10 @@ Make a boxplot of RPM~Type.  Is it reasonable to assume the RPM distributions ar
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+boxplot(Cars93$RPM~Cars93$Type)
 ```
 
-Replace text with your answer.
+It is not reasonable to assume all the RPM distributions are normal and have equal variances for the different types of cars. Visually the variability looks different between distributions especially Cm, Lg, and Md. Md and Lg appear skewed.
 
 ---
 
