@@ -167,7 +167,7 @@ A pharmaceutical company is doing preliminary hypothesis testing of hundreds of 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 2 -|-|-|-|-|-|-|-|-|-|-|-
 
-The company should use FDR. The false discovery rate is not as big a problem when in the preliminary phase, because the company is looking for candidate compounds for further research.
+The company should use FDR. The false discovery rate is not as big a problem when in the preliminary phase, because the company is looking for candidate compounds for further research. It also gives you a better chance compared to no correction at all of finding significant discoveries while keeping the False Discovery Rate down. 
 
 ---
 
@@ -207,7 +207,20 @@ Make a boxplot of RPM~Type.  Is it reasonable to assume the RPM distributions ar
 boxplot(Cars93$RPM~Cars93$Type)
 ```
 
-It is not reasonable to assume all the RPM distributions are normal and have equal variances for the different types of cars. Visually the variability looks different between distributions especially Cm, Lg, and Md. Md and Lg appear skewed.
+Visually the variability looks different between distributions especially Cm, Lg, and Md. Md and Lg appear skewed.
+
+Use the shapiro test to validate.
+
+```{r}
+  #'Cm','Lg','Md','Sm','Sp'
+  shapiro.test(Cars93[Cars93$Type == 'Cm',]$RPM)
+  shapiro.test(Cars93[Cars93$Type == 'Lg',]$RPM)
+  shapiro.test(Cars93[Cars93$Type == 'Md',]$RPM)
+  shapiro.test(Cars93[Cars93$Type == 'Sm',]$RPM)
+  shapiro.test(Cars93[Cars93$Type == 'Sp',]$RPM)
+```
+
+Based on the Shapiro Test, it is reasonable to assume all the RPM distributions are normal and have equal variances for the different types of cars.
 
 ---
 
@@ -218,10 +231,11 @@ Conduct pairwise t-tests with no correction for multiple testing to see which me
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+pairwise.t.test( Cars93$RPM, Cars93$Type, p.adjust.method='none',
+                 pool.sd = TRUE)$p.value < 0.05
 ```
 
-Replace text with your answer.
+The mean for Lg is significantly different than for Md, Sm, and Sp.
 
 ---
 
@@ -232,10 +246,11 @@ Repeat 3b, but this time use Bonferroni correction.
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3c -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+pairwise.t.test( Cars93$RPM, Cars93$Type, p.adjust.method='bonf',
+                 pool.sd = TRUE)$p.value < 0.05
 ```
 
-Replace text with your answer.
+The mean for Lg is significantly different than for Md, Sm, and Sp.
 
 ---
 
@@ -244,12 +259,16 @@ Replace text with your answer.
 Now suppose we actually need to estimate the differences in the population mean RPM types while controlling for Type I errors using the Bonferroni correction.  Use the onewayComp() function from the DS705data package with adjust = 'bonferroni' to compute the CI's with 95% overall confidence.  How much larger is the mean RPM for small cars than for large cars according to your estimates?
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3d -|-|-|-|-|-|-|-|-|-|-|-
-
-```{r}
-
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+require(DS705data)
 ```
 
-Replace text with your answer.
+```{r}
+onewayComp(RPM~Type,data=Cars93,var.equal=TRUE,
+           adjust='bonferroni')$comp
+```
+
+The mean RPM for small cars is 961 RPMs larger than for large cars.
 
 ---
 
@@ -260,10 +279,11 @@ Repeat 3d, but this time use the Tukey-Kramer procedure (use onewayComp() with a
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3e -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-
+onewayComp(RPM~Type,data=Cars93,var.equal=TRUE,
+           adjust='one.step')$comp
 ```
 
-Replace text with your answer.
+The mean RPM for small cars is 961 RPMs larger than for large cars.
 
 ---
 
@@ -284,9 +304,14 @@ Replace text with your answer.
 Even when you're using a parametric procedure (one that assumes normality for instance), it can be useful to bootstrap the results to validate the choice of parametric procedure.  Use onewayComp() to get the Tukey-Kramer confidence intervals with 95% confidence, but add nboot=10000 to have the code appoximate the critical values used to construct the intervals using bootstrapping.  How do the results compare the theoretically derived Tukey-Kramer results from 3e?  Does this increase your belief in the validity of the theoretical Tukey-Kramer results?  
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3g -|-|-|-|-|-|-|-|-|-|-|-
+```{r}
+onewayComp(RPM~Type,data=Cars93,var.equal=TRUE,
+           adjust='one.step', nboot=0)$comp
+```
 
 ```{r}
-
+onewayComp(RPM~Type,data=Cars93,var.equal=TRUE,
+           adjust='one.step', nboot=10000)$comp
 ```
 
 Replace text with your answer.
@@ -309,12 +334,17 @@ It should be fairly clear that the price data is not from  normal distributions,
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4a -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# replace this with your code
+games.howell <- onewayComp(Price~Type,data=Cars93,var.equal=FALSE,
+           adjust='one.step')
+
+games.howell$pair[[3]]<.1
+games.howell$comp[,1]
+
 ```
 
 ---
 
-Replace text with answer.
+The largest significant difference in price is between Small and Midsize cars. The Small Midrange price is $17,052 less than Midsize Midrange price.
 
 ### Part 4b
 
@@ -323,7 +353,12 @@ Now repeat 4a, but since the price distributions are skewed use bootstrapping by
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# replace this with your code
+games.howell <- onewayComp(Price~Type,data=Cars93,var.equal=FALSE, nboot=10000,
+           adjust='one.step')
+
+games.howell$pair[[3]]<.1
+games.howell$comp[,1]
+
 ```
 
 ---
@@ -346,8 +381,35 @@ Since the prices are skewed it might be better to report differences in medians 
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4d -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# replace this with your code
+```{r echo=TRUE}
+bootMedDiff <- function(d,i){
+  # d is a dataframe with 
+  #    quantitative variable in column 1
+  #    factor variable in column 2
+  meds <- tapply(d[i,"Price"],d[,"Type"],median)
+  
+  #c( meds[3]-meds[1], meds[3]-meds[2], meds[1]-meds[2])
+  #c( meds[4]-meds[1], meds[4]-meds[2], meds[1]-meds[2])
+  }
 ```
 
+```{r echo=FALSE}
+set.seed(1)
+```
+
+```{r echo=TRUE}
+
+summary(Cars93$Type)
+
+boot.object <- boot(Cars93, bootMedDiff, R = 5000, 
+                    strata = Cars93$Type)
+# med_C - med_A 
+boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=1)$bca[4:5]
+# med_C - med_B 
+boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=2)$bca[4:5]
+# med_A - med_B (= 6)
+boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=3)$bca[4:5]
+# med_A - med_B (= 6)
+boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=4)$bca[4:5]
+```
 ---
