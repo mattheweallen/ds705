@@ -382,34 +382,35 @@ Since the prices are skewed it might be better to report differences in medians 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4d -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r echo=TRUE}
-bootMedDiff <- function(d,i){
-  # d is a dataframe with 
-  #    quantitative variable in column 1
-  #    factor variable in column 2
-  meds <- tapply(d[i,"Price"],d[,"Type"],median)
-  
-  #c( meds[3]-meds[1], meds[3]-meds[2], meds[1]-meds[2])
-  #c( meds[4]-meds[1], meds[4]-meds[2], meds[1]-meds[2])
+  bootMedDiff <- function(d,i){
+    meds <- tapply(d[i,"Price"],d[,"Type"],median)
+    c( meds[5]-meds[1], meds[5]-meds[2], meds[5]-meds[3], meds[5]-meds[4])
   }
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 set.seed(1)
+require(boot)
 ```
 
 ```{r echo=TRUE}
 
-summary(Cars93$Type)
-
-boot.object <- boot(Cars93, bootMedDiff, R = 5000, 
+boot.object <- boot(Cars93[,c("Type","Price")], bootMedDiff, R = 5000, 
                     strata = Cars93$Type)
-# med_C - med_A 
+
+# Cm = Compact
+# Lg = Large
+# Md = Midsize
+# Sm = Small
+# Sp = Sporty
+
+# med_Sp - med_Cm 
 boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=1)$bca[4:5]
-# med_C - med_B 
+# med_Sp - med_Lg
 boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=2)$bca[4:5]
-# med_A - med_B (= 6)
+# med_Sp - med_Md
 boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=3)$bca[4:5]
-# med_A - med_B (= 6)
+# med_Sp - med_Sm
 boot.ci(boot.object,conf = 1 - .1/4, type='bca', index=4)$bca[4:5]
 ```
 ---
