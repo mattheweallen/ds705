@@ -295,7 +295,7 @@ Simultaneous confidence intervals increase the width of the individual intervals
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3f  -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace text with your answer.
+The populations appear to have similar variances, so I think the Tukey-Kramer confidence intervals are better, because they are tighter.
 
 ---
 
@@ -304,7 +304,7 @@ Replace text with your answer.
 Even when you're using a parametric procedure (one that assumes normality for instance), it can be useful to bootstrap the results to validate the choice of parametric procedure.  Use onewayComp() to get the Tukey-Kramer confidence intervals with 95% confidence, but add nboot=10000 to have the code appoximate the critical values used to construct the intervals using bootstrapping.  How do the results compare the theoretically derived Tukey-Kramer results from 3e?  Does this increase your belief in the validity of the theoretical Tukey-Kramer results?  
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 3g -|-|-|-|-|-|-|-|-|-|-|-
-```{r}
+```{r include=FALSE}
 onewayComp(RPM~Type,data=Cars93,var.equal=TRUE,
            adjust='one.step', nboot=0)$comp
 ```
@@ -314,7 +314,7 @@ onewayComp(RPM~Type,data=Cars93,var.equal=TRUE,
            adjust='one.step', nboot=10000)$comp
 ```
 
-Replace text with your answer.
+The confidence intervals are similar to Tukey-Kramer. Tukey-Kramer confidence intervals appear to be tigther than the bootstrap confidence intervals. This increases my belief in the validity of the Tukey-Kramer results.
 
 ---
 
@@ -363,7 +363,7 @@ games.howell$comp[,1]
 
 ---
 
-Replace text with answer.
+They seem to be the same.
 
 ### Part 4c
 
@@ -371,7 +371,7 @@ Are the results in 4a and 4b very different?  Which results seem more trustworth
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4c -|-|-|-|-|-|-|-|-|-|-|-
 
-Replace text with answer.
+They seem to be the same.
 
 ----
 
