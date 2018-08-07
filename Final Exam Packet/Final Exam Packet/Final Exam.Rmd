@@ -1,0 +1,119 @@
+
+---
+title: "DS 705 Final Exam"
+author: "Matt Allen"
+output:
+  word_document: default
+  pdf_document: default
+fontsize: 12pt
+---
+
+Unlike the Homework RMD files, this one doesn't contain all of the questions.  Rather we want you to read the questions on D2L and use this RMD file to record your R code that you used to answer each question.  This file must knit correctly.  After you submit the D2L quiz, then upload this RMD file and the knitted version of this file to the Final Exam dropbox on D2L.
+
+## Questions 1-16
+
+You do not need to submit any work with these questions.  Just answer them in D2L.
+
+## Problem 1 - Questions 17-21
+
+You're going to analyze the data in BirdPecks.rda and answer the questions in D2l.  Put all of your R in the chunk below:
+
+```{r}
+
+```
+
+---
+
+## Problem 2 - Questions 22-26
+
+Analyze StrengthSpeed.rda and put your R below:
+
+```{r}
+
+```
+
+---
+
+## Problem 3 - Questions 27-36
+
+Analyze GroupHLT scores and put your R here:
+
+```{r}
+
+```
+
+---
+
+## Problem 4 - Questions 37-41
+
+Analyze the data in treadware.rda and put your R here:
+
+```{r}
+
+```
+
+---
+
+## Problem 5 - Questions 42-59
+
+Analyze the data in diamond.rda and include your R here:
+
+```{r}
+
+```
+
+---
+
+## Problem 6 - Questions 60- 66
+
+Analyze the data in Shells.rda and include your R here:
+
+```{r}
+
+```
+
+---
+
+## Problem 7 - Questions 67-70
+
+Analyze the "Primary News Source for Americans" data described in the problem statement.  Put your R below:
+
+```{r}
+
+```
+
+---
+
+## Problem 8 - Questions 71-75
+
+Analyze the data in cheese.rda and put your R below:
+
+```{r}
+
+```
+
+---
+
+## Problem 9 - Questions 76-90
+
+Analyze the data in careerbarrier.rda and put your R below:
+
+```{r}
+
+```
+
+---
+
+## Problem 10 - Questions 91-98
+
+Analyze the data on seat postion vs. nausea described in the problem.  Put your R below:
+
+```{r}
+
+```
+
+---
+
+## Question 99
+
+Make sure both this RMD and the resulting knitted Word document are uploaded to the Dropbox "Final Exam R Code."

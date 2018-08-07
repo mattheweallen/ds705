@@ -207,9 +207,7 @@ Make a boxplot of RPM~Type.  Is it reasonable to assume the RPM distributions ar
 boxplot(Cars93$RPM~Cars93$Type)
 ```
 
-Visually the variability looks different between distributions especially Cm, Lg, and Md. Md and Lg appear skewed.
-
-Use the shapiro test to validate.
+Md and Lg appear skewed. Use the shapiro test to validate normality.
 
 ```{r}
   #'Cm','Lg','Md','Sm','Sp'
@@ -220,7 +218,7 @@ Use the shapiro test to validate.
   shapiro.test(Cars93[Cars93$Type == 'Sp',]$RPM)
 ```
 
-Based on the Shapiro Test, it is reasonable to assume all the RPM distributions are normal and have equal variances for the different types of cars.
+Based on the Shapiro Test, it is reasonable to assume all the RPM distributions are normal. Visually the variance looks like it could be the same for the distributions of RPMs.
 
 ---
 
@@ -235,7 +233,7 @@ pairwise.t.test( Cars93$RPM, Cars93$Type, p.adjust.method='none',
                  pool.sd = TRUE)$p.value < 0.05
 ```
 
-The mean for Lg is significantly different than for Md, Sm, and Sp.
+The mean RPM for Lg is significantly different than for Cm, Md, Sm, and Sp.
 
 ---
 
@@ -250,7 +248,7 @@ pairwise.t.test( Cars93$RPM, Cars93$Type, p.adjust.method='bonf',
                  pool.sd = TRUE)$p.value < 0.05
 ```
 
-The mean for Lg is significantly different than for Md, Sm, and Sp.
+The mean RPM for Lg is significantly different than for Cm, Md, Sm, and Sp.
 
 ---
 
@@ -371,7 +369,7 @@ Are the results in 4a and 4b very different?  Which results seem more trustworth
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 4c -|-|-|-|-|-|-|-|-|-|-|-
 
-They seem to be the same.
+They seem to be the same. I would trust the bootstrap method more, because the distributions of Price are not normal. 
 
 ----
 
