@@ -60,11 +60,12 @@ Should any questionnaire items be dropped from the factor analysis because of lo
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
 
 ```{r}
-# Insert your R code here.
-
+KMO(mat)
 ```
 
-Replace this text with your answers here.
+The overall MSA value would be considered superb by the guidelines set by Hutcheson and Sofroniou, and so it is acceptable for factor analysis.
+
+The lowest MSA value for a question is 0.76, which is still considered good by Hutcheson and Sofroniou, so no questionnaire items need to be dropped from the factor analysis because of low MSA values.
 
 ### Part 1c  
 
