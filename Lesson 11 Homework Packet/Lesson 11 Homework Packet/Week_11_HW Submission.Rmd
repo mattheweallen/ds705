@@ -25,19 +25,29 @@ Is factor analysis warranted based on this measure?
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
+```{r include=FALSE}
 # Load the data
 load(file = "ifanmot.rda")
+#library for cortest.bartlett
+library(psych)
 ```
 
-```{r eval=FALSE}
-#
-as.dist(round(cor(ifanmot[,1:42]),0))
-
+```{r}
+mat <- cor(ifanmot[,1:42])
+cortest.bartlett(mat,n=400)
 ```
 
-State the null and alternative hypothesis. Report on the results.
-Replace this text with yours here.
+\begin{table}
+\centering
+\begin{tabular}{ll}
+$H_0$: &  The correlation matrix is the identity matrix \\
+$H_a$: &  The correlation matrix is not the identity matrix \\
+\end{tabular}
+\end{table}
+
+At a 5% level of significance, we can reject the null hypothesis in favor of the alternative that the correlation matrix is not the identity matrix. In other words, correlations exist between the variables.
+
+The p-value is reported as zero. The result is a strong indication that factor analysis is warranted.
 
 ### Part 1b
 
