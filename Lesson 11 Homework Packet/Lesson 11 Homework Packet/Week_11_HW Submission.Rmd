@@ -73,36 +73,46 @@ Use R to create a scree plot for the questionnaire items that you deemed to be a
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
-
+``` {r eval=FALSE}
+output <- princomp(ifanmot[,1:42], cor=TRUE)
+{
+plot(output,type="lines") # scree plot 
+abline(h=1,lty=2)  # add horizonal dotted line at 1
+}
 ```
 
 Where would you say the "knee" is in the scree plot?  
 
+The knee is at Comp.3.
+
 How many factors does the knee in the scree plot suggest extracting?
+
+The number of factors to extract suggested by the knee in the scree plot is 3.
 
 How many components have eigenvalues (aka variances, latent roots) greater than 1?
 
+From the plot it, appears 9 components have eigenvalues greater than 1.
+
 How many factors does this suggest extracting?
 
+It would suggest extracting 9 components, but that is suggested for fewer than 30 variables, which is not the case in this example.
 
 ### Part 1d
-
+  
 Use a principal components extraction with the varimax rotation to extract 3 factors.  Print the output with factor loadings under 0.5 suppressed and sort the loadings.  (Note - in the video the columns were labeled PC1, PC2, etc., but the newer version of principal() uses RC1, RC2, etc.)
 
 Answer the questions below.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
-
+``` {r include=FALSE}
+fa.out <- principal(ifanmot[,1:42],nfactors=3,rotate="varimax")
+print.psych(fa.out,cut=.5,sort=TRUE)
 ```
 
-What is the cumulative variance explained (as a percent)?  
+What is the cumulative variance explained (as a percent)?  The cumulative variance explained is 48%.
 
-Is this considered an acceptable percent of total variation?
+Is this considered an acceptable percent of total variation? This would not be considered acceptable, since a 60% minimum is considered acceptable.
 
 ### Part 1e
 
@@ -112,14 +122,14 @@ Answer the questions below.
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e -|-|-|-|-|-|-|-|-|-|-|-
 
-```{r}
-# Insert your R code here.
-
+``` {r include=FALSE}
+fa.out <- principal(ifanmot[,1:42],nfactors=9,rotate="varimax")
+print.psych(fa.out,cut=.5,sort=TRUE)
 ```
 
-What is the cumulative variance explained (as a percent)?  
+What is the cumulative variance explained (as a percent)? The cumulative variance explained is 67%. 
 
-Is this considered an acceptable percent of total variation?
+Is this considered an acceptable percent of total variation? Since a 60% minimum is considered acceptable, 67% would be considered acceptable.
 
 ### Part 1f
 
@@ -135,15 +145,15 @@ I have labeled the second factor (labeled PC9 in the R output) for you as "Socia
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
 
-Factor 1: 
+Factor 1: Fun 
 Factor 2: Social
-Factor 3:
-Factor 4:
-Factor 5:
-Factor 6:
-Factor 7:
-Factor 8:
-Factor 9:
+Factor 3: Identification
+Factor 4: Patriotism
+Factor 5: Artistic
+Factor 6: Loyalty
+Factor 7: Gambling
+Factor 8: Boredom
+Factor 9: Entertainment
 
 ### Part 1g
     
