@@ -1,4 +1,3 @@
-
 ---
 title: 'Dimension Reduction - PCA and Exploratory Factor Analysis'
 author: "Matt Allen"
@@ -170,5 +169,3 @@ fulldata <- cbind(ifanmot,fan$scores)
 require(plyr)
 fulldata <- rename(fulldata,c("RC1"="Fun","RC9"="Social","RC5"="Identification","RC3"="Patriotism","RC4"="Artistic","RC7"="Loyalty","RC2"="Gambling","RC6"="Boredom","RC8"="Entertainment"))
 ```
-
-
