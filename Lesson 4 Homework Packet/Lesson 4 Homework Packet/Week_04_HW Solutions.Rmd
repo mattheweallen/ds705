@@ -1,0 +1,397 @@
+---
+title: "Inference for Paired Data"
+author: "Solutions"
+output:
+  word_document: default
+fontsize: 12pt
+---
+
+## Exercise 1  
+
+To reduce ankle injuries, restrictive appliances such as taping and spatting (applying tape over the shoe and sock) have been employed. As part of a study at UWL, subjects also completed a 5-point Likert-type scale survey regarding their perceptions of the movement of each ankle appliance during exercise.
+
+Researchers would like to compare the central values for perceptions of the movement of taped ankles compared to spatted ankles using $\alpha = 0.10$ and to estimate the difference with 90% confidence.
+
+### Part 1a
+
+Load the data set AnkleMovement.rda from the DS705 package.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1a -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+require(DS705data)
+data(AnkleMovement)
+```
+
+---
+
+### Part 1b	
+
+Create a new variable of the differences, with the perceptions of the spatted ankle (spat) subtracted from the perceptions of the taped ankle (tape).
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1b -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+# I like to add the new data to the data frame to keep everything together
+AnkleMovement$diff <- AnkleMovement$tape-AnkleMovement$spat
+```
+
+---
+
+### Part 1c  
+
+Create a boxplot, histogram, and normal probability plot for the sample of differences. 
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+boxplot(AnkleMovement$diff)
+hist(AnkleMovement$diff)
+qqnorm(AnkleMovement$diff)
+qqline(AnkleMovement$diff)
+```
+
+---
+
+### Part 1d  
+
+Comment on the suitability of this data for the paired t-test, the Wilcoxon signed rank test, and the sign test.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1d -|-|-|-|-|-|-|-|-|-|-|-
+
+The choice here is somewhat subjective, but ultimately you should choose the most powerful test for which the conditions are met.  The boxplot is asymmetrical, in particular, the box shows that the median and first quartile are the same.  However, the histogram appears very roughly symmetric and mound-shaped.  To get another point of information, the Shapiro-Wilk test of normality (not shown) gives a p-value of $P$ = `r round(shapiro.test(AnkleMovement$diff)$p.value,4)` which, while somewhat small, does not give strong evidence against normality.  
+
+All three possible procedures rely on the samlple being selected randomly in order to make an inference about the population.  Since it is not explicitely stated here, we will have to *assume* that the sample was randomly selected. 
+
+Since the t-test is fairly robust to mild departures from normality, the t-test seems like a good choice.  Particularly given that the t-test is the most powerful of the three procedures. Actually, this a good place to try all three procedures, in this case, they all agree.
+
+This is pretty subjective, so answers may vary.  It is your reasoning that we are evaluating.
+
+---
+
+### Part 1e 
+
+Because the choice of test is somewhat unclear, as happens often in real life, try all three tests to compare the central values for subject's perceptions of the movement of taped ankles compared to spatted ankles using $\alpha = 0.10$.
+
+Do the paired *t*-test first: 
+
+#### Step 1
+
+Define the parameter in words in the context of the problem.
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step1 -|-|-|-|-|-|-|-|-|-|-|-
+
+Let $d =$ perceived movement for taped ankle - perceived movement for spatted ankle.  We want to know if the mean difference, $\mu_d$, is nonzero.
+
+
+#### Step 2
+
+State the null and alternative hypotheses for the test.
+ 
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step2 -|-|-|-|-|-|-|-|-|-|-|-
+
+$H_0: \mu_d = 0$
+
+$H_a: \mu_d \neq 0$
+
+#### Step 3
+
+Use R to generate the output for the test you selected.
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step3 -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+test <-t.test(AnkleMovement$diff,mu=0,alternative="two.sided",conf.level=0.9)
+test
+```
+
+#### Step 4
+
+State a statistical conclusion at $\alpha=0.10$ and interpret it in the context of the problem.
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step4 -|-|-|-|-|-|-|-|-|-|-|-
+
+Do not reject $H_0$ at $\alpha = 0.10$.  There is not sufficient evidence to suggest that the population mean difference of patients perception of movement for taped versus spatted ankles is different than zero ($P =$ `r round(test$p.value,3)`).  In other words, patients typically perceive no difference in movement between taped and spatted ankles.
+
+---
+
+#### Step 5  
+
+Write an interpretation in the context of the problem for the 90% CI.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 1f -|-|-|-|-|-|-|-|-|-|-|-
+
+We are 90% confident that the population mean perception of movement for taped ankles is anywhere from `r -round(test$conf.int[1],2)` points lower to `r round(test$conf.int[2],2)` points higher than the perception of movement for spatted ankles.  Since this range includes zero, we cannot conclude there is a significant difference at the $\alpha=0.1$ level of significance.  
+
+---
+
+#### Step 6
+
+Perform the Wilcoxon Signed Rank Test.  
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step6 -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+test2 <- wilcox.test(AnkleMovement$diff,mu=0,alternative="two.sided",conf.level=0.9)
+test2
+```
+
+$H_0: M_d = 0, H_a: M_d \neq 0$
+
+where $M_d$ is the population median of the differences (diff=tape - spat).
+
+Do not reject $H_0$ at $\alpha = 0.10$.  There is not sufficient evidence to suggest that the population median difference of patients perception of movement for taped versus spatted ankles is different than zero ($P =$ `r round(test2$p.value,3)`).  
+
+As with the t-test, patients typically perceive no difference in movement between taped and spatted ankles. 
+
+#### Step 7
+
+Perform the sign test. 
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step7 -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+require(signmedian.test)
+test3 <- signmedian.test(AnkleMovement$diff,mu=0,alternative="two.sided",conf.level=0.9)
+test3
+```
+
+$H_0: M_d = 0, H_a: M_d \neq 0$
+
+where $M_d$ is the population median of the differences (diff=tape - spat).
+
+Do not reject $H_0$ at $\alpha = 0.10$.  There is  insufficient evidence to suggest that the population median difference of patients perception of movement for taped versus spatted ankles is different than zero ($P =$ `r round(test3$p.value,3)`).  Once again, patients typically perceive no difference in movement between taped and spatted ankles.
+
+---
+
+#### Step 8
+
+Construct a bootstrap confidence interval at a 90% level of confidence for the mean difference in population mean perception of movement for taped and spatted ankles.  Use a bootstrap sample size of 5000.  Compare this interval with the results of the 90% *t*-interval.
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step9 -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+bootMeanPaired <- function(x,i){
+  # x is a vector of differences from paired data
+  # i is a vector of indices for the resampled elements of x
+  mean(x[i]) # the statistic that gets returned
+  }
+
+library(boot)
+boot.object <- boot(AnkleMovement$diff, bootMeanPaired, R = 5000)
+boot.ci(boot.object,conf=0.9,type='bca')$bca[4:5]
+```
+
+The bootstrap interval is very similar to the paired *t*-interval. Both intervals contain 0 and therefore don't provide significant evidence in a difference of perception scores in the population, on average..
+
+#### Step 9
+
+Compare the results of the three hypothesis tests and also whether or not the 90% bootstrap interval agrees with the result of each test.  Which procedure should be reported and why?
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 1e.step9 -|-|-|-|-|-|-|-|-|-|-|-
+
+All of the procedures lead to the same conclusion, that there is no difference in the mean or median perception between taping and spatting.
+
+The paired *t*-test may be a good choice to report because even though the normality assumption is not strongly met, the paired *t*-test is robust to departures from normality. The Wilcoxon signed rank test might also be a good choice because the response variable is found by taking a difference in integers between 1 and 5. However, the number of ties in the sample may be problematic for the Wilcoxon signed rank test. 
+
+The sign test and the bootstrap interval also seem reasonable here, too, because all of the data conditions are met for these procedures. Many would probably choose to report the paired *t*-test and interval results because they are the most widely recognized and the results are not contradicted by any of the other alternatives.
+
+Even though this is a small sample, the graphs, tests, and confidence intervals provide a pretty reliable conclusion, at least at the 10% level of significance, that there is no difference in population central values.
+
+---
+
+## Exercise 2
+
+In a nationwide study of insurance claims (in dollars) filed in the previous year, a random sample of 125 claims was selected from all claims for vehicles classified as small, meaning the gross vehicle weight rating (GVWR) is less than 4500 pounds.  
+
+For each claim, the insurance company's estimate for the claim was also provided.
+
+The data frame SmallAuto.rda contains the claims and estimates for each vehicle class. 
+
+### Part 2a  
+
+Load the data SmallAuto from the DS705 package.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2a -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+data("SmallAuto")
+```
+
+---
+
+### Part 2b
+
+Construct histograms and boxplots for both the estimated claims and actual for the small class of vehicle. Describe the shapes of these distributions.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2b -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+boxplot(Claim~Category,data=SmallAuto)
+est <- SmallAuto$Claim[SmallAuto$Category=="Estimate"]
+act <- SmallAuto$Claim[SmallAuto$Category=="Actual"]
+hist(est,main="Estimate",xlab="Claim (dollars)")
+hist(act,main="Actual",xlab="Claim (dollars)")
+```
+
+The distributions are very skewed to the right with numerous outliers.
+
+---
+
+### Part 2c  
+
+Create a new variable of the differences for small vehicles, with the difference being the estimated claim amount minus the actual claim amount. 
+
+Also create a boxplot, histogram, and normal probability plot for the sample of differences. Also, obtain the P-value for a Shapiro-Wilk normality test.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2c -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+Diff <- est-act
+hist(Diff)
+boxplot(Diff)
+qqnorm(Diff)
+qqline(Diff)
+shapiro.test((Diff))
+```
+
+---
+
+### Part 2d  
+
+Comment on the shape of the distribution of differences and the suitability of this data for the paired *t*-test, the Wilcoxon signed rank test, and the sign test.  Which test will you use?
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2d -|-|-|-|-|-|-|-|-|-|-|-
+
+The differences seem to be approximately normally distributed since there are only two mild outliers and the boxplot is pretty symmetric, the histogram is mound-shaped, and the normal probability plot follows close to the line.
+
+The Shapiro-Wilk test, when applied to the differences, yields $P =$ `r round(shapiro.test(Diff)$p.value,3)` which also indicates no significant departure from normality.  Considering the fact that this is a large sample at $n=125$, we can be confident that the differences are approximately normal.  Since this is said to be a random sample and is normally distributed, the paired *t*-test will be used.
+
+---
+
+### Part 2e 
+    
+Conduct an appropriate test to see if the population central values for the estimated claim amount is less than for the actual claim amounts for vehicles in the small class using $\alpha = 0.05$.
+
+#### Step 1
+
+Define the parameter in words in the context of the problem.
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step1 -|-|-|-|-|-|-|-|-|-|-|-
+
+$\mu_d$ is the population mean difference of claim estimated and actual claim amounts (Diff=Estimated-Actual).  
+
+#### Step 2
+
+State the null and alternative hypotheses for the test.
+ 
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step2 -|-|-|-|-|-|-|-|-|-|-|-
+
+$H_0$: $\mu_d \geq 0$
+
+$H_1$: $\mu_d < 0$
+
+#### Step 3
+
+Use R to generate the output for the test you selected. Pay close attention to the order of subtraction done behind the scenes in R.
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step3 -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+test <- t.test(Claim~Category,data=SmallAuto,mu=0,paired=T,alternative="greater")
+test
+```
+
+#### Step 4
+
+State a statistical conclusion at $\alpha=0.05$ and interpret it in the context of the problem.
+
+#### -|-|-|-|-|-|-|-|-|-|-|- Answer 2e.step4 -|-|-|-|-|-|-|-|-|-|-|-
+
+Reject $H_0$ at $\alpha = 0.05$ ($P =$ `r round(test$p.value,3)`).  There is sufficient evidence to show the population mean for all estimated insurance claims is less than the population mean for all actual claims for vehicles in the small class. 
+
+---
+
+### Part 2f  
+
+Write an interpretation in the context of the problem for a 95% two-sided confidence interval.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 2f -|-|-|-|-|-|-|-|-|-|-|-
+```{r}
+ci <- t.test(Claim~Category,data=SmallAuto,mu=0,paired=T,
+             alternative="two.sided")$conf.int
+ci
+```
+
+We are 95% confident that the average estimated claim is \$`r round(abs(ci[1]),2)` 
+to \$`r round(abs(ci[2]),2)` less than the average for all actual claims for vehicles in the small class.
+
+---
+
+## Exercise 3
+
+The data frame AutoIns is very similar to Small Auto.  
+
+In a nationwide study of insurance claims filed in the previous year, a random sample of 125 claims was selected from all claims for vehicles classified as small, meaning the gross vehicle weight rating (GVWR) is less than 4500 pounds  A separate sample of 125 claims for vehicles classified as standard, meaning the GVWR is between 4500 and 8500 pounds.
+
+For each claim, the insurance company's estimate for the claim was also provided.
+
+The data frame AutoIns.rda contains the claims and estimates for each vehicle class. The variables in the data frame are defined as follows:
+
+claim.small = the actual claim amount in dollars for a vehicle in the small class
+
+est.small = the estimated claim amount in dollars for a vehicle in the small class
+
+claim.standard = the actual claim amount in dollars for a vehicle in the standard class
+
+est.standard = the estimated claim amount in dollars for a vehicle in the standard class
+
+### Part 3a  
+
+Load the data AutoIns from the DS705 package and look at the structure of the data in the file.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 3a -|-|-|-|-|-|-|-|-|-|-|-
+
+```{r}
+data(AutoIns)
+```
+
+---
+
+### Part 3b  
+
+Is the data "stacked" or "side-by-side" ("tall" or "wide")?
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 3b -|-|-|-|-|-|-|-|-|-|-|-
+
+Side-by-side.
+
+---
+
+### Part 3c  
+
+Which pairs of variables in the data frame are independent of each other?  You can use the variable names to identify them.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 3c -|-|-|-|-|-|-|-|-|-|-|-
+
+claim.small and claim.standard are independent of each other. 
+
+est.small and est.standard are independent of each other.
+
+claim.small and est.standard are independent of each other.
+
+est.small and claim.standard are independent of each other.
+
+---
+
+### Part 3d  
+
+Which pairs of variables in the data frame are paired (matched pairs)? You can use the variable names to identify them.
+
+### -|-|-|-|-|-|-|-|-|-|-|- Answer 3d -|-|-|-|-|-|-|-|-|-|-|-
+
+claim.small and est.small are paired.
+
+claim.standard and est.standard are paired.
+
+---

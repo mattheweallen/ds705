@@ -19,7 +19,16 @@ You do not need to submit any work with these questions.  Just answer them in D2
 You're going to analyze the data in BirdPecks.rda and answer the questions in D2l.  Put all of your R in the chunk below:
 
 ```{r}
-
+load(file = "BirdPecks.rda")
+boxplot(BirdPecks$pecks~BirdPecks$group)
+hist(BirdPecks$pecks[which(BirdPecks$group==1)], main="Pecks Group 1", xlab = "Pecks")
+hist(BirdPecks$pecks[which(BirdPecks$group==2)], main="Pecks Group 2", xlab = "Pecks") 
+#test for normality
+shapiro.test(BirdPecks$pecks[which(BirdPecks$group==1)])
+shapiro.test(BirdPecks$pecks[which(BirdPecks$group==2)])
+#Wilcoxon rank sum test
+wtest <- wilcox.test(pecks~group,data=BirdPecks,conf.int=T,conf.level = 0.90)
+wtest
 ```
 
 ---
@@ -29,7 +38,7 @@ You're going to analyze the data in BirdPecks.rda and answer the questions in D2
 Analyze StrengthSpeed.rda and put your R below:
 
 ```{r}
-
+load(file = "StrengthSpeed.rda")
 ```
 
 ---
