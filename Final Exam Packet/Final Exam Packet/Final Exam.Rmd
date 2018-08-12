@@ -39,6 +39,18 @@ Analyze StrengthSpeed.rda and put your R below:
 
 ```{r}
 load(file = "StrengthSpeed.rda")
+StrengthSpeed$diff <- StrengthSpeed$after-StrengthSpeed$before
+#create plots
+boxplot(StrengthSpeed$diff)
+hist(StrengthSpeed$diff)
+{
+  qqnorm(StrengthSpeed$diff)
+  qqline(StrengthSpeed$diff)
+}
+shapiro.test(StrengthSpeed$diff)
+#perform paired t-test
+test <-t.test(StrengthSpeed$diff,mu=0,alternative="less",conf.level=0.95)
+test
 ```
 
 ---
@@ -48,7 +60,42 @@ load(file = "StrengthSpeed.rda")
 Analyze GroupHLT scores and put your R here:
 
 ```{r}
+hlt.after.win.1 <- c(79, 76, 74, 70, 81, 85, 73, 78, 69, 72, 83, 89, 72, 79, 75)
+group1 <- rep(1, length(hlt.after.win.1))
+hlt.after.loss.2 <- c(78, 96, 85, 91, 77,103, 72, 93, 98, 86, 70, 110, 70, 91, 99)
+group2 <- rep(2, length(hlt.after.loss.2))
 
+hostility.scores <- data.frame(group=c(group1,group2), hlt.score=c(hlt.after.win.1,hlt.after.loss.2))
+
+boxplot(hlt.score~group,data=hostility.scores)
+hist(hlt.after.win.1,main="Hostility After Win",xlab="HLT Score")
+hist(hlt.after.loss.2,main="Hostility After Loss",xlab="HLT Score")
+{
+  qqnorm(hlt.after.win.1)
+  qqline(hlt.after.win.1)
+}
+{
+  qqnorm(hlt.after.loss.2)
+  qqline(hlt.after.loss.2)
+}
+#do shapiro-wilk test
+shapiro.test(hlt.after.win.1)$p.value
+shapiro.test(hlt.after.loss.2)$p.value
+
+#perform test
+test <- t.test(hlt.score~group,data=hostility.scores,alternative="less")
+test
+
+#confidence interval after loss
+t.test(hlt.after.loss.2, conf.level = 0.95)
+
+#bootstrap confidence interval after loss
+library(boot)
+samplemean <- function(x, d) {
+  return(mean(x[d]))
+}
+boot.object <- boot(hlt.after.loss.2, samplemean, R = 5000)
+boot.ci(boot.object,conf=.95,type='bca')$bca[4:5]
 ```
 
 ---
@@ -58,7 +105,18 @@ Analyze GroupHLT scores and put your R here:
 Analyze the data in treadware.rda and put your R here:
 
 ```{r}
+#load(file = "treadware.rda") #this command is failing with error:Error in readChar(con, 5L, useBytes = TRUE) : cannot open the connection
+#use ds705data instead
+require(DS705data)
+data("treadwear")
+aggregate(wear~brand,data=treadwear, FUN= "mean" )
+aggregate(wear~brand,data=treadwear, FUN= "sd" )
+boxplot(wear~brand,data=treadwear)
 
+shapiro.test(treadwear[treadwear$brand == 'A',]$wear)$p.value
+shapiro.test(treadwear[treadwear$brand == 'B',]$wear)$p.value
+shapiro.test(treadwear[treadwear$brand == 'C',]$wear)$p.value
+shapiro.test(treadwear[treadwear$brand == 'D',]$wear)$p.value
 ```
 
 ---
@@ -68,7 +126,8 @@ Analyze the data in treadware.rda and put your R here:
 Analyze the data in diamond.rda and include your R here:
 
 ```{r}
-
+test <- oneway.test(wear~brand,data=treadwear, var.equal=FALSE)
+test
 ```
 
 ---
