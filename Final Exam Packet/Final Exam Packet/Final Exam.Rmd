@@ -242,6 +242,34 @@ Analyze the data in careerbarrier.rda and put your R below:
 
 ```{r}
 load(file = "careerbarrier.rda")
+
+require(psych)
+mat <- cor(careerbarrier[,1:15])
+cortest.bartlett(mat,n=76)
+
+#KMO MSA
+KMO(mat)
+
+#drop money
+mat <- cor(careerbarrier[,2:15])
+cortest.bartlett(mat,n=76)
+
+#KMO MSA
+KMO(mat)
+
+
+#scree plot
+output <- princomp(careerbarrier[,2:15], cor=TRUE)
+{
+plot(output,type="lines") # scree plot 
+abline(h=1,lty=2)
+}
+output$sdev^2  # This prints the eigenvalues so you can compare to 1
+
+#Use a principal components extraction with the varimax rotation to extract 5 factors
+fan <- principal(careerbarrier[,2:15],nfactors=5,rotate="varimax")
+print(fan,cut=.5,sort=TRUE)
+
 ```
 
 ---
@@ -251,6 +279,27 @@ load(file = "careerbarrier.rda")
 Analyze the data on seat postion vs. nausea described in the problem.  Put your R below:
 
 ```{r}
+nausea <-c(98,110,161)
+no.nausea<-c(264,321,280)
+
+seatposition <- matrix(c(nausea,no.nausea),ncol=3,byrow=TRUE)
+colnames(seatposition) <- c("Front","Middle","Rear")
+rownames(seatposition) <- c("Nausea","No Nausea")
+seatposition <- as.table(seatposition)
+seatposition
+
+addmargins(seatposition)
+
+result <- chisq.test(seatposition)
+result
+
+nausea.bus.frontvsrear=c(98,161)
+Total=c(362,441)
+out <- prop.test(nausea.bus.frontvsrear,Total,correct=FALSE, conf.level = 0.9) # continuity correction is optional
+out
+
+#odds ratio
+(161/280)/(98/264)
 
 ```
 
