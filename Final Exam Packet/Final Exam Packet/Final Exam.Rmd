@@ -117,6 +117,11 @@ shapiro.test(treadwear[treadwear$brand == 'A',]$wear)$p.value
 shapiro.test(treadwear[treadwear$brand == 'B',]$wear)$p.value
 shapiro.test(treadwear[treadwear$brand == 'C',]$wear)$p.value
 shapiro.test(treadwear[treadwear$brand == 'D',]$wear)$p.value
+
+#multiple comparisons procedure
+#Games-Howell
+onewayComp(wear~brand,data=treadwear,var.equal=FALSE,
+           adjust='one.step')$pair[[3]]<.05
 ```
 
 ---
@@ -126,8 +131,41 @@ shapiro.test(treadwear[treadwear$brand == 'D',]$wear)$p.value
 Analyze the data in diamond.rda and include your R here:
 
 ```{r}
-test <- oneway.test(wear~brand,data=treadwear, var.equal=FALSE)
-test
+load(file = "diamond.rda")
+plot(diamond$price~diamond$carat)
+#linear model
+linear.model <- lm(price~carat,data=diamond)
+summary(linear.model)
+#pearson correlation coefficient
+out <- cor.test(diamond$carat,diamond$price)
+out
+rPearson <- out$estimate
+rPearson
+ci <- out$conf.int
+ci
+
+#confidence interval linear model coefficients
+confint(linear.model)
+
+#normality of residuals
+resids <- linear.model$resid
+hist(resids)
+{
+qqnorm(resids)
+qqline(resids)
+}
+shapiro.test(resids)
+
+price.fit <- linear.model$fitted.values
+plot(price.fit,resids)
+
+#test for equal variance
+require(lmtest)
+out <- bptest(linear.model)
+p <- out$p.value
+p
+#coefficient of determination
+summary(linear.model)
 ```
 
 ---
@@ -137,7 +175,23 @@ test
 Analyze the data in Shells.rda and include your R here:
 
 ```{r}
+load(file = "shells.rda")
 
+fit1 <- lm(Y~.,data=shells)
+fit.null <- lm(Y~1,data=shells)
+
+step(fit.null,scope=list(lower=fit.null,upper=fit1),direction="both")
+#check for multicollinearity
+#install.packages("car")
+library(car)
+model.a <- lm(formula = Y ~ X2 + X4 + X1 + X6 + X7, data = shells)
+vif(model.a)
+summary(model.a)
+#model b
+model.b <- lm(formula = Y ~ X1+X2+X2**2+X4+X6, data = shells)
+model.b
+extractAIC(model.b)
+summary(model.b)
 ```
 
 ---
@@ -147,7 +201,9 @@ Analyze the data in Shells.rda and include your R here:
 Analyze the "Primary News Source for Americans" data described in the problem statement.  Put your R below:
 
 ```{r}
-
+observed <- c(38,20,15,42)
+proportions <- c(.45,.18,.16,.21)
+chisq.test(x=observed,p=proportions)
 ```
 
 ---
@@ -157,7 +213,25 @@ Analyze the "Primary News Source for Americans" data described in the problem st
 Analyze the data in cheese.rda and put your R below:
 
 ```{r}
+load(file = "cheese.rda")
+summary(cheese)
+boxplot(acetic~taste, data=cheese)
+#fit logistic model
+cheese.out <- glm(taste~acetic + person,data=cheese,family="binomial")
+summary(cheese.out)
+#odds.ratio acetic
+exp(2.787)
 
+newdata <- data.frame(person="Child", acetic=6)
+predict(cheese.out, newdata, type="response")
+
+#conf int
+out <- predict(cheese.out, newdata,se.fit=TRUE)
+C = .95  # define the level of confidence
+crit = qnorm(1-(1-C)/2)  # get the appropriate critical value
+lower = exp(out$fit-crit*out$se.fit)/(1+exp(out$fit-crit*out$se.fit))
+upper = exp(out$fit+crit*out$se.fit)/(1+exp(out$fit+crit*out$se.fit))
+c(lower,upper)
 ```
 
 ---
@@ -167,7 +241,7 @@ Analyze the data in cheese.rda and put your R below:
 Analyze the data in careerbarrier.rda and put your R below:
 
 ```{r}
-
+load(file = "careerbarrier.rda")
 ```
 
 ---
