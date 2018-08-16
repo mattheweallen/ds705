@@ -36,13 +36,10 @@ mat <- cor(ifanmot[,1:42])
 cortest.bartlett(mat,n=400)
 ```
 
-\begin{table}
-\centering
-\begin{tabular}{ll}
-$H_0$: &  The correlation matrix is the identity matrix \\
-$H_a$: &  The correlation matrix is not the identity matrix \\
-\end{tabular}
-\end{table}
+\newpage
+$H_0$: The correlation matrix is the identity matrix 
+
+$H_a$: The correlation matrix is not the identity matrix 
 
 At a 5% level of significance, we can reject the null hypothesis in favor of the alternative that the correlation matrix is not the identity matrix. In other words, correlations exist between the variables.
 
@@ -72,7 +69,7 @@ Use R to create a scree plot for the questionnaire items that you deemed to be a
 
 ### -|-|-|-|-|-|-|-|-|-|-|- Answer 1c -|-|-|-|-|-|-|-|-|-|-|-
 
-``` {r eval=FALSE}
+``` {r}
 output <- princomp(ifanmot[,1:42], cor=TRUE)
 {
 plot(output,type="lines") # scree plot 
