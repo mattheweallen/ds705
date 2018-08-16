@@ -18,7 +18,7 @@ require(gridExtra)
 The purpose of this report is to provide a method for easily determining the credit worthiness of a borrower. Bad loans effect the bottom line of the bank, but not lending effects profitability. The risk of bad loans has to be balanced with the bank's ability to generate a profit. The proposed method seeks a balance between risk and profitability.
 A model of good versus bad loans was generated from data provided by the bank. The model incorporates attributes of a borrower such as the loan payment amount, the amount of the loan, income and income verification, debt to income ratio, and the number of credit inquiries. The model provides a lever for adjustment. The model can be adjusted to increase or decrease risk.    
 We optimized the model in two ways. The model can be the most accurate, or it can be the most profitable. This is all based on the level of risk the bank is willing to take.
-The models for maximum profitability and maximum accuracy have been provided. The model with maximum profitability is more than twice as profitable as the most accurate model. Based on risk level, we suggest somewhere in between the most accurate and the most profitable.  
+The models for maximum profitability and maximum accuracy have been provided. The model with maximum profitability is more than twice as profitable as the most accurate model. Based on risk level, we suggest somewhere in between the most accurate and the most profitable.
 
 \newpage
 
@@ -325,11 +325,7 @@ If the model had predicted all the good loans perfectly, the total profit would 
 
 ## 8. Results Summary
 
-The classification threshold that produces the maximum profit is .76, which gives an accuracy of 65%.
-
-Given a bad loan, the model will correctly predict it 54% of the time.
-
-Given a good loan, the model will correctly predict it 68% of the time.
+The classification threshold that produces the maximum profit is .76, which gives an accuracy of 65%. The most profitable model is 2.08 times more profitable than the most accurate model. The model should be adjusted based on the banks level of risk. A more accurate model is less risky versus a riskier or less accurate model which is more profitable. At the most profitable threshold, a bad loan will be correctly predicted 54% of the time, and a good loan will be correctly predicted 68% of the time.
 
 ```{r contigency_table_max_profit, include=FALSE}
 #predprob <- fitted(loan.model) # get predicted probabilities
