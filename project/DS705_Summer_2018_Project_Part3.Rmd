@@ -229,7 +229,7 @@ extractAIC(loan.model)
 summary(loan.model)
 #summary(test)
 ```
-The model with the coefficients is below.
+A first-order logistic regression model with the transformed variable was used. The response represents the probability of a good loan. The model with the coefficients is below.
 
 $$\widehat{\text{ln} \left( \frac{P(Good)}{1-P(Good)} \right)} = 5.181 - 1.875 \cdot \text{log_amount} 
 + 1.468 \cdot \text{log_payment} + 0.467 \cdot \text{log_income} - 0.357 \cdot \text{verified} - 0.028 \cdot \text{debtIncRat} 
@@ -242,7 +242,7 @@ require(HH)
 vif(response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim,  data = train)
 ```
 
-The contingency table along with the overall accuracy is below. The accuracy is at 79%. That is 79% of the time truly good or bad loans are classified correctly. Based on the accuracy and that the terms are all significant, this is a decent model. From the contingency table, there are relatively few loans predicted as bad compared to good loans. The model may be good at predicting good loans, and bad at predicting bad ones.
+The contingency table along with the overall accuracy is below. Using the default threshold of 0.5, the accuracy is at 79%. That is 79% of the time truly good or bad loans are classified correctly. Based on the accuracy and that the terms are all significant, this is a decent model. From the contingency table, there are relatively few loans predicted as bad compared to good loans. The model may be good at predicting good loans, and bad at predicting bad ones.
 
 ```{r contigency_table, echo=FALSE}
 #predprob <- fitted(loan.model) # get predicted probabilities
