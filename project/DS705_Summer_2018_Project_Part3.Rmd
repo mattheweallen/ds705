@@ -1,0 +1,350 @@
+---
+title: 'Predicting Loan Defaults with Logistic Regression'
+author: "Matt Allen"
+date: "07/29/2018"
+output: word_document
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+require(ggplot2)
+require(grid)
+require(gridExtra)
+```
+
+## 1. Executive Summary
+
+The purpose of this report is to provide a method for easily determining the credit worthiness of a borrower. Bad loans effect the bottom line of the bank, but not lending effects profitability. The risk of bad loans has to be balanced with the bank's ability to generate a profit. The proposed method seeks a balance between risk and profitability.
+A model of good versus bad loans was generated from data provided by the bank. The model incorporates attributes of a borrower such as the loan payment amount, the amount of the loan, income and income verification, debt to income ratio, and the number of credit inquiries. The model provides a lever for adjustment. The model can be adjusted to increase or decrease risk.    
+We optimized the model in two ways. The model can be the most accurate, or it can be the most profitable. This is all based on the level of risk the bank is willing to take.
+The models for maximum profitability and maximum accuracy have been provided. The model with maximum profitability is more than twice as profitable as the most accurate model. Based on risk level, we suggest somewhere in between the most accurate and the most profitable.  
+
+\newpage
+
+## 2. Introduction
+
+The purpose of this project is to build a model to predict whether or not a borrower will pay back a loan. The description of the data set is [here](https://datascienceuwl.github.io/Project2018/loans50k.csv). The model will give a simple "Good" or "Bad" indicating the quality of the loan. The project will begin by preparing and cleaning the data. Variables will be selected by domain knowledge versus an automated method. Through exploration of the selected variables, the variables may be transformed to satisfy conditions of model fitting like being normally distributed for example. The data will be fitted to a logistic model with a training data set. Part of the data set will be held out as test data set to validate the model. The model is binomial and the mean also called the classification threshold can be adjusted to optimize for accuracy or profit.  
+
+## 3. Preparing and Cleaning the Data
+
+The first step in preparing the data was to create a new column named response that has the values "Good" and "Bad". It was based on the variable status. Only the rows with status of "Fully Paid", "Charged off", and "Default" were kept. "Fully Paid" maps to "Good", and "Charged off" and "Default" were mapped to "Bad".
+
+```{r create_response_column, include=FALSE}
+
+filePath <- "C:/Users/matt/source/repos/ds705/project/loans50k.csv"
+#filePath <- "C:/Users/irgepi/source/repos/ds705/project/loans50k.csv"
+loans <- read.csv2(filePath, header = TRUE, sep = ",")
+loans$response <- loans$status
+#summary(loans$verified)
+
+#Good loans are those that have a status of "Fully Paid". Bad loans are those that have a status of "Charged Off" or "Default".
+levels(loans$response)[levels(loans$response)==c("Charged Off")] <- "Bad"
+levels(loans$response)[levels(loans$response)==c("Default")] <- "Bad"
+levels(loans$response)[levels(loans$response)==c("Fully Paid")] <- "Good"
+loans <- loans[which(loans$response=="Bad" | loans$response=="Good"), ]
+
+#remove unuused levels
+loans$response <- factor(loans$response)
+
+#make ratio of amount to payment
+#loans$amount_payment_ratio <- loans$amount / loans$payment
+#hist(loans$amount_payment_ratio)
+
+#transform Source Verified to Verified
+levels(loans$verified)[levels(loans$verified)==c("Source Verified")] <- "Verified"
+#remove unuused levels
+loans$verified <- factor(loans$verified)
+
+#experiment
+summary(loans$bcOpen)
+hist((loans$bcOpen)^(1/3))
+
+summary(loans$totalBcLim)
+hist((loans$totalBcLim)^(1/3))
+
+```
+
+
+The initial dataset consisted of 50,000 records. After reducing "Good" and "Bad", the total number of records left were 34,655 records. The number of records with the variable response equal to "Good" was 27,074, and "Bad" was 7,581.
+
+There were variables that could be removed, because they were not useful. For example, the status variable may be removed, because it has been transformed into the response variable. The totalPaid variable can be removed, because it is not knowable at the time of issue of a loan. The variable loanid was removed because it is just an identifier and has no predictive power. 
+
+The variable employment, which indicates job title, can be removed because there is so much variation. It would be possible to create a new variable with job title that puts titles in more general categories, but it probably is still not useful. A better indicator may be income from job. 
+
+The variable length indicates the length of employment. This could be a good indicator, but there are more than 1300 missing values. It should be removed, because removing the rows with missing income would significantly reduce the data set, and imputation methods may be challenging for this much missing data where there is not necessarily a good proxy.
+
+The variable revolRatio indicates proportion of revolving credit in use. This can be removed, because it is captured in other variables like debtIncRatio. With similar resoning, bcRatio can be removed. The variable accOpen24 can be removed, because if an account is opened there will likely be a credit inquiry, which is captured in inq6mth.
+
+The variable grade indicates the risk of the loan. I would consider it to be another response variable like status or the response variable derived from status, but with more levels. For this reason, it should be eliminated. The variable rate can be removed for similar reasons as grade. The loan rate is an indication of the borrower's risk. The greater the risk the higher the rate. 
+
+The variable pubRec can be eliminated, because the variable delinq2yr should capture this information. If someone has pubRec against them, they would have also missed payments. 
+
+After inspection of the histograms of the variables totalBal and totalLim, it was discovered that their distributions are bimodal, which violates condition of normality, so debtIncRatio was used as a proxy. The variable openAcc was found not to be significant and was also removed.
+
+After elimination of variables, the predictors that are left are payment, amount, verified, income, debtIncRat, delinq2yr and inq6mth. The variable verified is categorical, the rest are quantitative. 
+
+With the remaining variables, there is no imputation or record removal needed. 
+
+```{r reduce_variables, include=FALSE}
+  #eliminate length, many missing values what is another a proxy? show count of n/a.
+  table(loans$length)
+  class(loans$length)
+  #1823 as n/a
+  length(which(loans$length == "n/a"))
+
+  columns_to_keep <- c("response","totalPaid", "amount", "debtIncRat","verified","income", "delinq2yr","inq6mth","payment", "bcOpen", "totalBcLim")
+  loans <- loans[columns_to_keep]
+
+  #convert income, amount, debtIncRat and totalPaid to numeric
+  loans$income <- as.numeric(as.character(loans$income))
+  loans$amount <- as.numeric(as.character(loans$amount))
+  loans$payment <- as.numeric(as.character(loans$payment))
+  loans$totalPaid <- as.numeric(as.character(loans$totalPaid))
+  loans$debtIncRat <- as.numeric(as.character(loans$debtIncRat))
+  
+  
+```
+
+
+## 4. Exploring and Transforming the Data
+The variables amount, income, delinq2yr, inq6mth showed varying degrees of right skewness. From inspection of histograms, the variable amount, payment and income showed the most right skewness and were transformed by the log function. The variables delinq2yr and inq6mth were transformed by taking the cubed root. Histograms of the transformed variables are displayed in Figure 1.
+
+
+```{r transform_and_plot_variables, include=FALSE}
+#transform variables
+loans$log_amount <- log(loans$amount)
+
+loans$log_payment <- log(loans$payment)
+
+loans$log_income <- log(loans$income)
+
+#remove NAs from bcOpen, there are 360.
+loans <- loans[which(!is.na(loans$bcOpen)),]
+
+#replaced totalLim and totalBal etc with
+loans$cube_rt_bcOpen <- (loans$bcOpen)^(1/3)
+summary(loans$cube_rt_bcOpen)
+summary(loans$bcOpen)
+
+
+loans$cube_rt_totalBcLim <- (loans$totalBcLim)^(1/3)
+
+summary(loans$cube_rt_totalBcLim)
+summary(loans$totalBcLim)
+
+#cube_rt_bcOpen+cube_rt_totalBcLim
+#sum(is.na(loans$bcOpen))
+#sum(is.na(loans$totalBcLim))
+  
+loans$cube_rt_delinq2yr <- (loans$delinq2yr)^(1/3)
+loans$cube_rt_inq6mth <- (loans$inq6mth)^(1/3)
+#https://stats.stackexchange.com/questions/11406/boxplot-with-respect-to-two-factors-using-ggplot2-in-r
+
+log_amount_plot <- ggplot(loans, aes(x=log_amount)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+log_payment_plot <- ggplot(loans, aes(x=log_payment)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+log_income_plot <- ggplot(loans, aes(x=log_income)) + 
+  geom_histogram(binwidth=.1, colour="black", fill="white")
+
+cube_rt_delinq2yr_plot <- ggplot(loans, aes(x=cube_rt_delinq2yr)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
+
+cube_rt_inq6mth_plot <- ggplot(loans, aes(x=cube_rt_inq6mth)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
+
+cube_rt_bcOpen_plot <- ggplot(loans, aes(x=cube_rt_bcOpen)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
+
+cube_rt_totalBcLim_plot <- ggplot(loans, aes(x=cube_rt_totalBcLim)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
+
+debtIncRat_plot <- ggplot(loans, aes(x=debtIncRat)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white")
+
+
+#https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html
+
+#grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, #cube_rt_bcOpen_plot, cube_rt_totalBcLim_plot, debtIncRat_plot, nrow=4, ncol=2, top="Predictors", bottom = "Figure 1 #Histograms of Numeric Predictors")
+
+
+#make bar graph of categorical predictors.
+```
+
+```{r plot_variable_hists, echo=FALSE}
+grid.arrange(log_amount_plot, log_payment_plot, log_income_plot,  cube_rt_delinq2yr_plot, cube_rt_inq6mth_plot, cube_rt_bcOpen_plot, cube_rt_totalBcLim_plot, debtIncRat_plot, nrow=4, ncol=2, top="Predictors", bottom = "Figure 1 Histograms of Numeric Predictors")
+
+#make bar graph of categorical predictors.
+```
+
+To develop a picture of the relationships between the predictor variables, and the response, two boxplots for each response "Good" and "Bad" were created for a predictor variable. The boxplots were created to explore the differences in distributions between "Good" and "Bad" loans for each predictor variable. The plots can be seen in Figure 2. Looking at the log_amount variable box plot, the mean of amount is lower for Good than Bad, which makes sense. A smaller loan would be easier to pay back. Similarly with the variable log_payment, a loan that has a smaller payment makes it easier to make the payment each month.  Also as indicated by log_income, those with greater incomes have more money to pay back a loan. 
+
+```{r explore_relationships, echo=FALSE}
+log_amount_boxplot <- ggplot(aes(y = log_amount, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+log_payment_boxplot <- ggplot(aes(y = log_payment, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+
+log_income_boxplot <- ggplot(aes(y = log_income, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+
+cube_rt_delinq2yr_boxplot <- ggplot(aes(y = cube_rt_delinq2yr, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+cube_rt_inq6mth_boxplot <- ggplot(aes(y = cube_rt_inq6mth, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+
+debtIncRat_boxplot <- ggplot(aes(y = debtIncRat, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+
+
+cube_rt_bcOpen_boxplot <- ggplot(aes(y = cube_rt_bcOpen, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+cube_rt_totalBcLim_boxplot <- ggplot(aes(y = cube_rt_totalBcLim, x = response), data = loans) + geom_boxplot() + coord_flip() + theme(axis.title.y=element_blank())
+
+
+grid.arrange(log_amount_boxplot, log_payment_boxplot, log_income_boxplot, cube_rt_delinq2yr_boxplot, cube_rt_bcOpen_boxplot, cube_rt_totalBcLim_boxplot, cube_rt_inq6mth_boxplot,  debtIncRat_boxplot, nrow=4, ncol=2, top="Predictors by Response", bottom = "Figure 2 Boxplots of Numeric Predictors by Response")
+```
+
+After inspection of the boxplot for cube_rt_delinq2yr, the variable delinq2yr was removed from the model, because even after transformation it is extremely right skewed. Taking it out of the model did not effect the accuracy or profit predictions significantly.
+
+After plotting and exploring of several other predictors, the shapes of bcOpen and totalBcLim after cube root transformation were found to be close to normal. Adding them to the model decreased AIC, and increased predictive power. The terms are significant. The variables bcOpen and totalBcLim which indicate credit card utilization may be proxies for totalBal and totalLim, which were removed because of their bimodal distributions. The variable bcOpen had 360 values with NA. These were removed from the data set.
+
+## 5. The Logistic Model
+
+From the summary of the model all the variables are very significant as indicated by p-values that are close to zero. Based on the VIF, the variables log_payment and log_amount show correlation. However, they are still very significant in the model, and will be kept.
+
+```{r create_training_test_datasets, include=FALSE}
+#https://stackoverflow.com/questions/17200114/how-to-split-data-into-training-testing-sets-using-sample-function
+## 80% of the sample size
+smp_size <- floor(0.8 * nrow(loans))
+
+## set the seed to make your partition reproducible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(loans)), size = smp_size)
+
+train <- loans[train_ind, ]
+test <- loans[-train_ind, ]
+```
+
+```{r create_model, include=FALSE}
+#cube_rt_delinq2yr +
+loan.model <- glm(formula = response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim, family = "binomial", data = train)
+extractAIC(loan.model)
+summary(loan.model)
+#summary(test)
+```
+The model with the coefficients is below.
+
+$$\widehat{\text{ln} \left( \frac{P(Good)}{1-P(Good)} \right)} = 5.181 - 1.875 \cdot \text{log_amount} 
++ 1.468 \cdot \text{log_payment} + 0.467 \cdot \text{log_income} - 0.357 \cdot \text{verified} - 0.028 \cdot \text{debtIncRat} 
+- 0.037 \cdot \text{cube_rt_inq6mth} + 0.018 \cdot \text{cube_rt_bcOpen} + 0.024 \cdot \text{cube_rt_totalBcLim}$$
+
+
+
+```{r vif, include=FALSE}
+require(HH)
+vif(response ~ log_amount + log_payment + log_income  + verified + debtIncRat + cube_rt_inq6mth + cube_rt_bcOpen + cube_rt_totalBcLim,  data = train)
+```
+
+The contingency table along with the overall accuracy is below. The accuracy is at 79%. That is 79% of the time truly good or bad loans are classified correctly. Based on the accuracy and that the terms are all significant, this is a decent model. From the contingency table, there are relatively few loans predicted as bad compared to good loans. The model may be good at predicting good loans, and bad at predicting bad ones.
+
+```{r contigency_table, echo=FALSE}
+#predprob <- fitted(loan.model) # get predicted probabilities
+predprob <- predict(loan.model, test, type="response")
+threshhold <- 0.5  # Set Y=1 when predicted probability exceeds this
+predLoan <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                labels=c("Bad", "Good"))  
+
+cTab <- table(test$response, predLoan) 
+addmargins(cTab)
+
+p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+print(paste('Proportion correctly predicted = ', p)) 
+```
+
+## 6. Optimizing the Threshold for Accuracy
+
+The maxmimum accuracy occurs near the threshold of .55. As you can see from the plot above of accuracy vs threshold, the accuracy is mostly flat from 0 to 0.6, but from inspection of the data peaks at .55. It then declines between 0.6 and 1.0.
+
+```{r accuracy, echo=FALSE}
+model.accuracy <- function(threshhold) {
+  predprob <- predict(loan.model, test, type="response")
+  predLoan <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                  labels=c("Bad", "Good"))  
+
+  cTab <- table(test$response, predLoan) 
+  addmargins(cTab)
+
+  p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+}
+
+threshholds <- seq(from = 0, to = 1, length.out = 30)
+accuracy <- sapply(threshholds,model.accuracy)
+accuracy.df <- data.frame(threshhold=threshholds, accuracy=accuracy)
+#model is most accurate at around .5
+plot(accuracy~threshholds)
+```
+
+
+
+## 7. Optimizing the Threshold for Profit
+
+```{r profit, include=FALSE}
+model.profit <- function(threshhold) {
+  predprob <- predict(loan.model, test, type="response")
+  profit.df <- test[which(predprob > threshhold),]
+  profit <- sum(profit.df$totalPaid - profit.df$amount)
+}
+threshholds <- seq(from = 0, to = 1, length.out = 30)
+profit <- sapply(threshholds,model.profit)
+
+max(profit)
+threshholds[which.max(profit)] #threshold of max profit
+threshhold.df <- data.frame(threshhold=threshholds, profit=profit)
+plot(profit~threshholds)
+
+#no loans denied
+noloandenied.profit <- sum(test$totalPaid - test$amount)
+noloandenied.profit
+#model increase
+(max(profit) - noloandenied.profit)/noloandenied.profit
+
+#perfect prediction
+good.test.df <- test[which(test$response == "Good"),]
+perfect.profit <- sum(good.test.df$totalPaid - good.test.df$amount)
+#perfect increase
+(perfect.profit - noloandenied.profit)/noloandenied.profit
+1485/244
+```
+
+The maximum profit of $2,609,607 occurs at a threshold of .76. The best profit threshold corresponds to an accuracy of 65%. The profit where the model is the most accurate at a threshold of 55% is $1,247,186. The maximum accuracy and profit thresholds do not coincide.   
+
+If no loans were denied the total profit would be $758,390. The increase from using the model is 244%.
+
+If the model had predicted all the good loans perfectly, the total profit would be $12,020,435, which represents an increase of 1485%. Perfect prediction is at least 6 times better, so may be the model could be improved.
+
+```{r profit_plot, echo=FALSE}
+  plot(profit~threshholds)
+```
+
+## 8. Results Summary
+
+The classification threshold that produces the maximum profit is .76, which gives an accuracy of 65%.
+
+Given a bad loan, the model will correctly predict it 54% of the time.
+
+Given a good loan, the model will correctly predict it 68% of the time.
+
+```{r contigency_table_max_profit, include=FALSE}
+#predprob <- fitted(loan.model) # get predicted probabilities
+predprob <- predict(loan.model, test, type="response")
+threshhold <- 0.76  # Set Y=1 when predicted probability exceeds this
+predLoan <- cut(predprob, breaks=c(-Inf, threshhold, Inf), 
+                labels=c("Bad", "Good"))  
+
+cTab <- table(test$response, predLoan) 
+addmargins(cTab)
+
+p <- sum(diag(cTab)) / sum(cTab)  # compute the proportion of correct classifications
+print(paste('Proportion correctly predicted = ', p)) 
+print(paste('Proportion correctly predicted given bad loan = ', 819/1521))
+print(paste('Proportion correctly predicted given good loan = ', 3626/5338))
+```
+
+
